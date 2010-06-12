@@ -219,7 +219,7 @@ namespace NLog.Targets
 
         private void sendMessage(string SyslogServer, int Port, byte[] msg)
         {
-            string ipAddress = Dns.GetHostEntry(SyslogServer).AddressList[0].ToString();
+            string ipAddress = Dns.GetHostAddresses(SyslogServer).FirstOrDefault().ToString();
             UdpClient udp = new UdpClient(ipAddress, Port);
             udp.Send(msg, msg.Length);
             udp.Close();
