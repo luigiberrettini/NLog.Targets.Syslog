@@ -1,0 +1,41 @@
+# exclude vs files
+*.obj
+*.exe
+*.exp
+*.pdb
+*.dll
+*.user
+*.aps
+*.pch
+*.vspscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.bak
+*.cache
+*.ilk
+*.zip
+*.lib
+*.sbr
+Thumbs.db
+
+# exclude build locations
+[Dd]ebug/
+[Rr]elease/
+[Tt]est[Rr]esults/
+[Ll]ib/
+[Bb]in/
+[Oo]bj/
+
+# exclude merge files
+*.orig
+
+# exclude other locations
+_UpgradeReport_Files/
+_ReSharper.*/
+
+# keep assembly references
+!/References/*.*
