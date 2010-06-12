@@ -38,4 +38,4 @@ _UpgradeReport_Files/
 _ReSharper.*/
 
 # keep assembly references
-!/References/*.*
+!/libs/*.*
