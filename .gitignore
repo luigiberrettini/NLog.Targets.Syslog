@@ -21,6 +21,8 @@
 *.lib
 *.sbr
 Thumbs.db
+*.StyleCop
+StyleCop.*
 
 # exclude build locations
 [Dd]ebug/
