@@ -13,7 +13,7 @@ To use NLog Syslog, you simply wire it up as an extension in the NLog.config fil
     &lt;/extensions&gt;
     
     &lt;targets&gt;
-        &lt;target name=<span style="color: #008080; ">"syslog"</span> type=<span style="color: #008080; ">"Syslog"</span> password=<span style="color: #008080; ">""</span> syslogserver=<span style="color: #008080; ">""</span> port=<span style="color: #008080; ">""</span> facility=<span style="color: #008080; ">""</span><span style="color: Navy; ">/</span>&gt;
+        &lt;target name=<span style="color: #008080; ">"syslog"</span> type=<span style="color: #008080; ">"Syslog"</span> syslogserver=<span style="color: #008080; ">""</span> port=<span style="color: #008080; ">""</span> facility=<span style="color: #008080; ">""</span><span style="color: Navy; ">/</span>&gt;
     &lt;/targets&gt;
 
     &lt;rules&gt;
