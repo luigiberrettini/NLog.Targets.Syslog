@@ -25,10 +25,12 @@ namespace NLog.Targets
     using System.Threading;
     using System.Net;
     using System.Net.Sockets;
+    using System.Globalization;
 
     /// <summary>
     /// This class enables logging to a unix-style syslog server using NLog.
     /// </summary>
+    
     [NLog.Targets.Target("Syslog")]
     public class Syslog : NLog.Targets.Target
     {
@@ -41,7 +43,7 @@ namespace NLog.Targets
             SyslogServer = "127.0.0.1";
             Port = 514;
             Sender = Assembly.GetCallingAssembly().GetName().Name;
-            Facility = SyslogFacility.Local0;
+            Facility = SyslogFacility.Local1;
         }
 
         #region Enumerations
@@ -256,9 +258,17 @@ namespace NLog.Targets
         /// </summary>
         /// <param name="logEvent">The NLog.LogEventInfo </param>
         protected override void Write(LogEventInfo logEvent)
-        {
+        {            
+            // Store the current UI culture
+            CultureInfo currentCulture = Thread.CurrentThread.CurrentCulture;
+            // Set the current Locale to "en-US" for proper date formatting
+            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
+
             byte[] msg = buildSyslogMessage(Facility, getSyslogSeverity(logEvent.Level), DateTime.Now, Sender, logEvent.FormattedMessage);
             sendMessage(SyslogServer, Port, msg);
+
+            // Restore the original culture
+            Thread.CurrentThread.CurrentCulture = currentCulture;
         }
 
         /// <summary>
@@ -324,8 +334,6 @@ namespace NLog.Targets
         /// <returns>Byte array containing formatted syslog message</returns>
         private static byte[] buildSyslogMessage(SyslogFacility facility, SyslogSeverity priority, DateTime time, string sender, string body)
         {
-            // Set the current Locale to "en-US" for proper date formatting
-            Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
 
             // Get sender machine name
             string machine = System.Net.Dns.GetHostName() + " ";
