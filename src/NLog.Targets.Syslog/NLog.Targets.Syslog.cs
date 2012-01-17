@@ -32,7 +32,7 @@ namespace NLog.Targets
     /// </summary>
     
     [NLog.Targets.Target("Syslog")]
-    public class Syslog : NLog.Targets.Target
+    public class Syslog : NLog.Targets.TargetWithLayout
     {
         /// <summary>
         /// Initializes a new instance of the Syslog class
@@ -264,7 +264,7 @@ namespace NLog.Targets
             // Set the current Locale to "en-US" for proper date formatting
             Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en-US");
 
-            byte[] msg = buildSyslogMessage(Facility, getSyslogSeverity(logEvent.Level), DateTime.Now, Sender, logEvent.FormattedMessage);
+            byte[] msg = buildSyslogMessage(Facility, getSyslogSeverity(logEvent.Level), DateTime.Now, Sender, Layout.Render(logEvent));
             sendMessage(SyslogServer, Port, msg);
 
             // Restore the original culture
