@@ -41,3 +41,4 @@ _ReSharper.*/
 
 # keep assembly references
 !/libs/*.*
+*.nupkg
