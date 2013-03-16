@@ -367,7 +367,7 @@ namespace NLog.Targets
             string timeToString = time.ToString("MMM dd HH:mm:ss ");
             sender = sender + ": ";
 
-            string[] strParams = { pri, timeToString, machine, sender, body };
+            string[] strParams = { pri, timeToString, machine, sender, body, Environment.NewLine };
             var str = string.Concat(strParams);
             return Encoding.ASCII.GetBytes(string.Concat(strParams));
         }
