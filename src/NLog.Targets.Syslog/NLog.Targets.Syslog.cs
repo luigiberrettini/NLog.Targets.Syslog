@@ -253,6 +253,13 @@ namespace NLog.Targets
         /// Sets the syslog facility name to send messages as (for example, local0 or local7)
         /// </summary>
         public SyslogFacility Facility { get; set; }
+
+        /// <summary>
+        /// If this is set, it will be prefixed on the log message in []. If you have
+        /// several applications running on a server, this can be used to add an identifier
+        /// to the log message to show which application logged the message. 
+        /// </summary>
+        public String CustomPrefix { get; set; }
         #endregion
 
         /// <summary>
@@ -266,8 +273,8 @@ namespace NLog.Targets
             // Set the current Locale to "en-US" for proper date formatting
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
-            byte[] msg = BuildSyslogMessage(Facility, getSyslogSeverity(logEvent.Level), DateTime.Now, Sender, logEvent.FormattedMessage);
-            sendMessage(SyslogServer, Port, msg);
+            byte[] msg = BuildSyslogMessage(Facility, GetSyslogSeverity(logEvent.Level), DateTime.Now, Sender, logEvent.FormattedMessage);
+            SendMessage(SyslogServer, Port, msg);
 
             // Restore the original culture
             Thread.CurrentThread.CurrentCulture = currentCulture;
@@ -279,7 +286,7 @@ namespace NLog.Targets
         /// <param name="logServer">The syslog server's host name or IP address</param>
         /// <param name="port">The UDP port that syslog is running on</param>
         /// <param name="msg">The syslog formatted message ready to transmit</param>
-        private void sendMessage(string logServer, int port, byte[] msg)
+        private static void SendMessage(string logServer, int port, byte[] msg)
         {
             var logServerIp = Dns.GetHostAddresses(logServer).FirstOrDefault();
             if (logServerIp == null) return;
@@ -295,7 +302,7 @@ namespace NLog.Targets
         /// </summary>
         /// <param name="logLevel">NLog log level to translate</param>
         /// <returns>SyslogSeverity which corresponds to the NLog level. </returns>
-        private SyslogSeverity getSyslogSeverity(LogLevel logLevel)
+        private static SyslogSeverity GetSyslogSeverity(LogLevel logLevel)
         {
             if (logLevel == LogLevel.Fatal)
             { 
@@ -339,7 +346,7 @@ namespace NLog.Targets
         /// <param name="sender">Name of the subsystem sending the message</param>
         /// <param name="body">Message text</param>
         /// <returns>Byte array containing formatted syslog message</returns>
-        private static byte[] BuildSyslogMessage(SyslogFacility facility, SyslogSeverity priority, DateTime time, string sender, string body)
+        private byte[] BuildSyslogMessage(SyslogFacility facility, SyslogSeverity priority, DateTime time, string sender, string body)
         {
 
             // Get sender machine name
@@ -351,6 +358,11 @@ namespace NLog.Targets
 
             string timeToString = time.ToString("MMM dd HH:mm:ss ");
             sender = sender + ": ";
+
+            if (!String.IsNullOrEmpty(CustomPrefix))
+            {
+                body = String.Format("[{0}] {1}", CustomPrefix, body);
+            }
 
             string[] strParams = { pri, timeToString, machine, sender, body };
             return Encoding.ASCII.GetBytes(string.Concat(strParams));
