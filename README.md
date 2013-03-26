@@ -2,7 +2,7 @@
 
 <b>NLog Syslog</b> is a custom target for <a href="http://nlog-project.org/">NLog</a> version 2.0 allowing you to send logging messages to a UNIX-style Syslog server.
 
-To use NLog Syslog, you simply wire it up as an extension in the NLog.config file and place the NLog.Targets.Syslog.dll in the same location as the NLog.dll & NLog.config files. Then use as you would any NLog target. Below is a sample NLog.config file:
+To use NLog Syslog, you simply wire it up as an extension in the NLog.config file and place the NLog.Targets.Syslog.dll in the same location as the NLog.dll & NLog.config files. Then use as you would any NLog target. To use TCP as transport protocol just specify protocol="tcp" in target configuration. Below is a sample NLog.config file:
 
 <pre>&lt;?xml version=<span style="color: #008080; ">"1.0"</span> encoding=<span style="color: #008080; ">"utf-8"</span> ?&gt;
 &lt;nlog xmlns=<span style="color: #008080; ">"http://www.nlog-project.org/schemas/NLog.xsd"</span>
