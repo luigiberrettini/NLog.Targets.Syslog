@@ -46,6 +46,7 @@ namespace NLog.Targets
             Port = 514;
             Sender = Assembly.GetCallingAssembly().GetName().Name;
             Facility = SyslogFacility.Local1;
+            Protocol = ProtocolType.Udp;
         }
 
         #region Enumerations
@@ -260,6 +261,11 @@ namespace NLog.Targets
         /// to the log message to show which application logged the message. 
         /// </summary>
         public String CustomPrefix { get; set; }
+
+        /// <summary>
+        /// Sets the syslog server protocol (tcp/udp) 
+        /// </summary>
+        public ProtocolType Protocol { get; set; }
         #endregion
 
         /// <summary>
@@ -274,7 +280,7 @@ namespace NLog.Targets
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
             byte[] msg = BuildSyslogMessage(Facility, GetSyslogSeverity(logEvent.Level), DateTime.Now, Sender, logEvent.FormattedMessage);
-            SendMessage(SyslogServer, Port, msg);
+            SendMessage(SyslogServer, Port, msg, Protocol);
 
             // Restore the original culture
             Thread.CurrentThread.CurrentCulture = currentCulture;
@@ -286,15 +292,31 @@ namespace NLog.Targets
         /// <param name="logServer">The syslog server's host name or IP address</param>
         /// <param name="port">The UDP port that syslog is running on</param>
         /// <param name="msg">The syslog formatted message ready to transmit</param>
-        private static void SendMessage(string logServer, int port, byte[] msg)
+        private static void SendMessage(string logServer, int port, byte[] msg, ProtocolType protocol)
         {
             var logServerIp = Dns.GetHostAddresses(logServer).FirstOrDefault();
             if (logServerIp == null) return;
             
             var ipAddress = logServerIp.ToString();
-            var udp = new UdpClient(ipAddress, port);
-            udp.Send(msg, msg.Length);
-            udp.Close();
+
+            switch (protocol)
+            {
+                case ProtocolType.Udp:
+                    var udp = new UdpClient(ipAddress, port);
+                    udp.Send(msg, msg.Length);
+                    udp.Close();
+                    break;
+                case ProtocolType.Tcp:
+                    var tcp = new TcpClient(ipAddress, port);
+                    var stream = tcp.GetStream();
+                    stream.Write(msg, 0, msg.Length);
+
+                    stream.Close();
+                    tcp.Close();
+                    break;
+                default:
+                    throw new NLogConfigurationException(string.Format("Protocol '{0}' is not supported.", protocol));
+            }
         }
 
         /// <summary>
@@ -364,7 +386,7 @@ namespace NLog.Targets
                 body = String.Format("[{0}] {1}", CustomPrefix, body);
             }
 
-            string[] strParams = { pri, timeToString, machine, sender, body };
+            string[] strParams = { pri, timeToString, machine, sender, body, Environment.NewLine };
             return Encoding.ASCII.GetBytes(string.Concat(strParams));
         }
     }
