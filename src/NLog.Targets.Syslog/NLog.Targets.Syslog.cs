@@ -292,6 +292,7 @@ namespace NLog.Targets
         /// <param name="logServer">The syslog server's host name or IP address</param>
         /// <param name="port">The UDP port that syslog is running on</param>
         /// <param name="msg">The syslog formatted message ready to transmit</param>
+        /// <param name="protocol">The syslog server protocol (tcp/udp)</param>
         private static void SendMessage(string logServer, int port, byte[] msg, ProtocolType protocol)
         {
             var logServerIp = Dns.GetHostAddresses(logServer).FirstOrDefault();
