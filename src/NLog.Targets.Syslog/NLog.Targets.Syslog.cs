@@ -91,8 +91,12 @@ namespace NLog.Targets
             // Set the current Locale to "en-US" for proper date formatting
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
-            byte[] msg = BuildSyslogMessage(Facility, GetSyslogSeverity(logEvent.Level), DateTime.Now, Sender, logEvent.FormattedMessage);
-            SendMessage(SyslogServer, Port, msg, Protocol);
+            string[] formattedLines = logEvent.FormattedMessage.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);            
+            foreach (string fline in formattedLines)
+            {
+                byte[] msg = BuildSyslogMessage(Facility, GetSyslogSeverity(logEvent.Level), DateTime.Now, Sender, fline);
+                SendMessage(SyslogServer, Port, msg, Protocol);
+            }
 
             // Restore the original culture
             Thread.CurrentThread.CurrentCulture = currentCulture;
