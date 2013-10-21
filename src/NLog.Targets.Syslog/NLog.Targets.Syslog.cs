@@ -28,6 +28,8 @@ namespace NLog.Targets
     using System.Net;
     using System.Net.Sockets;
     using System.Globalization;
+    using System.Net.Security;
+    using System.IO;
 
     /// <summary>
     /// This class enables logging to a unix-style syslog server using NLog.
@@ -68,6 +70,11 @@ namespace NLog.Targets
         public ProtocolType Protocol { get; set; }
 
         /// <summary>
+        /// If this is set, try to configure and use SSL if available.
+        /// </summary>
+        public bool Ssl { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the Syslog class
         /// </summary>
         public Syslog()
@@ -95,7 +102,7 @@ namespace NLog.Targets
             foreach (string fline in formattedLines)
             {
                 byte[] msg = BuildSyslogMessage(Facility, GetSyslogSeverity(logEvent.Level), DateTime.Now, Sender, fline);
-                SendMessage(SyslogServer, Port, msg, Protocol);
+            	SendMessage(SyslogServer, Port, msg, Protocol, Ssl);
             }
 
             // Restore the original culture
@@ -109,7 +116,7 @@ namespace NLog.Targets
         /// <param name="port">The UDP port that syslog is running on</param>
         /// <param name="msg">The syslog formatted message ready to transmit</param>
         /// <param name="protocol">The syslog server protocol (tcp/udp)</param>
-        private static void SendMessage(string logServer, int port, byte[] msg, ProtocolType protocol)
+        private static void SendMessage(string logServer, int port, byte[] msg, ProtocolType protocol, bool useSsl = false)
         {
             var logServerIp = Dns.GetHostAddresses(logServer).FirstOrDefault();
             if (logServerIp == null) return;
@@ -125,7 +132,18 @@ namespace NLog.Targets
                     break;
                 case ProtocolType.Tcp:
                     var tcp = new TcpClient(ipAddress, port);
-                    var stream = tcp.GetStream();
+                    Stream stream = tcp.GetStream();
+                    if (useSsl)
+                    {
+                        var sslStream = new SslStream(tcp.GetStream());
+                        sslStream.AuthenticateAsClient(logServer);
+                        stream = sslStream;
+                    }
+                    else
+                    {
+                        stream = tcp.GetStream();
+                    }
+
                     stream.Write(msg, 0, msg.Length);
 
                     stream.Close();
