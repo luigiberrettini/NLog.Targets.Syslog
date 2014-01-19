@@ -14,6 +14,8 @@ x64/
 build/
 [Bb]in/
 [Oo]bj/
+src/NLog.Targets.Syslog/lib
+src/NLog.Targets.Syslog/deploy
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
