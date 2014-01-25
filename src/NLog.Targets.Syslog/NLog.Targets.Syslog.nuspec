@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>https://github.com/graffen/NLog.Targets.Syslog/blob/master/License.txt</licenseUrl>
+    <projectUrl>https://github.com/graffen/NLog.Targets.Syslog</projectUrl>
+    <iconUrl>http://nlog-project.org/N.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2014 Jesper Hess Nielsen &lt;jesper@graffen.dk&gt;</copyright>
+    <tags>>NLog Syslog Log Logging</tags>
+    <dependencies>
+      <dependency id="NLog" version="2.0.0.2000"/>
+    </dependencies>
+  </metadata>
+</package>
