@@ -17,5 +17,10 @@
     <dependencies>
       <dependency id="NLog" version="2.0.0.2000"/>
     </dependencies>
+    <releaseNotes>
+        Version 2.0
+        ===========
+        This version removes support for CustomPrefix. Instead, NLog Layouts can be used for the same functionality.
+    </releaseNotes>
   </metadata>
 </package>
