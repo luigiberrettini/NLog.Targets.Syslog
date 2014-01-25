@@ -15,7 +15,7 @@ To use NLog Syslog, you simply wire it up as an extension in the NLog.config fil
   </extensions>
 
   <targets>
-    <target name="syslog" type="Syslog" syslogserver="127.0.0.1" port="514" sender="MyProgram" facility="Local7" customprefix="MyCustomPrefix"/>
+    <target name="syslog" type="Syslog" syslogserver="127.0.0.1" port="514" sender="MyProgram" facility="Local7" layout="[CustomPrefix] ${machinename} ${message}/>
   </targets>
 
   <rules>

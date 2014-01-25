@@ -58,13 +58,6 @@ namespace NLog.Targets
         public SyslogFacility Facility { get; set; }
 
         /// <summary>
-        /// If this is set, it will be prefixed on the log message in []. If you have
-        /// several applications running on a server, this can be used to add an identifier
-        /// to the log message to show which application logged the message. 
-        /// </summary>
-        public String CustomPrefix { get; set; }
-
-        /// <summary>
         /// Sets the syslog server protocol (tcp/udp) 
         /// </summary>
         public ProtocolType Protocol { get; set; }
@@ -216,11 +209,6 @@ namespace NLog.Targets
 
             string timeToString = time.ToString("MMM dd HH:mm:ss ");
             sender = sender + ": ";
-
-            if (!String.IsNullOrEmpty(CustomPrefix))
-            {
-                body = String.Format("[{0}] {1}", CustomPrefix, body);
-            }
 
             string[] strParams = { pri, timeToString, machine, sender, body, Environment.NewLine };
             return Encoding.ASCII.GetBytes(string.Concat(strParams));
