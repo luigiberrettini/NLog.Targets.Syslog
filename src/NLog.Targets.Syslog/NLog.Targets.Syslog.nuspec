@@ -11,15 +11,14 @@
     <iconUrl>http://nlog-project.org/N.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes></releaseNotes>
     <copyright>Copyright 2014 Jesper Hess Nielsen &lt;jesper@graffen.dk&gt;</copyright>
     <tags>>NLog Syslog Log Logging</tags>
     <dependencies>
       <dependency id="NLog" version="2.0.0.2000"/>
     </dependencies>
     <releaseNotes>
-        Version 2.0
-        ===========
+        Version 2.0.5138.27351
+        ======================
         This version removes support for CustomPrefix. Instead, NLog Layouts can be used for the same functionality.
     </releaseNotes>
   </metadata>
