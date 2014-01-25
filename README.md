@@ -23,5 +23,5 @@ To use NLog Syslog, you simply wire it up as an extension in the NLog.config fil
   </rules>
 </nlog>
 ```
-
+The package is also available through NuGet. Simply search for "NLog.Targets.Syslog".
 See more about NLog at: http://nlog-project.org
