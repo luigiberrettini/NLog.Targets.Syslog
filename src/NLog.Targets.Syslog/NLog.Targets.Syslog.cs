@@ -95,7 +95,7 @@ namespace NLog.Targets
             foreach (var formattedMessageLine in formattedMessageLines)
             {
                 logEvent.Message = formattedMessageLine;
-                var message = BuildSyslogMessage(Facility, GetSyslogSeverity(logEvent.Level), DateTime.Now, Sender, Layout.Render(logEvent));
+                byte[] message = BuildSyslogMessage(Facility, GetSyslogSeverity(logEvent.Level), DateTime.Now, Sender, Layout.Render(logEvent));
                 SendMessage(SyslogServer, Port, message, Protocol, Ssl);
             }
 
