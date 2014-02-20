@@ -94,7 +94,11 @@ namespace NLog.Targets
             string[] formattedLines = logEvent.FormattedMessage.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);            
             foreach (string fline in formattedLines)
             {
-                var layoutLine = new LogEventInfo(logEvent.Level, logEvent.LoggerName, fline);
+                var layoutLine = new LogEventInfo(level: logEvent.Level, loggerName: logEvent.LoggerName, message: fline);
+                if (logEvent.HasStackTrace)
+                {
+                    layoutLine.SetStackTrace(stackTrace: logEvent.StackTrace, userStackFrame: logEvent.UserStackFrameNumber);
+                }
                 byte[] msg = BuildSyslogMessage(Facility, GetSyslogSeverity(logEvent.Level), DateTime.Now, Sender, Layout.Render(layoutLine));
             	SendMessage(SyslogServer, Port, msg, Protocol, Ssl);
             }
