@@ -87,15 +87,15 @@ namespace NLog.Targets
         protected override void Write(LogEventInfo logEvent)
         {            
             // Store the current UI culture
-            CultureInfo currentCulture = Thread.CurrentThread.CurrentCulture;
+            var currentCulture = Thread.CurrentThread.CurrentCulture;
             // Set the current Locale to "en-US" for proper date formatting
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
-            string[] formattedMessageLines = logEvent.FormattedMessage.Split(new char[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries);
+            var formattedMessageLines = Layout.Render(logEvent).Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            var severity = GetSyslogSeverity(logEvent.Level);
             foreach (var formattedMessageLine in formattedMessageLines)
             {
-                logEvent.Message = formattedMessageLine;
-                byte[] message = BuildSyslogMessage(Facility, GetSyslogSeverity(logEvent.Level), DateTime.Now, Sender, Layout.Render(logEvent));
+                var message = BuildSyslogMessage(Facility, severity, DateTime.Now, Sender, formattedMessageLine);
                 SendMessage(SyslogServer, Port, message, Protocol, Ssl);
             }
 
