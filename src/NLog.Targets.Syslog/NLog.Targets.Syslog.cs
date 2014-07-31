@@ -52,6 +52,8 @@ namespace NLog.Targets
         /// </summary>
         public string Sender { get; set; }
 
+        public string MachineName { get; set; }
+
         /// <summary>
         /// Sets the syslog facility name to send messages as (for example, local0 or local7)
         /// </summary>
@@ -78,6 +80,7 @@ namespace NLog.Targets
             Sender = Assembly.GetCallingAssembly().GetName().Name;
             Facility = SyslogFacility.Local1;
             Protocol = ProtocolType.Udp;
+            MachineName = Dns.GetHostName();
         }
 
         /// <summary>
@@ -201,7 +204,7 @@ namespace NLog.Targets
         {
 
             // Get sender machine name
-            string machine = Dns.GetHostName() + " ";
+            string machine = MachineName + " ";
 
             // Calculate PRI field
             int calculatedPriority = (int)facility * 8 + (int)priority;
