@@ -17,6 +17,9 @@
 ////
 
 // ReSharper disable CheckNamespace
+
+using System.Collections.Generic;
+
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
 {
@@ -70,6 +73,11 @@ namespace NLog.Targets
         public bool Ssl { get; set; }
 
         /// <summary>
+        /// If set, split message by newlines and send as separate messages
+        /// </summary>
+        public bool SplitNewlines { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the Syslog class
         /// </summary>
         public Syslog()
@@ -81,6 +89,7 @@ namespace NLog.Targets
             Facility = SyslogFacility.Local1;
             Protocol = ProtocolType.Udp;
             MachineName = Dns.GetHostName();
+            SplitNewlines = true;
         }
 
         /// <summary>
@@ -94,7 +103,7 @@ namespace NLog.Targets
             // Set the current Locale to "en-US" for proper date formatting
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
-            var formattedMessageLines = Layout.Render(logEvent).Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            var formattedMessageLines = GetFormattedMessageLines(logEvent);
             var severity = GetSyslogSeverity(logEvent.Level);
             foreach (var formattedMessageLine in formattedMessageLines)
             {
@@ -104,6 +113,12 @@ namespace NLog.Targets
 
             // Restore the original culture
             Thread.CurrentThread.CurrentCulture = currentCulture;
+        }
+
+        private IEnumerable<string> GetFormattedMessageLines(LogEventInfo logEvent)
+        {
+            var msg = Layout.Render(logEvent);
+            return SplitNewlines ? msg.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries) : new[] {msg};
         }
 
         /// <summary>
