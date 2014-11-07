@@ -70,6 +70,11 @@ namespace NLog.Targets
         public bool Ssl { get; set; }
 
         /// <summary>
+        /// Sets the log messages encoding
+        /// </summary>
+        public string Encoding { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the Syslog class
         /// </summary>
         public Syslog()
@@ -81,6 +86,7 @@ namespace NLog.Targets
             Facility = SyslogFacility.Local1;
             Protocol = ProtocolType.Udp;
             MachineName = Dns.GetHostName();
+            Encoding = System.Text.Encoding.ASCII.WebName;
         }
 
         /// <summary>
@@ -214,7 +220,7 @@ namespace NLog.Targets
             sender = sender + ": ";
 
             string[] strParams = { pri, timeToString, machine, sender, body, Environment.NewLine };
-            return Encoding.ASCII.GetBytes(string.Concat(strParams));
+            return System.Text.Encoding.GetEncoding(Encoding).GetBytes(string.Concat(strParams));
         }
     }
 }
