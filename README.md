@@ -40,6 +40,7 @@ Optionally, your configuration can override them using attributes on
 * `port`: Port of syslog listener (default: `514`)
 * `protocol`: `udp` or `tcp` (default: `udp`)
 * `ssl`: `false` or `true`; TCP only (default: `false`)
+* `encoding`: Webname of encoding to use (default: `ASCII`)
 
 #### Syslog packet elements
 
