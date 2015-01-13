@@ -17,9 +17,9 @@
       <dependency id="NLog" version="2.0.0.2000"/>
     </dependencies>
     <releaseNotes>
-        Version 2.0.5138.27351
-        ======================
-        This version removes support for CustomPrefix. Instead, NLog Layouts can be used for the same functionality.
+      Version 2.0.5491.28088
+      ======================
+      Added configuration option to disable new-line splitting for messages
     </releaseNotes>
   </metadata>
 </package>
