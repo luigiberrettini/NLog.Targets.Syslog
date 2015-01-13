@@ -17,7 +17,7 @@
       <dependency id="NLog" version="2.0.0.2000"/>
     </dependencies>
     <releaseNotes>
-      Version 2.0.5491.28088
+      Version 2.1.5491.28378
       ======================
       Added configuration option to disable new-line splitting for messages
     </releaseNotes>
