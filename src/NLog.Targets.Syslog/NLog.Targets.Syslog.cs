@@ -131,35 +131,41 @@ namespace NLog.Targets
         private static void SendMessage(string logServer, int port, byte[] msg, ProtocolType protocol, bool useSsl = false)
         {
             var logServerIp = Dns.GetHostAddresses(logServer).FirstOrDefault();
-            if (logServerIp == null) return;
+            if (logServerIp == null)
+            {
+                return;
+            }
             
             var ipAddress = logServerIp.ToString();
-
             switch (protocol)
             {
                 case ProtocolType.Udp:
-                    var udp = new UdpClient(ipAddress, port);
-                    udp.Send(msg, msg.Length);
-                    udp.Close();
+                    using (var udp = new UdpClient(ipAddress, port))
+                    {
+                        udp.Send(msg, msg.Length);
+                    }
                     break;
                 case ProtocolType.Tcp:
-                    var tcp = new TcpClient(ipAddress, port);
-                    Stream stream = tcp.GetStream();
-                    if (useSsl)
+                    using (var tcp = new TcpClient(ipAddress, port))
                     {
-                        var sslStream = new SslStream(tcp.GetStream());
-                        sslStream.AuthenticateAsClient(logServer);
-                        stream = sslStream;
+                        if (useSsl)
+                        {
+                            using (var sslStream = new SslStream(tcp.GetStream()))
+                            {
+                                sslStream.AuthenticateAsClient(logServer);
+                                sslStream.Write(msg, 0, msg.Length);
+                                sslStream.Flush();
+                            }
+                        }
+                        else
+                        {
+                            using (var stream = tcp.GetStream())
+                            {
+                                stream.Write(msg, 0, msg.Length);
+                                stream.Flush();
+                            }
+                        }
                     }
-                    else
-                    {
-                        stream = tcp.GetStream();
-                    }
-
-                    stream.Write(msg, 0, msg.Length);
-
-                    stream.Close();
-                    tcp.Close();
                     break;
                 default:
                     throw new NLogConfigurationException(string.Format("Protocol '{0}' is not supported.", protocol));
@@ -217,7 +223,6 @@ namespace NLog.Targets
         /// <returns>Byte array containing formatted syslog message</returns>
         private byte[] BuildSyslogMessage(SyslogFacility facility, SyslogSeverity priority, DateTime time, string sender, string body)
         {
-
             // Get sender machine name
             string machine = MachineName + " ";
 
@@ -226,7 +231,7 @@ namespace NLog.Targets
             string pri = "<" + calculatedPriority.ToString(CultureInfo.InvariantCulture) + ">";
 
             string timeToString = time.ToString("MMM dd HH:mm:ss ");
-            sender = sender + ": ";
+            sender = string.Concat(sender, ": ");
 
             string[] strParams = { pri, timeToString, machine, sender, body, Environment.NewLine };
             return Encoding.ASCII.GetBytes(string.Concat(strParams));

@@ -48,6 +48,6 @@
         /// <summary>
         /// debug-level messages
         /// </summary>
-        Debug = 7
+        Debug = 7,
     }
 }
