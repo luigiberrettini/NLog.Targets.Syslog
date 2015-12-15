@@ -17,9 +17,6 @@
 ////
 
 // ReSharper disable CheckNamespace
-
-using System.Collections.Generic;
-
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
 {
@@ -32,38 +29,41 @@ namespace NLog.Targets
     using System.Net.Sockets;
     using System.Globalization;
     using System.Net.Security;
-    using System.IO;
+    using System.Collections.Generic;
 
     /// <summary>
     /// This class enables logging to a unix-style syslog server using NLog.
     /// </summary>
-    [NLog.Targets.Target("Syslog")]
-    public class Syslog : NLog.Targets.TargetWithLayout
+    [Target("Syslog")]
+    public class Syslog : TargetWithLayout
     {
         /// <summary>
-        /// Sets the IP Address or Host name of your Syslog server
+        /// Gets or sets the IP Address or Host name of your Syslog server
         /// </summary>
         public string SyslogServer { get; set; }
 
         /// <summary>
-        /// Sets the Port number syslog is running on (usually 514)
+        /// Gets or sets the Port number syslog is running on (usually 514)
         /// </summary>
         public int Port { get; set; }
 
         /// <summary>
-        /// Sets the name of the application that will show up in the syslog log
+        /// Gets or sets the name of the application that will show up in the syslog log
         /// </summary>
         public string Sender { get; set; }
 
+        /// <summary>
+        /// Gets or sets the machine name hosting syslog
+        /// </summary>
         public string MachineName { get; set; }
 
         /// <summary>
-        /// Sets the syslog facility name to send messages as (for example, local0 or local7)
+        /// Gets or sets the syslog facility name to send messages as (for example, local0 or local7)
         /// </summary>
         public SyslogFacility Facility { get; set; }
 
         /// <summary>
-        /// Sets the syslog server protocol (tcp/udp) 
+        /// Gets or sets the syslog server protocol (tcp/udp) 
         /// </summary>
         public ProtocolType Protocol { get; set; }
 
@@ -83,13 +83,13 @@ namespace NLog.Targets
         public Syslog()
         {
             // Sensible defaults...
-            SyslogServer = "127.0.0.1";
-            Port = 514;
-            Sender = Assembly.GetCallingAssembly().GetName().Name;
-            Facility = SyslogFacility.Local1;
-            Protocol = ProtocolType.Udp;
-            MachineName = Dns.GetHostName();
-            SplitNewlines = true;
+            this.SyslogServer = "127.0.0.1";
+            this.Port = 514;
+            this.Sender = Assembly.GetCallingAssembly().GetName().Name;
+            this.Facility = SyslogFacility.Local1;
+            this.Protocol = ProtocolType.Udp;
+            this.MachineName = Dns.GetHostName();
+            this.SplitNewlines = true;
         }
 
         /// <summary>
@@ -97,18 +97,18 @@ namespace NLog.Targets
         /// </summary>
         /// <param name="logEvent">The NLog.LogEventInfo </param>
         protected override void Write(LogEventInfo logEvent)
-        {            
+        {
             // Store the current UI culture
             var currentCulture = Thread.CurrentThread.CurrentCulture;
             // Set the current Locale to "en-US" for proper date formatting
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
 
-            var formattedMessageLines = GetFormattedMessageLines(logEvent);
+            var formattedMessageLines = this.GetFormattedMessageLines(logEvent);
             var severity = GetSyslogSeverity(logEvent.Level);
             foreach (var formattedMessageLine in formattedMessageLines)
             {
-                var message = BuildSyslogMessage(Facility, severity, DateTime.Now, Sender, formattedMessageLine);
-                SendMessage(SyslogServer, Port, message, Protocol, Ssl);
+                var message = this.BuildSyslogMessage(this.Facility, severity, DateTime.Now, this.Sender, formattedMessageLine);
+                SendMessage(this.SyslogServer, this.Port, message, this.Protocol, this.Ssl);
             }
 
             // Restore the original culture
@@ -117,8 +117,8 @@ namespace NLog.Targets
 
         private IEnumerable<string> GetFormattedMessageLines(LogEventInfo logEvent)
         {
-            var msg = Layout.Render(logEvent);
-            return SplitNewlines ? msg.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries) : new[] {msg};
+            var msg = this.Layout.Render(logEvent);
+            return this.SplitNewlines ? msg.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries) : new[] { msg };
         }
 
         /// <summary>
@@ -128,41 +128,47 @@ namespace NLog.Targets
         /// <param name="port">The UDP port that syslog is running on</param>
         /// <param name="msg">The syslog formatted message ready to transmit</param>
         /// <param name="protocol">The syslog server protocol (tcp/udp)</param>
+        /// <param name="useSsl">Specify if SSL should be used</param>
         private static void SendMessage(string logServer, int port, byte[] msg, ProtocolType protocol, bool useSsl = false)
         {
             var logServerIp = Dns.GetHostAddresses(logServer).FirstOrDefault();
-            if (logServerIp == null) return;
-            
-            var ipAddress = logServerIp.ToString();
+            if (logServerIp == null)
+            {
+                return;
+            }
 
+            var ipAddress = logServerIp.ToString();
             switch (protocol)
             {
                 case ProtocolType.Udp:
-                    var udp = new UdpClient(ipAddress, port);
-                    udp.Send(msg, msg.Length);
-                    udp.Close();
+                    using (var udp = new UdpClient(ipAddress, port))
+                    {
+                        udp.Send(msg, msg.Length);
+                    }
                     break;
                 case ProtocolType.Tcp:
-                    var tcp = new TcpClient(ipAddress, port);
-                    Stream stream = tcp.GetStream();
-                    if (useSsl)
+                    using (var tcp = new TcpClient(ipAddress, port))
                     {
-                        var sslStream = new SslStream(tcp.GetStream());
-                        sslStream.AuthenticateAsClient(logServer);
-                        stream = sslStream;
-                    }
-                    else
-                    {
-                        stream = tcp.GetStream();
+                        // disposition of tcp also disposes stream
+                        var stream = tcp.GetStream();
+                        if (useSsl)
+                        {
+                            // leave stream open so that we don't double dispose
+                            using (var sslStream = new SslStream(stream, true))
+                            {
+                                sslStream.AuthenticateAsClient(logServer);
+                                sslStream.Write(msg, 0, msg.Length);
+                            }
+                        }
+                        else
+                        {
+                            stream.Write(msg, 0, msg.Length);
+                        }
                     }
 
-                    stream.Write(msg, 0, msg.Length);
-
-                    stream.Close();
-                    tcp.Close();
                     break;
                 default:
-                    throw new NLogConfigurationException(string.Format("Protocol '{0}' is not supported.", protocol));
+                    throw new NLogConfigurationException($"Protocol '{protocol}' is not supported.");
             }
         }
 
@@ -174,35 +180,30 @@ namespace NLog.Targets
         private static SyslogSeverity GetSyslogSeverity(LogLevel logLevel)
         {
             if (logLevel == LogLevel.Fatal)
-            { 
-                return SyslogSeverity.Emergency; 
+            {
+                return SyslogSeverity.Emergency;
             }
-            
+
             if (logLevel >= LogLevel.Error)
             {
                 return SyslogSeverity.Error;
             }
-            
+
             if (logLevel >= LogLevel.Warn)
-            { 
-                return SyslogSeverity.Warning; 
+            {
+                return SyslogSeverity.Warning;
             }
-            
+
             if (logLevel >= LogLevel.Info)
             {
                 return SyslogSeverity.Informational;
             }
-            
+
             if (logLevel >= LogLevel.Debug)
             {
                 return SyslogSeverity.Debug;
             }
-            
-            if (logLevel >= LogLevel.Trace)
-            {
-                return SyslogSeverity.Notice; 
-            }
-            
+
             return SyslogSeverity.Notice;
         }
 
@@ -217,15 +218,14 @@ namespace NLog.Targets
         /// <returns>Byte array containing formatted syslog message</returns>
         private byte[] BuildSyslogMessage(SyslogFacility facility, SyslogSeverity priority, DateTime time, string sender, string body)
         {
-
             // Get sender machine name
-            string machine = MachineName + " ";
+            var machine = this.MachineName + " ";
 
             // Calculate PRI field
-            int calculatedPriority = (int)facility * 8 + (int)priority;
-            string pri = "<" + calculatedPriority.ToString(CultureInfo.InvariantCulture) + ">";
+            var calculatedPriority = (int)facility * 8 + (int)priority;
+            var pri = "<" + calculatedPriority.ToString(CultureInfo.InvariantCulture) + ">";
 
-            string timeToString = time.ToString("MMM dd HH:mm:ss ");
+            var timeToString = time.ToString("MMM dd HH:mm:ss ");
             sender = sender + ": ";
 
             string[] strParams = { pri, timeToString, machine, sender, body, Environment.NewLine };
