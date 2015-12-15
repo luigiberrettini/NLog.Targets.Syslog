@@ -1,7 +1,7 @@
 Syslog Target for NLog
 ======================
 
-**NLog Syslog** is a custom target for [NLog](http://nlog-project.org/) version 2.0 allowing you to send logging messages to a UNIX-style Syslog server.
+**NLog Syslog** is a custom target for [NLog](http://nlog-project.org/) version 4.2.2 allowing you to send logging messages to a UNIX-style Syslog server.
 
 ## Configuration
 
