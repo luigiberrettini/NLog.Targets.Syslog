@@ -1,4 +1,6 @@
-﻿namespace NLog.Targets
+﻿// ReSharper disable CheckNamespace
+namespace NLog.Targets
+// ReSharper enable CheckNamespace
 {
     /// <summary>
     /// syslog facilities
