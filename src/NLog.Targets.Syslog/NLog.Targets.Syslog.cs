@@ -24,19 +24,23 @@ namespace NLog.Targets
     using System.Linq;
     using System.Text;
     using System.Reflection;
-    using System.Threading;
     using System.Net;
     using System.Net.Sockets;
     using System.Globalization;
     using System.Net.Security;
     using System.Collections.Generic;
-
+    using Layouts;
     /// <summary>
     /// This class enables logging to a unix-style syslog server using NLog.
     /// </summary>
     [Target("Syslog")]
     public class Syslog : TargetWithLayout
     {
+        private const string NilValue = "-";
+        private static readonly CultureInfo _usCulture = new CultureInfo("en-US");
+        private static readonly byte[] _bom = { 0xEF, 0xBB, 0xBF };
+
+
         /// <summary>
         /// Gets or sets the IP Address or Host name of your Syslog server
         /// </summary>
@@ -50,12 +54,12 @@ namespace NLog.Targets
         /// <summary>
         /// Gets or sets the name of the application that will show up in the syslog log
         /// </summary>
-        public string Sender { get; set; }
+        public Layout Sender { get; set; }
 
         /// <summary>
         /// Gets or sets the machine name hosting syslog
         /// </summary>
-        public string MachineName { get; set; }
+        public Layout MachineName { get; set; }
 
         /// <summary>
         /// Gets or sets the syslog facility name to send messages as (for example, local0 or local7)
@@ -78,6 +82,35 @@ namespace NLog.Targets
         public bool SplitNewlines { get; set; }
 
         /// <summary>
+        /// RFC number for syslog protocol
+        /// </summary>
+        public RfcNumber Rfc { get; set; }
+
+        #region RFC 5424 members
+
+        /// <summary>
+        /// Syslog protocol version for RFC 5424
+        /// </summary>
+        private byte ProtocolVersion { get; set; }
+
+        /// <summary>
+        /// Layout for PROCID protocol field
+        /// </summary>
+        public Layout ProcId { get; set; }
+
+        /// <summary>
+        /// Layout for MSGID protocol field
+        /// </summary>
+        public Layout MsgId { get; set; }
+
+        /// <summary>
+        /// Layout for STRUCTURED-DATA protocol field
+        /// </summary>
+        public Layout StructuredData { get; set; }
+
+        #endregion
+
+        /// <summary>
         /// Initializes a new instance of the Syslog class
         /// </summary>
         public Syslog()
@@ -90,6 +123,13 @@ namespace NLog.Targets
             this.Protocol = ProtocolType.Udp;
             this.MachineName = Dns.GetHostName();
             this.SplitNewlines = true;
+            this.Rfc = RfcNumber.Rfc3164;
+
+            //Defaults for rfc 5424
+            this.ProtocolVersion = 1;
+            this.ProcId = NilValue;
+            this.MsgId = NilValue;
+            this.StructuredData = NilValue;
         }
 
         /// <summary>
@@ -98,21 +138,13 @@ namespace NLog.Targets
         /// <param name="logEvent">The NLog.LogEventInfo </param>
         protected override void Write(LogEventInfo logEvent)
         {
-            // Store the current UI culture
-            var currentCulture = Thread.CurrentThread.CurrentCulture;
-            // Set the current Locale to "en-US" for proper date formatting
-            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
-
             var formattedMessageLines = this.GetFormattedMessageLines(logEvent);
             var severity = GetSyslogSeverity(logEvent.Level);
             foreach (var formattedMessageLine in formattedMessageLines)
             {
-                var message = this.BuildSyslogMessage(this.Facility, severity, DateTime.Now, this.Sender, formattedMessageLine);
+                var message = this.BuildSyslogMessage(logEvent, this.Facility, severity, formattedMessageLine);
                 SendMessage(this.SyslogServer, this.Port, message, this.Protocol, this.Ssl);
             }
-
-            // Restore the original culture
-            Thread.CurrentThread.CurrentCulture = currentCulture;
         }
 
         private IEnumerable<string> GetFormattedMessageLines(LogEventInfo logEvent)
@@ -210,26 +242,95 @@ namespace NLog.Targets
         /// <summary>
         /// Builds a syslog-compatible message using the information we have available. 
         /// </summary>
+        /// <param name="logEvent">The NLog.LogEventInfo</param>
         /// <param name="facility">Syslog Facility to transmit message from</param>
         /// <param name="priority">Syslog severity level</param>
-        /// <param name="time">Time stamp for log message</param>
-        /// <param name="sender">Name of the subsystem sending the message</param>
         /// <param name="body">Message text</param>
         /// <returns>Byte array containing formatted syslog message</returns>
-        private byte[] BuildSyslogMessage(SyslogFacility facility, SyslogSeverity priority, DateTime time, string sender, string body)
+        private byte[] BuildSyslogMessage(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity priority, string body)
         {
-            // Get sender machine name
-            var machine = this.MachineName + " ";
+            switch (Rfc)
+            {
+                case RfcNumber.Rfc5424:
+                    return this.BuildSyslogMessage5424(logEvent, facility, priority, body);
+                default:
+                    return this.BuildSyslogMessage3164(logEvent, facility, priority, body);
+            }
+        }
 
+        /// <summary>
+        /// Builds rfc-3164 compatible message
+        /// </summary>
+        /// <param name="logEvent">The NLog.LogEventInfo</param>
+        /// <param name="facility">Syslog Facility to transmit message from/param>
+        /// <param name="priority">Syslog severity level</param>
+        /// <param name="body">Message text/param>
+        /// <returns>Byte array containing formatted syslog message</returns>
+        private byte[] BuildSyslogMessage3164(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity priority, string body)
+        {
             // Calculate PRI field
             var calculatedPriority = (int)facility * 8 + (int)priority;
             var pri = "<" + calculatedPriority.ToString(CultureInfo.InvariantCulture) + ">";
 
-            var timeToString = time.ToString("MMM dd HH:mm:ss ");
-            sender = sender + ": ";
+            var time = logEvent.TimeStamp.ToLocalTime().ToString("MMM dd HH:mm:ss ", _usCulture);
 
-            string[] strParams = { pri, timeToString, machine, sender, body, Environment.NewLine };
+            // Get sender machine name
+            var machine = this.MachineName.Render(logEvent) + " ";
+
+            var sender = this.Sender.Render(logEvent) + ": ";
+
+            string[] strParams = { pri, time, machine, sender, body, Environment.NewLine };
             return Encoding.ASCII.GetBytes(string.Concat(strParams));
+        }
+
+        /// <summary>
+        /// Builds rfc-5424 compatible message
+        /// </summary>
+        /// <param name="logEvent">The NLog.LogEventInfo</param>
+        /// <param name="facility">Syslog Facility to transmit message from/param>
+        /// <param name="priority">Syslog severity level</param>
+        /// <param name="body">Message text/param>
+        /// <returns>Byte array containing formatted syslog message</returns>
+        private byte[] BuildSyslogMessage5424(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity priority, string body)
+        {
+            // Calculate PRI field
+            var calculatedPriority = (int)facility * 8 + (int)priority;
+            var pri = "<" + calculatedPriority.ToString(CultureInfo.InvariantCulture) + ">";
+            var version = this.ProtocolVersion.ToString(CultureInfo.InvariantCulture);
+            var time = logEvent.TimeStamp.ToString("o");
+            // Get sender machine name
+            var machine = this.MachineName.Render(logEvent);
+            if (machine.Length > 255)
+            {
+                machine = machine.Substring(0, 255);
+            }
+            var sender = this.Sender.Render(logEvent);
+            if (sender.Length > 48)
+            {
+                sender = sender.Substring(0, 48);
+            }
+            var procId = this.ProcId.Render(logEvent);
+            if (procId.Length > 128)
+            {
+                procId = procId.Substring(0, 128);
+            }
+            var msgId = this.MsgId.Render(logEvent);
+            if (msgId.Length > 32)
+            {
+                msgId = msgId.Substring(0, 32);
+            }
+
+            var headerData = Encoding.ASCII.GetBytes(string.Concat(pri, version, " ", time, " ", machine, " ", sender, " ", procId, " ", msgId, " "));
+            var structuredData = Encoding.UTF8.GetBytes(this.StructuredData.Render(logEvent) + " ");
+            var messageData = Encoding.UTF8.GetBytes(body);
+
+            var allData = new List<byte>();
+            allData.AddRange(headerData);
+            allData.AddRange(structuredData);
+            allData.AddRange(_bom);
+            allData.AddRange(messageData);
+
+            return allData.ToArray();
         }
     }
 }
