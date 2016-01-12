@@ -30,6 +30,8 @@ namespace NLog.Targets
     using System.Net.Security;
     using System.Collections.Generic;
     using Layouts;
+    using Common;
+
     /// <summary>
     /// This class enables logging to a unix-style syslog server using NLog.
     /// </summary>
@@ -133,17 +135,89 @@ namespace NLog.Targets
         }
 
         /// <summary>
-        /// This is where we hook into NLog, by overriding the Write method. 
+        /// Writes single event.
+        /// No need to override sync version of Write(LogEventInfo) because it is called only from async version.
         /// </summary>
-        /// <param name="logEvent">The NLog.LogEventInfo </param>
-        protected override void Write(LogEventInfo logEvent)
+        /// <param name="logEvent">The NLog.AsyncLogEventInfo</param>
+        protected override void Write(AsyncLogEventInfo logEvent)
         {
-            var formattedMessageLines = this.GetFormattedMessageLines(logEvent);
-            var severity = GetSyslogSeverity(logEvent.Level);
-            foreach (var formattedMessageLine in formattedMessageLines)
+            SendEventsBatch(new[] { logEvent });
+        }
+
+        /// <summary>
+        /// Writes array of events
+        /// </summary>
+        /// <param name="logEvents">The array of NLog.AsyncLogEventInfo</param>
+        protected override void Write(AsyncLogEventInfo[] logEvents)
+        {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            SendEventsBatch(logEvents);
+            sw.Stop();
+            System.Diagnostics.Debug.WriteLine("Elapsed {0} ms", sw.Elapsed.TotalMilliseconds);
+        }
+
+        /// <summary>
+        /// Sends array of events to syslog server
+        /// </summary>
+        /// <param name="logEvents">The array of NLog.AsyncLogEventInfo</param>
+        private void SendEventsBatch(AsyncLogEventInfo[] logEvents)
+        {
+            var logServerIp = Dns.GetHostAddresses(SyslogServer).FirstOrDefault();
+            if (logServerIp == null)
             {
-                var message = this.BuildSyslogMessage(logEvent, this.Facility, severity, formattedMessageLine);
-                SendMessage(this.SyslogServer, this.Port, message, this.Protocol, this.Ssl);
+                return;
+            }
+            var ipAddress = logServerIp.ToString();
+            switch (Protocol)
+            {
+                case ProtocolType.Udp:
+                    using (var udp = new UdpClient(ipAddress, Port))
+                    {
+                        ProcessAndSendEvents(logEvents, messageData => udp.Send(messageData, messageData.Length));
+                    }
+                    break;
+                case ProtocolType.Tcp:
+                    using (var tcp = new TcpClient(ipAddress, Port))
+                    {
+                        // disposition of tcp also disposes stream
+                        var stream = tcp.GetStream();
+                        if (Ssl)
+                        {
+                            // leave stream open so that we don't double dispose
+                            using (var sslStream = new SslStream(stream, true))
+                            {
+                                sslStream.AuthenticateAsClient(SyslogServer);
+                                ProcessAndSendEvents(logEvents, messageData => sslStream.Write(messageData, 0, messageData.Length));
+                            }
+                        }
+                        else
+                        {
+                            ProcessAndSendEvents(logEvents, messageData => stream.Write(messageData, 0, messageData.Length));
+                        }
+                    }
+                    break;
+                default:
+                    throw new NLogConfigurationException($"Protocol '{Protocol}' is not supported.");
+            }
+        }
+
+        /// <summary>
+        /// Processes array of events and sends messages bytes using
+        /// </summary>
+        /// <param name="logEvents">The array of NLog.AsyncLogEventInfo</param>
+        /// <param name="messageSendAction">Implementation of send data method</param>
+        void ProcessAndSendEvents(AsyncLogEventInfo[] logEvents, Action<byte[]> messageSendAction)
+        {
+            foreach (var asyncLogEvent in logEvents)
+            {
+                var logEvent = asyncLogEvent.LogEvent;
+                var formattedMessageLines = this.GetFormattedMessageLines(logEvent);
+                var severity = GetSyslogSeverity(logEvent.Level);
+                foreach (var formattedMessageLine in formattedMessageLines)
+                {
+                    var message = this.BuildSyslogMessage(logEvent, this.Facility, severity, formattedMessageLine);
+                    messageSendAction(message);
+                }
             }
         }
 
@@ -151,57 +225,6 @@ namespace NLog.Targets
         {
             var msg = this.Layout.Render(logEvent);
             return this.SplitNewlines ? msg.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries) : new[] { msg };
-        }
-
-        /// <summary>
-        /// Performs the actual network part of sending a message
-        /// </summary>
-        /// <param name="logServer">The syslog server's host name or IP address</param>
-        /// <param name="port">The UDP port that syslog is running on</param>
-        /// <param name="msg">The syslog formatted message ready to transmit</param>
-        /// <param name="protocol">The syslog server protocol (tcp/udp)</param>
-        /// <param name="useSsl">Specify if SSL should be used</param>
-        private static void SendMessage(string logServer, int port, byte[] msg, ProtocolType protocol, bool useSsl = false)
-        {
-            var logServerIp = Dns.GetHostAddresses(logServer).FirstOrDefault();
-            if (logServerIp == null)
-            {
-                return;
-            }
-
-            var ipAddress = logServerIp.ToString();
-            switch (protocol)
-            {
-                case ProtocolType.Udp:
-                    using (var udp = new UdpClient(ipAddress, port))
-                    {
-                        udp.Send(msg, msg.Length);
-                    }
-                    break;
-                case ProtocolType.Tcp:
-                    using (var tcp = new TcpClient(ipAddress, port))
-                    {
-                        // disposition of tcp also disposes stream
-                        var stream = tcp.GetStream();
-                        if (useSsl)
-                        {
-                            // leave stream open so that we don't double dispose
-                            using (var sslStream = new SslStream(stream, true))
-                            {
-                                sslStream.AuthenticateAsClient(logServer);
-                                sslStream.Write(msg, 0, msg.Length);
-                            }
-                        }
-                        else
-                        {
-                            stream.Write(msg, 0, msg.Length);
-                        }
-                    }
-
-                    break;
-                default:
-                    throw new NLogConfigurationException($"Protocol '{protocol}' is not supported.");
-            }
         }
 
         /// <summary>
