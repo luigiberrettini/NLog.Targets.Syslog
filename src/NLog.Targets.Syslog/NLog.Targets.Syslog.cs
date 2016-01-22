@@ -24,12 +24,13 @@ namespace NLog.Targets
     using System.Linq;
     using System.Text;
     using System.Reflection;
-    using System.Threading;
     using System.Net;
     using System.Net.Sockets;
     using System.Globalization;
     using System.Net.Security;
     using System.Collections.Generic;
+    using Layouts;
+    using Common;
 
     /// <summary>
     /// This class enables logging to a unix-style syslog server using NLog.
@@ -37,6 +38,11 @@ namespace NLog.Targets
     [Target("Syslog")]
     public class Syslog : TargetWithLayout
     {
+        private const string NilValue = "-";
+        private static readonly CultureInfo _usCulture = new CultureInfo("en-US");
+        private static readonly byte[] _bom = { 0xEF, 0xBB, 0xBF };
+
+
         /// <summary>
         /// Gets or sets the IP Address or Host name of your Syslog server
         /// </summary>
@@ -50,12 +56,12 @@ namespace NLog.Targets
         /// <summary>
         /// Gets or sets the name of the application that will show up in the syslog log
         /// </summary>
-        public string Sender { get; set; }
+        public Layout Sender { get; set; }
 
         /// <summary>
         /// Gets or sets the machine name hosting syslog
         /// </summary>
-        public string MachineName { get; set; }
+        public Layout MachineName { get; set; }
 
         /// <summary>
         /// Gets or sets the syslog facility name to send messages as (for example, local0 or local7)
@@ -78,6 +84,35 @@ namespace NLog.Targets
         public bool SplitNewlines { get; set; }
 
         /// <summary>
+        /// RFC number for syslog protocol
+        /// </summary>
+        public RfcNumber Rfc { get; set; }
+
+        #region RFC 5424 members
+
+        /// <summary>
+        /// Syslog protocol version for RFC 5424
+        /// </summary>
+        private byte ProtocolVersion { get; set; }
+
+        /// <summary>
+        /// Layout for PROCID protocol field
+        /// </summary>
+        public Layout ProcId { get; set; }
+
+        /// <summary>
+        /// Layout for MSGID protocol field
+        /// </summary>
+        public Layout MsgId { get; set; }
+
+        /// <summary>
+        /// Layout for STRUCTURED-DATA protocol field
+        /// </summary>
+        public Layout StructuredData { get; set; }
+
+        #endregion
+
+        /// <summary>
         /// Initializes a new instance of the Syslog class
         /// </summary>
         public Syslog()
@@ -90,86 +125,106 @@ namespace NLog.Targets
             this.Protocol = ProtocolType.Udp;
             this.MachineName = Dns.GetHostName();
             this.SplitNewlines = true;
+            this.Rfc = RfcNumber.Rfc3164;
+
+            //Defaults for rfc 5424
+            this.ProtocolVersion = 1;
+            this.ProcId = NilValue;
+            this.MsgId = NilValue;
+            this.StructuredData = NilValue;
         }
 
         /// <summary>
-        /// This is where we hook into NLog, by overriding the Write method. 
+        /// Writes single event.
+        /// No need to override sync version of Write(LogEventInfo) because it is called only from async version.
         /// </summary>
-        /// <param name="logEvent">The NLog.LogEventInfo </param>
-        protected override void Write(LogEventInfo logEvent)
+        /// <param name="logEvent">The NLog.AsyncLogEventInfo</param>
+        protected override void Write(AsyncLogEventInfo logEvent)
         {
-            // Store the current UI culture
-            var currentCulture = Thread.CurrentThread.CurrentCulture;
-            // Set the current Locale to "en-US" for proper date formatting
-            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+            SendEventsBatch(new[] { logEvent });
+        }
 
-            var formattedMessageLines = this.GetFormattedMessageLines(logEvent);
-            var severity = GetSyslogSeverity(logEvent.Level);
-            foreach (var formattedMessageLine in formattedMessageLines)
+        /// <summary>
+        /// Writes array of events
+        /// </summary>
+        /// <param name="logEvents">The array of NLog.AsyncLogEventInfo</param>
+        protected override void Write(AsyncLogEventInfo[] logEvents)
+        {
+            var sw = System.Diagnostics.Stopwatch.StartNew();
+            SendEventsBatch(logEvents);
+            sw.Stop();
+            System.Diagnostics.Debug.WriteLine("Elapsed {0} ms", sw.Elapsed.TotalMilliseconds);
+        }
+
+        /// <summary>
+        /// Sends array of events to syslog server
+        /// </summary>
+        /// <param name="logEvents">The array of NLog.AsyncLogEventInfo</param>
+        private void SendEventsBatch(AsyncLogEventInfo[] logEvents)
+        {
+            var logServerIp = Dns.GetHostAddresses(SyslogServer).FirstOrDefault();
+            if (logServerIp == null)
             {
-                var message = this.BuildSyslogMessage(this.Facility, severity, DateTime.Now, this.Sender, formattedMessageLine);
-                SendMessage(this.SyslogServer, this.Port, message, this.Protocol, this.Ssl);
+                return;
             }
+            var ipAddress = logServerIp.ToString();
+            switch (Protocol)
+            {
+                case ProtocolType.Udp:
+                    using (var udp = new UdpClient(ipAddress, Port))
+                    {
+                        ProcessAndSendEvents(logEvents, messageData => udp.Send(messageData, messageData.Length));
+                    }
+                    break;
+                case ProtocolType.Tcp:
+                    using (var tcp = new TcpClient(ipAddress, Port))
+                    {
+                        // disposition of tcp also disposes stream
+                        var stream = tcp.GetStream();
+                        if (Ssl)
+                        {
+                            // leave stream open so that we don't double dispose
+                            using (var sslStream = new SslStream(stream, true))
+                            {
+                                sslStream.AuthenticateAsClient(SyslogServer);
+                                ProcessAndSendEvents(logEvents, messageData => sslStream.Write(messageData, 0, messageData.Length));
+                            }
+                        }
+                        else
+                        {
+                            ProcessAndSendEvents(logEvents, messageData => stream.Write(messageData, 0, messageData.Length));
+                        }
+                    }
+                    break;
+                default:
+                    throw new NLogConfigurationException($"Protocol '{Protocol}' is not supported.");
+            }
+        }
 
-            // Restore the original culture
-            Thread.CurrentThread.CurrentCulture = currentCulture;
+        /// <summary>
+        /// Processes array of events and sends messages bytes using
+        /// </summary>
+        /// <param name="logEvents">The array of NLog.AsyncLogEventInfo</param>
+        /// <param name="messageSendAction">Implementation of send data method</param>
+        void ProcessAndSendEvents(AsyncLogEventInfo[] logEvents, Action<byte[]> messageSendAction)
+        {
+            foreach (var asyncLogEvent in logEvents)
+            {
+                var logEvent = asyncLogEvent.LogEvent;
+                var formattedMessageLines = this.GetFormattedMessageLines(logEvent);
+                var severity = GetSyslogSeverity(logEvent.Level);
+                foreach (var formattedMessageLine in formattedMessageLines)
+                {
+                    var message = this.BuildSyslogMessage(logEvent, this.Facility, severity, formattedMessageLine);
+                    messageSendAction(message);
+                }
+            }
         }
 
         private IEnumerable<string> GetFormattedMessageLines(LogEventInfo logEvent)
         {
             var msg = this.Layout.Render(logEvent);
             return this.SplitNewlines ? msg.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries) : new[] { msg };
-        }
-
-        /// <summary>
-        /// Performs the actual network part of sending a message
-        /// </summary>
-        /// <param name="logServer">The syslog server's host name or IP address</param>
-        /// <param name="port">The UDP port that syslog is running on</param>
-        /// <param name="msg">The syslog formatted message ready to transmit</param>
-        /// <param name="protocol">The syslog server protocol (tcp/udp)</param>
-        /// <param name="useSsl">Specify if SSL should be used</param>
-        private static void SendMessage(string logServer, int port, byte[] msg, ProtocolType protocol, bool useSsl = false)
-        {
-            var logServerIp = Dns.GetHostAddresses(logServer).FirstOrDefault();
-            if (logServerIp == null)
-            {
-                return;
-            }
-
-            var ipAddress = logServerIp.ToString();
-            switch (protocol)
-            {
-                case ProtocolType.Udp:
-                    using (var udp = new UdpClient(ipAddress, port))
-                    {
-                        udp.Send(msg, msg.Length);
-                    }
-                    break;
-                case ProtocolType.Tcp:
-                    using (var tcp = new TcpClient(ipAddress, port))
-                    {
-                        // disposition of tcp also disposes stream
-                        var stream = tcp.GetStream();
-                        if (useSsl)
-                        {
-                            // leave stream open so that we don't double dispose
-                            using (var sslStream = new SslStream(stream, true))
-                            {
-                                sslStream.AuthenticateAsClient(logServer);
-                                sslStream.Write(msg, 0, msg.Length);
-                            }
-                        }
-                        else
-                        {
-                            stream.Write(msg, 0, msg.Length);
-                        }
-                    }
-
-                    break;
-                default:
-                    throw new NLogConfigurationException($"Protocol '{protocol}' is not supported.");
-            }
         }
 
         /// <summary>
@@ -210,26 +265,95 @@ namespace NLog.Targets
         /// <summary>
         /// Builds a syslog-compatible message using the information we have available. 
         /// </summary>
+        /// <param name="logEvent">The NLog.LogEventInfo</param>
         /// <param name="facility">Syslog Facility to transmit message from</param>
         /// <param name="priority">Syslog severity level</param>
-        /// <param name="time">Time stamp for log message</param>
-        /// <param name="sender">Name of the subsystem sending the message</param>
         /// <param name="body">Message text</param>
         /// <returns>Byte array containing formatted syslog message</returns>
-        private byte[] BuildSyslogMessage(SyslogFacility facility, SyslogSeverity priority, DateTime time, string sender, string body)
+        private byte[] BuildSyslogMessage(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity priority, string body)
         {
-            // Get sender machine name
-            var machine = this.MachineName + " ";
+            switch (Rfc)
+            {
+                case RfcNumber.Rfc5424:
+                    return this.BuildSyslogMessage5424(logEvent, facility, priority, body);
+                default:
+                    return this.BuildSyslogMessage3164(logEvent, facility, priority, body);
+            }
+        }
 
+        /// <summary>
+        /// Builds rfc-3164 compatible message
+        /// </summary>
+        /// <param name="logEvent">The NLog.LogEventInfo</param>
+        /// <param name="facility">Syslog Facility to transmit message from/param>
+        /// <param name="priority">Syslog severity level</param>
+        /// <param name="body">Message text/param>
+        /// <returns>Byte array containing formatted syslog message</returns>
+        private byte[] BuildSyslogMessage3164(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity priority, string body)
+        {
             // Calculate PRI field
             var calculatedPriority = (int)facility * 8 + (int)priority;
             var pri = "<" + calculatedPriority.ToString(CultureInfo.InvariantCulture) + ">";
 
-            var timeToString = time.ToString("MMM dd HH:mm:ss ");
-            sender = sender + ": ";
+            var time = logEvent.TimeStamp.ToLocalTime().ToString("MMM dd HH:mm:ss ", _usCulture);
 
-            string[] strParams = { pri, timeToString, machine, sender, body, Environment.NewLine };
+            // Get sender machine name
+            var machine = this.MachineName.Render(logEvent) + " ";
+
+            var sender = this.Sender.Render(logEvent) + ": ";
+
+            string[] strParams = { pri, time, machine, sender, body, Environment.NewLine };
             return Encoding.ASCII.GetBytes(string.Concat(strParams));
+        }
+
+        /// <summary>
+        /// Builds rfc-5424 compatible message
+        /// </summary>
+        /// <param name="logEvent">The NLog.LogEventInfo</param>
+        /// <param name="facility">Syslog Facility to transmit message from/param>
+        /// <param name="priority">Syslog severity level</param>
+        /// <param name="body">Message text/param>
+        /// <returns>Byte array containing formatted syslog message</returns>
+        private byte[] BuildSyslogMessage5424(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity priority, string body)
+        {
+            // Calculate PRI field
+            var calculatedPriority = (int)facility * 8 + (int)priority;
+            var pri = "<" + calculatedPriority.ToString(CultureInfo.InvariantCulture) + ">";
+            var version = this.ProtocolVersion.ToString(CultureInfo.InvariantCulture);
+            var time = logEvent.TimeStamp.ToString("o");
+            // Get sender machine name
+            var machine = this.MachineName.Render(logEvent);
+            if (machine.Length > 255)
+            {
+                machine = machine.Substring(0, 255);
+            }
+            var sender = this.Sender.Render(logEvent);
+            if (sender.Length > 48)
+            {
+                sender = sender.Substring(0, 48);
+            }
+            var procId = this.ProcId.Render(logEvent);
+            if (procId.Length > 128)
+            {
+                procId = procId.Substring(0, 128);
+            }
+            var msgId = this.MsgId.Render(logEvent);
+            if (msgId.Length > 32)
+            {
+                msgId = msgId.Substring(0, 32);
+            }
+
+            var headerData = Encoding.ASCII.GetBytes(string.Concat(pri, version, " ", time, " ", machine, " ", sender, " ", procId, " ", msgId, " "));
+            var structuredData = Encoding.UTF8.GetBytes(this.StructuredData.Render(logEvent) + " ");
+            var messageData = Encoding.UTF8.GetBytes(body);
+
+            var allData = new List<byte>();
+            allData.AddRange(headerData);
+            allData.AddRange(structuredData);
+            allData.AddRange(_bom);
+            allData.AddRange(messageData);
+
+            return allData.ToArray();
         }
     }
 }

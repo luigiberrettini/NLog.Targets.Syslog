@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="NLog.Targets.Syslog.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RfcNumber.cs" />
     <Compile Include="SyslogFacility.cs" />
     <Compile Include="SyslogSeverity.cs" />
   </ItemGroup>
