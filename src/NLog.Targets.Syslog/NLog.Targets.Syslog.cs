@@ -53,6 +53,11 @@ namespace NLog.Targets
         public string Sender { get; set; }
 
         /// <summary>
+        /// Gets or sets the timestamp format
+        /// </summary>
+        public string TimestampFormat { get; set; }
+
+        /// <summary>
         /// Gets or sets the machine name hosting syslog
         /// </summary>
         public string MachineName { get; set; }
@@ -88,6 +93,7 @@ namespace NLog.Targets
             this.Sender = Assembly.GetCallingAssembly().GetName().Name;
             this.Facility = SyslogFacility.Local1;
             this.Protocol = ProtocolType.Udp;
+            this.TimestampFormat = "MMM dd HH:mm:ss ";
             this.MachineName = Dns.GetHostName();
             this.SplitNewlines = true;
         }
@@ -225,7 +231,7 @@ namespace NLog.Targets
             var calculatedPriority = (int)facility * 8 + (int)priority;
             var pri = "<" + calculatedPriority.ToString(CultureInfo.InvariantCulture) + ">";
 
-            var timeToString = time.ToString("MMM dd HH:mm:ss ");
+            var timeToString = time.ToString(this.TimestampFormat);
             sender = sender + ": ";
 
             string[] strParams = { pri, timeToString, machine, sender, body, Environment.NewLine };
