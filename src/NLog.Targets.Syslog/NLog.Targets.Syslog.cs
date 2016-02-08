@@ -227,7 +227,7 @@ namespace NLog.Targets
             sender = sender + ": ";
 
             string[] strParams = { pri, timeToString, machine, sender, body, Environment.NewLine };
-            return Encoding.ASCII.GetBytes(string.Concat(strParams));
+            return Encoding.ASCII.GetBytes(string.Join(string.Empty, strParams));
         }
     }
 }
