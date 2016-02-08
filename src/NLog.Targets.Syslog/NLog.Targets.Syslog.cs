@@ -104,11 +104,6 @@ namespace NLog.Targets
         /// <param name="logEvent">The NLog.LogEventInfo </param>
         protected override void Write(LogEventInfo logEvent)
         {
-            // Store the current UI culture
-            var currentCulture = Thread.CurrentThread.CurrentCulture;
-            // Set the current Locale to "en-US" for proper date formatting
-            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
-
             var formattedMessageLines = this.GetFormattedMessageLines(logEvent);
             var severity = GetSyslogSeverity(logEvent.Level);
             foreach (var formattedMessageLine in formattedMessageLines)
@@ -116,9 +111,6 @@ namespace NLog.Targets
                 var message = this.BuildSyslogMessage(this.Facility, severity, DateTime.Now, this.Sender, formattedMessageLine);
                 SendMessage(this.SyslogServer, this.Port, message, this.Protocol, this.Ssl);
             }
-
-            // Restore the original culture
-            Thread.CurrentThread.CurrentCulture = currentCulture;
         }
 
         private IEnumerable<string> GetFormattedMessageLines(LogEventInfo logEvent)
@@ -231,7 +223,7 @@ namespace NLog.Targets
             var calculatedPriority = (int)facility * 8 + (int)priority;
             var pri = "<" + calculatedPriority.ToString(CultureInfo.InvariantCulture) + ">";
 
-            var timeToString = time.ToString(this.TimestampFormat);
+            var timeToString = time.ToString(this.TimestampFormat, CultureInfo.GetCultureInfo("en-US"));
             sender = sender + ": ";
 
             string[] strParams = { pri, timeToString, machine, sender, body, Environment.NewLine };
