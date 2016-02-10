@@ -121,7 +121,7 @@ namespace NLog.Targets
                     SendTcpMessage(logServer, port, msg, useSsl, ipAddress);
                     break;
                 default:
-                    throw new NLogConfigurationException($"Protocol '{protocol}' is not supported.");
+                    throw new NLogConfigurationException($"Protocol '{protocol}' is not supported");
             }
         }
 
