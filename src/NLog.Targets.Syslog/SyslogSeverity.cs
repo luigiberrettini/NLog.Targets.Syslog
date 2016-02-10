@@ -2,54 +2,31 @@
 namespace NLog.Targets
 // ReSharper enable CheckNamespace
 {
-    /// <summary>
-    /// syslog severities
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The syslog severities.
-    /// </para>
-    /// </remarks>
+    /// <summary>Syslog severities</summary>
     public enum SyslogSeverity
     {
-        /// <summary>
-        /// system is unusable
-        /// </summary>
+        /// <summary>System is unusable</summary>
         Emergency = 0,
 
-        /// <summary>
-        /// action must be taken immediately
-        /// </summary>
+        /// <summary>Action must be taken immediately</summary>
         Alert = 1,
 
-        /// <summary>
-        /// critical conditions
-        /// </summary>
+        /// <summary>Critical conditions</summary>
         Critical = 2,
 
-        /// <summary>
-        /// error conditions
-        /// </summary>
+        /// <summary>Error conditions</summary>
         Error = 3,
 
-        /// <summary>
-        /// warning conditions
-        /// </summary>
+        /// <summary>Warning conditions</summary>
         Warning = 4,
 
-        /// <summary>
-        /// normal but significant condition
-        /// </summary>
+        /// <summary>Normal but significant condition</summary>
         Notice = 5,
 
-        /// <summary>
-        /// informational messages
-        /// </summary>
+        /// <summary>Informational messages</summary>
         Informational = 6,
 
-        /// <summary>
-        /// debug-level messages
-        /// </summary>
+        /// <summary>Debug-level messages</summary>
         Debug = 7
     }
 }

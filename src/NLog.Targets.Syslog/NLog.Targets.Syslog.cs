@@ -79,7 +79,7 @@ namespace NLog.Targets
         }
 
         /// <summary>This is where we hook into NLog, by overriding the Write method</summary>
-        /// <param name="logEvent">The NLog.LogEventInfo </param>
+        /// <param name="logEvent">The NLog.LogEventInfo</param>
         protected override void Write(LogEventInfo logEvent)
         {
             var formattedMessageLines = GetFormattedMessageLines(logEvent);
@@ -91,6 +91,8 @@ namespace NLog.Targets
             }
         }
 
+        /// <summary>Renders message lines</summary>
+        /// <param name="logEvent">The NLog.LogEventInfo</param>
         private IEnumerable<string> GetFormattedMessageLines(LogEventInfo logEvent)
         {
             var msg = Layout.Render(logEvent);
@@ -123,6 +125,9 @@ namespace NLog.Targets
             }
         }
 
+        /// <summary>Performs the actual network part of sending a message with the UDP protocol</summary>
+        /// <param name="msg">The syslog formatted message ready to transmit</param>
+        /// <param name="ipAddress">The syslog server's IP address</param>
         private static void SendUdpMessage(int port, byte[] msg, string ipAddress)
         {
             using (var udp = new UdpClient(ipAddress, port))
@@ -131,6 +136,12 @@ namespace NLog.Targets
             }
         }
 
+        /// <summary>Performs the actual network part of sending a message with the TCP protocol</summary>
+        /// <param name="logServer">The syslog server's host name or IP address</param>
+        /// <param name="port">The UDP port that syslog is running on</param>
+        /// <param name="msg">The syslog formatted message ready to transmit</param>
+        /// <param name="useSsl">Specify if SSL should be used</param>
+        /// <param name="ipAddress">The syslog server's IP address</param>
         private static void SendTcpMessage(string logServer, int port, byte[] msg, bool useSsl, string ipAddress)
         {
             using (var tcp = new TcpClient(ipAddress, port))
