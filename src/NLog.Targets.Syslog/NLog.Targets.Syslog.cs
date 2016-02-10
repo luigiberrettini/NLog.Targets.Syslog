@@ -16,6 +16,16 @@
 //   limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Net;
+using System.Net.Security;
+using System.Net.Sockets;
+using System.Reflection;
+using System.Text;
+
 // ReSharper disable UnusedMember.Global
 // ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
@@ -24,16 +34,6 @@
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
 {
-    using System;
-    using System.Linq;
-    using System.Text;
-    using System.Reflection;
-    using System.Net;
-    using System.Net.Sockets;
-    using System.Globalization;
-    using System.Net.Security;
-    using System.Collections.Generic;
-
     /// <summary>This class enables logging to a unix-style syslog server using NLog</summary>
     [Target("Syslog")]
     public class Syslog : TargetWithLayout
@@ -83,7 +83,7 @@ namespace NLog.Targets
         protected override void Write(LogEventInfo logEvent)
         {
             var formattedMessageLines = GetFormattedMessageLines(logEvent);
-            var severity = GetSyslogSeverity(logEvent.Level);
+            var severity = (SyslogSeverity)logEvent.Level;
             foreach (var formattedMessageLine in formattedMessageLines)
             {
                 var message = BuildSyslogMessage(Facility, severity, DateTime.Now, Sender, formattedMessageLine);
@@ -126,6 +126,7 @@ namespace NLog.Targets
         }
 
         /// <summary>Performs the actual network part of sending a message with the UDP protocol</summary>
+        /// <param name="port">The TCP port that syslog is running on</param>
         /// <param name="msg">The syslog formatted message ready to transmit</param>
         /// <param name="ipAddress">The syslog server's IP address</param>
         private static void SendUdpMessage(int port, byte[] msg, string ipAddress)
@@ -164,49 +165,16 @@ namespace NLog.Targets
             }
         }
 
-        /// <summary>Mapping between NLog levels and syslog severity levels as they are not exactly one to one</summary>
-        /// <param name="logLevel">NLog log level to translate</param>
-        /// <returns>SyslogSeverity which corresponds to the NLog level</returns>
-        private static SyslogSeverity GetSyslogSeverity(LogLevel logLevel)
-        {
-            if (logLevel == LogLevel.Fatal)
-            {
-                return SyslogSeverity.Emergency;
-            }
-
-            if (logLevel >= LogLevel.Error)
-            {
-                return SyslogSeverity.Error;
-            }
-
-            if (logLevel >= LogLevel.Warn)
-            {
-                return SyslogSeverity.Warning;
-            }
-
-            if (logLevel >= LogLevel.Info)
-            {
-                return SyslogSeverity.Informational;
-            }
-
-            if (logLevel >= LogLevel.Debug)
-            {
-                return SyslogSeverity.Debug;
-            }
-
-            return SyslogSeverity.Notice;
-        }
-
         /// <summary>Builds a syslog-compatible message using the information we have available</summary>
         /// <param name="facility">Syslog facility to transmit message from</param>
-        /// <param name="priority">Syslog severity level</param>
+        /// <param name="severity">Syslog severity level</param>
         /// <param name="dateTime">Timestamp for log message</param>
         /// <param name="sender">Name of the subsystem sending the message</param>
         /// <param name="body">Message text</param>
         /// <returns>Byte array containing formatted syslog message</returns>
-        private byte[] BuildSyslogMessage(SyslogFacility facility, SyslogSeverity priority, DateTime dateTime, string sender, string body)
+        private byte[] BuildSyslogMessage(SyslogFacility facility, SyslogSeverity severity, DateTime dateTime, string sender, string body)
         {
-            var prival = CalculatePriority(facility, priority).ToString(CultureInfo.InvariantCulture);
+            var prival = CalculatePriorityValue(facility, severity).ToString(CultureInfo.InvariantCulture);
             var timestamp = dateTime.ToString(TimestampFormat, CultureInfo.GetCultureInfo("en-US"));
 
             return Encoding.ASCII.GetBytes($"<{prival}>{timestamp} {MachineName} {sender}: {body}{Environment.NewLine}");
@@ -214,11 +182,11 @@ namespace NLog.Targets
 
         /// <summary>Calculates syslog PRIVAL</summary>
         /// <param name="facility">Syslog facility to transmit message from</param>
-        /// <param name="priority">Syslog severity level</param>
+        /// <param name="severity">Syslog severity level</param>
         /// <returns>Byte array containing formatted syslog message</returns>
-        private static int CalculatePriority(SyslogFacility facility, SyslogSeverity priority)
+        private static int CalculatePriorityValue(SyslogFacility facility, SyslogSeverity severity)
         {
-            return (int)facility * 8 + (int)priority;
+            return (int)facility * 8 + (int)severity;
         }
     }
 }
