@@ -82,13 +82,10 @@ namespace NLog.Targets
         /// <param name="logEvent">The NLog.LogEventInfo</param>
         protected override void Write(LogEventInfo logEvent)
         {
-            var formattedMessageLines = GetFormattedMessageLines(logEvent);
-            var severity = (SyslogSeverity)logEvent.Level;
-            foreach (var formattedMessageLine in formattedMessageLines)
-            {
-                var message = BuildSyslogMessage(Facility, severity, DateTime.Now, Sender, formattedMessageLine);
-                SendMessage(SyslogServer, Port, message, Protocol, Ssl);
-            }
+            GetFormattedMessageLines(logEvent)
+                .Select(line => BuildSyslogMessage(Facility, (SyslogSeverity)logEvent.Level, DateTime.Now, Sender, line))
+                .ToList()
+                .ForEach(message => SendMessage(SyslogServer, Port, message, Protocol, Ssl));
         }
 
         /// <summary>Renders message lines</summary>
