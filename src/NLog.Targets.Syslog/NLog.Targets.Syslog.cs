@@ -82,7 +82,7 @@ namespace NLog.Targets
         /// <param name="logEvent">The NLog.LogEventInfo</param>
         protected override void Write(LogEventInfo logEvent)
         {
-            GetFormattedMessageLines(logEvent)
+            FormatMessageLines(logEvent)
                 .Select(line => BuildSyslogMessage(Facility, (SyslogSeverity)logEvent.Level, DateTime.Now, Sender, line))
                 .ToList()
                 .ForEach(message => SendMessage(SyslogServer, Port, message, Protocol, Ssl));
@@ -90,7 +90,7 @@ namespace NLog.Targets
 
         /// <summary>Renders message lines</summary>
         /// <param name="logEvent">The NLog.LogEventInfo</param>
-        private IEnumerable<string> GetFormattedMessageLines(LogEventInfo logEvent)
+        private IEnumerable<string> FormatMessageLines(LogEventInfo logEvent)
         {
             var msg = Layout.Render(logEvent);
             return SplitNewlines ? msg.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries) : new[] { msg };
