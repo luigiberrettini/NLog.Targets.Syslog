@@ -96,6 +96,30 @@ namespace NLog.Targets
             return SplitNewlines ? msg.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries) : new[] { msg };
         }
 
+        /// <summary>Builds a syslog-compatible message using the information we have available</summary>
+        /// <param name="facility">Syslog facility to transmit message from</param>
+        /// <param name="severity">Syslog severity level</param>
+        /// <param name="dateTime">Timestamp for log message</param>
+        /// <param name="sender">Name of the subsystem sending the message</param>
+        /// <param name="body">Message text</param>
+        /// <returns>Byte array containing formatted syslog message</returns>
+        private byte[] BuildSyslogMessage(SyslogFacility facility, SyslogSeverity severity, DateTime dateTime, string sender, string body)
+        {
+            var prival = CalculatePriorityValue(facility, severity).ToString(CultureInfo.InvariantCulture);
+            var timestamp = dateTime.ToString(TimestampFormat, CultureInfo.GetCultureInfo("en-US"));
+
+            return Encoding.ASCII.GetBytes($"<{prival}>{timestamp} {MachineName} {sender}: {body}{Environment.NewLine}");
+        }
+
+        /// <summary>Calculates syslog PRIVAL</summary>
+        /// <param name="facility">Syslog facility to transmit message from</param>
+        /// <param name="severity">Syslog severity level</param>
+        /// <returns>Byte array containing formatted syslog message</returns>
+        private static int CalculatePriorityValue(SyslogFacility facility, SyslogSeverity severity)
+        {
+            return (int)facility * 8 + (int)severity;
+        }
+
         /// <summary>Performs the actual network part of sending a message</summary>
         /// <param name="logServer">The syslog server's host name or IP address</param>
         /// <param name="port">The UDP port that syslog is running on</param>
@@ -160,30 +184,6 @@ namespace NLog.Targets
                     stream.Write(msg, 0, msg.Length);
                 }
             }
-        }
-
-        /// <summary>Builds a syslog-compatible message using the information we have available</summary>
-        /// <param name="facility">Syslog facility to transmit message from</param>
-        /// <param name="severity">Syslog severity level</param>
-        /// <param name="dateTime">Timestamp for log message</param>
-        /// <param name="sender">Name of the subsystem sending the message</param>
-        /// <param name="body">Message text</param>
-        /// <returns>Byte array containing formatted syslog message</returns>
-        private byte[] BuildSyslogMessage(SyslogFacility facility, SyslogSeverity severity, DateTime dateTime, string sender, string body)
-        {
-            var prival = CalculatePriorityValue(facility, severity).ToString(CultureInfo.InvariantCulture);
-            var timestamp = dateTime.ToString(TimestampFormat, CultureInfo.GetCultureInfo("en-US"));
-
-            return Encoding.ASCII.GetBytes($"<{prival}>{timestamp} {MachineName} {sender}: {body}{Environment.NewLine}");
-        }
-
-        /// <summary>Calculates syslog PRIVAL</summary>
-        /// <param name="facility">Syslog facility to transmit message from</param>
-        /// <param name="severity">Syslog severity level</param>
-        /// <returns>Byte array containing formatted syslog message</returns>
-        private static int CalculatePriorityValue(SyslogFacility facility, SyslogSeverity severity)
-        {
-            return (int)facility * 8 + (int)severity;
         }
     }
 }
