@@ -8,7 +8,7 @@ namespace TestApp
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
         public Form1()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
         private void ButtonLog_Click(object sender, EventArgs e)
@@ -34,6 +34,8 @@ namespace TestApp
                 case "buttonFatal":
                     Logger.Fatal("This is a sample fatal message");
                     break;
+                default:
+                    throw new InvalidOperationException($"Button name '{btn.Name}' is not supported");
             }
         }
     }

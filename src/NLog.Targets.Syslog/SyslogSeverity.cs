@@ -1,55 +1,92 @@
-﻿// ReSharper disable CheckNamespace
+﻿using System;
+
+// ReSharper disable CheckNamespace
 namespace NLog.Targets
 // ReSharper enable CheckNamespace
 {
-    /// <summary>
-    /// syslog severities
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The syslog severities.
-    /// </para>
-    /// </remarks>
-    public enum SyslogSeverity
+    /// <summary>Syslog severities</summary>
+    internal class SyslogSeverity : IComparable<SyslogSeverity>
     {
-        /// <summary>
-        /// system is unusable
-        /// </summary>
-        Emergency = 0,
+        private readonly int value;
+        private readonly string displayName;
 
-        /// <summary>
-        /// action must be taken immediately
-        /// </summary>
-        Alert = 1,
+        /// <summary>System is unusable</summary>
+        public static readonly SyslogSeverity Emergency = new SyslogSeverity(0, "Emergency");
 
-        /// <summary>
-        /// critical conditions
-        /// </summary>
-        Critical = 2,
+        /// <summary>Action must be taken immediately</summary>
+        public static readonly SyslogSeverity Alert = new SyslogSeverity(1, "Alert");
 
-        /// <summary>
-        /// error conditions
-        /// </summary>
-        Error = 3,
+        /// <summary>Critical conditions</summary>
+        public static readonly SyslogSeverity Critical = new SyslogSeverity(2, "Critical");
 
-        /// <summary>
-        /// warning conditions
-        /// </summary>
-        Warning = 4,
+        /// <summary>Error conditions</summary>
+        public static readonly SyslogSeverity Error = new SyslogSeverity(3, "Error");
 
-        /// <summary>
-        /// normal but significant condition
-        /// </summary>
-        Notice = 5,
+        /// <summary>Warning conditions</summary>
+        public static readonly SyslogSeverity Warning = new SyslogSeverity(4, "Warning");
 
-        /// <summary>
-        /// informational messages
-        /// </summary>
-        Informational = 6,
+        /// <summary>Normal but significant condition</summary>
+        public static readonly SyslogSeverity Notice = new SyslogSeverity(5, "Notice");
 
-        /// <summary>
-        /// debug-level messages
-        /// </summary>
-        Debug = 7
+        /// <summary>Informational messages</summary>
+        public static readonly SyslogSeverity Informational = new SyslogSeverity(6, "Informational");
+
+        /// <summary>Debug-level messages</summary>
+        public static readonly SyslogSeverity Debug = new SyslogSeverity(7, "Debug");
+
+        /// <summary>Initializes a new instance of the SyslogSeverity class</summary>
+        private SyslogSeverity(int value, string displayName)
+        {
+            this.value = value;
+            this.displayName = displayName;
+        }
+
+        /// <summary>Compare this instance of SyslogSeverity to another</summary>
+        /// <param name="other">The instance of SyslogSeverity this instance is to be compared with</param>
+        public int CompareTo(SyslogSeverity other)
+        {
+            return ((int)this).CompareTo((int)other);
+        }
+
+        /// <summary>Convert a syslog severity to an integer</summary>
+        /// <param name="severity">Syslog severity to convert</param>
+        /// <returns>SyslogSeverity which corresponds to the NLog level</returns>
+        public static explicit operator int(SyslogSeverity severity)
+        {
+            return severity.value;
+        }
+
+        /// <summary>Convert an NLog level to a syslog severity as they are not exactly one to one</summary>
+        /// <param name="logLevel">NLog log level to convert</param>
+        /// <returns>SyslogSeverity which corresponds to the NLog level</returns>
+        public static explicit operator SyslogSeverity(LogLevel logLevel)
+        {
+            if (logLevel == LogLevel.Fatal)
+                return Emergency;
+
+            if (logLevel == LogLevel.Error)
+                return Error;
+
+            if (logLevel == LogLevel.Warn)
+                return Warning;
+
+            if (logLevel == LogLevel.Info)
+                return Informational;
+
+            if (logLevel == LogLevel.Debug)
+                return Debug;
+
+            if (logLevel == LogLevel.Trace)
+                return Notice;
+
+            throw new InvalidOperationException($"Unsupported log level {logLevel}");
+        }
+
+        /// <summary>Convert a syslog severity to a string</summary>
+        /// <returns>The name of the syslog severity</returns>
+        public override string ToString()
+        {
+            return displayName;
+        }
     }
 }
