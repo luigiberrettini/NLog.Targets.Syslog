@@ -1,4 +1,4 @@
-﻿////
+﻿////////////////////////////////////////////////////////////////////////////////
 //   NLog.Targets.Syslog
 //   ------------------------------------------------------------------------
 //   Copyright 2013 Jesper Hess Nielsen <jesper@graffen.dk>
@@ -14,124 +14,102 @@
 //   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //   See the License for the specific language governing permissions and
 //   limitations under the License.
-////
+////////////////////////////////////////////////////////////////////////////////
 
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Net;
+using System.Net.Security;
+using System.Net.Sockets;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text;
+using NLog.Common;
+using NLog.Layouts;
+
+// ReSharper disable UnusedMember.Global
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable CheckNamespace
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
 {
-    using System;
-    using System.Linq;
-    using System.Text;
-    using System.Reflection;
-    using System.Net;
-    using System.Net.Sockets;
-    using System.Globalization;
-    using System.Net.Security;
-    using System.Collections.Generic;
-    using Layouts;
-    using Common;
-
-    /// <summary>
-    /// This class enables logging to a unix-style syslog server using NLog.
-    /// </summary>
+    /// <summary>This class enables logging to a unix-style syslog server using NLog</summary>
     [Target("Syslog")]
     public class Syslog : TargetWithLayout
     {
         private const string NilValue = "-";
         private static readonly CultureInfo _usCulture = new CultureInfo("en-US");
         private static readonly byte[] _bom = { 0xEF, 0xBB, 0xBF };
+        private static readonly char[] _lineSeps = { '\r', '\n' };
 
-
-        /// <summary>
-        /// Gets or sets the IP Address or Host name of your Syslog server
-        /// </summary>
+        /// <summary>Gets or sets the IP Address or Host name of your Syslog server</summary>
         public string SyslogServer { get; set; }
 
-        /// <summary>
-        /// Gets or sets the Port number syslog is running on (usually 514)
-        /// </summary>
+        /// <summary>Gets or sets the port number syslog is running on (usually 514)</summary>
         public int Port { get; set; }
 
-        /// <summary>
-        /// Gets or sets the name of the application that will show up in the syslog log
-        /// </summary>
+        /// <summary>Gets or sets the name of the application that will show up in the syslog log</summary>
         public Layout Sender { get; set; }
 
-        /// <summary>
-        /// Gets or sets the machine name hosting syslog
-        /// </summary>
+        /// <summary>Gets or sets the timestamp format</summary>
+        public string TimestampFormat { get; set; }
+
+        /// <summary>Gets or sets the machine name hosting syslog</summary>
         public Layout MachineName { get; set; }
 
-        /// <summary>
-        /// Gets or sets the syslog facility name to send messages as (for example, local0 or local7)
-        /// </summary>
+        /// <summary>Gets or sets the syslog facility name to transmit message from (e.g. local0 or local7)</summary>
         public SyslogFacility Facility { get; set; }
 
-        /// <summary>
-        /// Gets or sets the syslog server protocol (tcp/udp) 
-        /// </summary>
+        /// <summary>Gets or sets the syslog server protocol (TCP/UDP)</summary>
         public ProtocolType Protocol { get; set; }
 
-        /// <summary>
-        /// If this is set, try to configure and use SSL if available.
-        /// </summary>
+        /// <summary>If this is set, try to configure and use SSL if available</summary>
         public bool Ssl { get; set; }
 
-        /// <summary>
-        /// If set, split message by newlines and send as separate messages
-        /// </summary>
+        /// <summary>If set, split message by newlines and send as separate messages</summary>
         public bool SplitNewlines { get; set; }
 
-        /// <summary>
-        /// RFC number for syslog protocol
-        /// </summary>
+        /// <summary>RFC number for syslog protocol</summary> 
         public RfcNumber Rfc { get; set; }
 
         #region RFC 5424 members
 
-        /// <summary>
-        /// Syslog protocol version for RFC 5424
-        /// </summary>
-        private byte ProtocolVersion { get; set; }
+        /// <summary>Syslog protocol version for RFC 5424</summary>
+        private byte ProtocolVersion { get; }
 
-        /// <summary>
-        /// Layout for PROCID protocol field
-        /// </summary>
+        /// <summary>Layout for PROCID protocol field</summary>
         public Layout ProcId { get; set; }
 
-        /// <summary>
-        /// Layout for MSGID protocol field
-        /// </summary>
+        /// <summary>Layout for MSGID protocol field</summary>
         public Layout MsgId { get; set; }
 
-        /// <summary>
-        /// Layout for STRUCTURED-DATA protocol field
-        /// </summary>
+        /// <summary>Layout for STRUCTURED-DATA protocol field</summary>
         public Layout StructuredData { get; set; }
 
         #endregion
 
-        /// <summary>
-        /// Initializes a new instance of the Syslog class
-        /// </summary>
+        /// <summary>Initializes a new instance of the Syslog class</summary>
         public Syslog()
         {
-            // Sensible defaults...
-            this.SyslogServer = "127.0.0.1";
-            this.Port = 514;
-            this.Sender = Assembly.GetCallingAssembly().GetName().Name;
-            this.Facility = SyslogFacility.Local1;
-            this.Protocol = ProtocolType.Udp;
-            this.MachineName = Dns.GetHostName();
-            this.SplitNewlines = true;
-            this.Rfc = RfcNumber.Rfc3164;
+            SyslogServer = "127.0.0.1";
+            Port = 514;
+            Sender = Assembly.GetCallingAssembly().GetName().Name;
+            Facility = SyslogFacility.Local1;
+            Protocol = ProtocolType.Udp;
+            TimestampFormat = "MMM dd HH:mm:ss";
+            MachineName = Dns.GetHostName();
+            SplitNewlines = true;
+            Rfc = RfcNumber.Rfc3164;
 
             //Defaults for rfc 5424
-            this.ProtocolVersion = 1;
-            this.ProcId = NilValue;
-            this.MsgId = NilValue;
-            this.StructuredData = NilValue;
+            ProtocolVersion = 1;
+            ProcId = NilValue;
+            MsgId = NilValue;
+            StructuredData = NilValue;
         }
 
         /// <summary>
@@ -141,26 +119,19 @@ namespace NLog.Targets
         /// <param name="logEvent">The NLog.AsyncLogEventInfo</param>
         protected override void Write(AsyncLogEventInfo logEvent)
         {
-            SendEventsBatch(new[] { logEvent });
+            SendEventsBatch(logEvent);
         }
 
-        /// <summary>
-        /// Writes array of events
-        /// </summary>
+        /// <summary>Writes array of events</summary>
         /// <param name="logEvents">The array of NLog.AsyncLogEventInfo</param>
         protected override void Write(AsyncLogEventInfo[] logEvents)
         {
-            var sw = System.Diagnostics.Stopwatch.StartNew();
             SendEventsBatch(logEvents);
-            sw.Stop();
-            System.Diagnostics.Debug.WriteLine("Elapsed {0} ms", sw.Elapsed.TotalMilliseconds);
         }
 
-        /// <summary>
-        /// Sends array of events to syslog server
-        /// </summary>
+        /// <summary>Sends array of events to syslog server</summary>
         /// <param name="logEvents">The array of NLog.AsyncLogEventInfo</param>
-        private void SendEventsBatch(AsyncLogEventInfo[] logEvents)
+        private void SendEventsBatch(params AsyncLogEventInfo[] logEvents)
         {
             var logServerIp = Dns.GetHostAddresses(SyslogServer).FirstOrDefault();
             if (logServerIp == null)
@@ -201,9 +172,7 @@ namespace NLog.Targets
             }
         }
 
-        /// <summary>
-        /// Processes array of events and sends messages bytes using
-        /// </summary>
+        /// <summary>Processes array of events and sends messages bytes using action</summary>
         /// <param name="logEvents">The array of NLog.AsyncLogEventInfo</param>
         /// <param name="messageSendAction">Implementation of send data method</param>
         void ProcessAndSendEvents(AsyncLogEventInfo[] logEvents, Action<byte[]> messageSendAction)
@@ -211,60 +180,17 @@ namespace NLog.Targets
             foreach (var asyncLogEvent in logEvents)
             {
                 var logEvent = asyncLogEvent.LogEvent;
-                var formattedMessageLines = this.GetFormattedMessageLines(logEvent);
-                var severity = GetSyslogSeverity(logEvent.Level);
+                var formattedMessageLines = FormatMessageLines(logEvent);
+                var severity = (SyslogSeverity)logEvent.Level;
                 foreach (var formattedMessageLine in formattedMessageLines)
                 {
-                    var message = this.BuildSyslogMessage(logEvent, this.Facility, severity, formattedMessageLine);
+                    var message = BuildSyslogMessage(logEvent, Facility, severity, formattedMessageLine);
                     messageSendAction(message);
                 }
             }
         }
 
-        private IEnumerable<string> GetFormattedMessageLines(LogEventInfo logEvent)
-        {
-            var msg = this.Layout.Render(logEvent);
-            return this.SplitNewlines ? msg.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries) : new[] { msg };
-        }
-
-        /// <summary>
-        /// Mapping between NLog levels and syslog severity levels as they are not exactly one to one. 
-        /// </summary>
-        /// <param name="logLevel">NLog log level to translate</param>
-        /// <returns>SyslogSeverity which corresponds to the NLog level. </returns>
-        private static SyslogSeverity GetSyslogSeverity(LogLevel logLevel)
-        {
-            if (logLevel == LogLevel.Fatal)
-            {
-                return SyslogSeverity.Emergency;
-            }
-
-            if (logLevel >= LogLevel.Error)
-            {
-                return SyslogSeverity.Error;
-            }
-
-            if (logLevel >= LogLevel.Warn)
-            {
-                return SyslogSeverity.Warning;
-            }
-
-            if (logLevel >= LogLevel.Info)
-            {
-                return SyslogSeverity.Informational;
-            }
-
-            if (logLevel >= LogLevel.Debug)
-            {
-                return SyslogSeverity.Debug;
-            }
-
-            return SyslogSeverity.Notice;
-        }
-
-        /// <summary>
-        /// Builds a syslog-compatible message using the information we have available. 
-        /// </summary>
+        /// <summary>Builds a syslog-compatible message using the information we have available</summary>
         /// <param name="logEvent">The NLog.LogEventInfo</param>
         /// <param name="facility">Syslog Facility to transmit message from</param>
         /// <param name="priority">Syslog severity level</param>
@@ -275,85 +201,87 @@ namespace NLog.Targets
             switch (Rfc)
             {
                 case RfcNumber.Rfc5424:
-                    return this.BuildSyslogMessage5424(logEvent, facility, priority, body);
+                    return BuildSyslogMessage5424(logEvent, facility, priority, body);
                 default:
-                    return this.BuildSyslogMessage3164(logEvent, facility, priority, body);
+                    return BuildSyslogMessage3164(logEvent, facility, priority, body);
             }
         }
 
-        /// <summary>
-        /// Builds rfc-3164 compatible message
-        /// </summary>
+        /// <summary>Builds rfc-3164 compatible message</summary>
         /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <param name="facility">Syslog Facility to transmit message from/param>
-        /// <param name="priority">Syslog severity level</param>
-        /// <param name="body">Message text/param>
+        /// <param name="facility">Syslog Facility to transmit message from</param>
+        /// <param name="severity">Syslog severity level</param>
+        /// <param name="body">Message text</param>
         /// <returns>Byte array containing formatted syslog message</returns>
-        private byte[] BuildSyslogMessage3164(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity priority, string body)
+        private byte[] BuildSyslogMessage3164(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity severity, string body)
         {
             // Calculate PRI field
-            var calculatedPriority = (int)facility * 8 + (int)priority;
-            var pri = "<" + calculatedPriority.ToString(CultureInfo.InvariantCulture) + ">";
-
-            var time = logEvent.TimeStamp.ToLocalTime().ToString("MMM dd HH:mm:ss ", _usCulture);
-
+            var priority = CalculatePriorityValue(facility, severity).ToString(CultureInfo.InvariantCulture);
+            var time = logEvent.TimeStamp.ToLocalTime().ToString(TimestampFormat, _usCulture);
             // Get sender machine name
-            var machine = this.MachineName.Render(logEvent) + " ";
+            var machine = MachineName.Render(logEvent);
+            // Get sender
+            var sender = Sender.Render(logEvent);
 
-            var sender = this.Sender.Render(logEvent) + ": ";
-
-            string[] strParams = { pri, time, machine, sender, body, Environment.NewLine };
-            return Encoding.ASCII.GetBytes(string.Concat(strParams));
+            return Encoding.ASCII.GetBytes($"<{priority}>{time} {machine} {sender}: {body}{Environment.NewLine}");
         }
 
-        /// <summary>
-        /// Builds rfc-5424 compatible message
-        /// </summary>
+        /// <summary>Builds rfc-5424 compatible message</summary>
         /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <param name="facility">Syslog Facility to transmit message from/param>
-        /// <param name="priority">Syslog severity level</param>
-        /// <param name="body">Message text/param>
+        /// <param name="facility">Syslog Facility to transmit message from</param>
+        /// <param name="severity">Syslog severity level</param>
+        /// <param name="body">Message text</param>
         /// <returns>Byte array containing formatted syslog message</returns>
-        private byte[] BuildSyslogMessage5424(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity priority, string body)
+        private byte[] BuildSyslogMessage5424(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity severity, string body)
         {
             // Calculate PRI field
-            var calculatedPriority = (int)facility * 8 + (int)priority;
-            var pri = "<" + calculatedPriority.ToString(CultureInfo.InvariantCulture) + ">";
-            var version = this.ProtocolVersion.ToString(CultureInfo.InvariantCulture);
+            var priority = CalculatePriorityValue(facility, severity).ToString(CultureInfo.InvariantCulture);
+            var version = ProtocolVersion.ToString(CultureInfo.InvariantCulture);
             var time = logEvent.TimeStamp.ToString("o");
             // Get sender machine name
-            var machine = this.MachineName.Render(logEvent);
-            if (machine.Length > 255)
-            {
-                machine = machine.Substring(0, 255);
-            }
-            var sender = this.Sender.Render(logEvent);
-            if (sender.Length > 48)
-            {
-                sender = sender.Substring(0, 48);
-            }
-            var procId = this.ProcId.Render(logEvent);
-            if (procId.Length > 128)
-            {
-                procId = procId.Substring(0, 128);
-            }
-            var msgId = this.MsgId.Render(logEvent);
-            if (msgId.Length > 32)
-            {
-                msgId = msgId.Substring(0, 32);
-            }
+            var machine = Left(MachineName.Render(logEvent), 255);
+            var sender = Left(Sender.Render(logEvent), 48);
+            var procId = Left(ProcId.Render(logEvent), 128);
+            var msgId = Left(MsgId.Render(logEvent), 32);
 
-            var headerData = Encoding.ASCII.GetBytes(string.Concat(pri, version, " ", time, " ", machine, " ", sender, " ", procId, " ", msgId, " "));
-            var structuredData = Encoding.UTF8.GetBytes(this.StructuredData.Render(logEvent) + " ");
+            var headerData = Encoding.ASCII.GetBytes($"<{priority}>{version} {time} {machine} {sender} {procId} {msgId} ");
+            var structuredData = Encoding.UTF8.GetBytes(StructuredData.Render(logEvent) + " ");
             var messageData = Encoding.UTF8.GetBytes(body);
 
-            var allData = new List<byte>();
+            var allData = new List<byte>(headerData.Length + structuredData.Length + _bom.Length + messageData.Length);
             allData.AddRange(headerData);
             allData.AddRange(structuredData);
             allData.AddRange(_bom);
             allData.AddRange(messageData);
-
             return allData.ToArray();
+        }
+
+        /// <summary>Gets at most length first symbols</summary>
+        /// <param name="value">Source string</param>
+        /// <param name="length">Maximum symbols count</param>
+        /// <returns>String that contains at most length symbols</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static string Left(string value, int length)
+        {
+            return value.Length <= length ? value : value.Substring(0, length);
+        }
+
+        /// <summary>Renders message lines</summary>
+        /// <param name="logEvent">The NLog.LogEventInfo</param>
+        private IEnumerable<string> FormatMessageLines(LogEventInfo logEvent)
+        {
+            var msg = Layout.Render(logEvent);
+            return SplitNewlines ? msg.Split(_lineSeps, StringSplitOptions.RemoveEmptyEntries) : new[] { msg };
+        }
+
+        /// <summary>Calculates syslog PRIVAL</summary>
+        /// <param name="facility">Syslog facility to transmit message from</param>
+        /// <param name="severity">Syslog severity level</param>
+        /// <returns>Byte array containing formatted syslog message</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int CalculatePriorityValue(SyslogFacility facility, SyslogSeverity severity)
+        {
+            return (int)facility * 8 + (int)severity;
         }
     }
 }
