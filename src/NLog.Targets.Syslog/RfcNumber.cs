@@ -1,4 +1,6 @@
-﻿namespace NLog.Targets
+﻿// ReSharper disable CheckNamespace
+namespace NLog.Targets
+// ReSharper restore CheckNamespace
 {
     public enum RfcNumber
     {
