@@ -40,28 +40,41 @@ Optionally, your configuration can override them using attributes on
 * `port`: Port of syslog listener (default: `514`)
 * `protocol`: `udp` or `tcp` (default: `udp`)
 * `ssl`: `false` or `true`; TCP only (default: `false`)
+* `rfc`: Rfc compatibility for syslog message `Rfc3164` or `Rfc5424` (default: `Rfc3164`)
 
 #### Syslog packet elements
 
 Messages are sent using the format (framing) called syslog, which is
-defined in [RFC 3164](http://www.ietf.org/rfc/rfc3164.txt). In addition
+defined in [RFC 3164](http://www.ietf.org/rfc/rfc3164.txt) or 
+[RFC 5424](http://tools.ietf.org/html/rfc5424). In addition
 to a timestamp and the log message, RFC 3164 syslog messages include
 other elements: sending device name (such as the machine's hostname),
 sending app/component name (called "tag" in the RFC), facility, and
 severity.
 
-The following syslog elements can be overridden:
+The following syslog elements can be overridden for RFC 3164:
 
-* `machinename`: name of sending system or entity (default: machine 
-  [hostname](http://msdn.microsoft.com/en-us/library/system.net.dns.gethostname(v=vs.110).aspx))
-* `sender`: name of sending component or application (default: 
-  [calling method](http://msdn.microsoft.com/en-us/library/system.reflection.assembly.getcallingassembly(v=vs.110).aspx))
+* `machinename` ([Layout](https://github.com/NLog/NLog/wiki/Layouts)): name of sending system or entity (default: machine 
+  [hostname](http://msdn.microsoft.com/en-us/library/system.net.dns.gethostname(v=vs.110).aspx)).
+For example, ${machinename}
+* `sender` ([Layout](https://github.com/NLog/NLog/wiki/Layouts)): name of sending component or application (default: 
+  [calling method](http://msdn.microsoft.com/en-us/library/system.reflection.assembly.getcallingassembly(v=vs.110).aspx)).
+For example, ${logger}
 * `facility`: facility name (default: `Local1`)
 
 For example, to make logs from multiple systems use the same device
 identifier (rather than each system's hostname), one could set
 `machinename` to `app-cloud`. The logs from different systems would
 all appear to be from the same single entity called `app-cloud`.
+
+The following additional syslog elements can be overridden for [RFC 5424](http://tools.ietf.org/html/rfc5424):
+
+* `procid` ([Layout](https://github.com/NLog/NLog/wiki/Layouts)): [identifier](http://tools.ietf.org/html/rfc5424#section-6.2.6) (numeric or alphanumeric) of sending entity 
+(default: -). For example, ${processid} or ${processname}
+* `msgid` ([Layout](https://github.com/NLog/NLog/wiki/Layouts)): [message type identifier](http://tools.ietf.org/html/rfc5424#section-6.2.7) (numeric or alphanumeric) of sending entity 
+(default: -). For example, ${callsite}
+* `structureddata` ([Layout](https://github.com/NLog/NLog/wiki/Layouts)): [additional data](http://tools.ietf.org/html/rfc5424#section-6.3) of sending entity (default: -).
+For example, [thread@12345 id="${threadid}" name="${threadname}"][mydata2@12345 num="1" code="mycode"]
 
 #### Log message body
 
