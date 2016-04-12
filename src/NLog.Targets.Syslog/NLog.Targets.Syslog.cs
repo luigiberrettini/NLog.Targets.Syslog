@@ -217,7 +217,7 @@ namespace NLog.Targets
         {
             // Calculate PRI field
             var priority = CalculatePriorityValue(facility, severity).ToString(CultureInfo.InvariantCulture);
-            var time = logEvent.TimeStamp.ToLocalTime().ToString(TimestampFormat, _usCulture);
+            var time = logEvent.TimeStamp.ToString(TimestampFormat, _usCulture);
             // Get sender machine name
             var machine = MachineName.Render(logEvent);
             // Get sender
