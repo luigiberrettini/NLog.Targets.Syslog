@@ -215,15 +215,14 @@ namespace NLog.Targets
         /// <returns>Byte array containing formatted syslog message</returns>
         private byte[] BuildSyslogMessage3164(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity severity, string body)
         {
-            // Calculate PRI field
-            var priority = CalculatePriorityValue(facility, severity).ToString(CultureInfo.InvariantCulture);
+            var pri = Priority(facility, severity);
             var time = logEvent.TimeStamp.ToString(TimestampFormat, _usCulture);
             // Get sender machine name
             var machine = MachineName.Render(logEvent);
             // Get sender
             var sender = Sender.Render(logEvent);
 
-            return Encoding.ASCII.GetBytes($"<{priority}>{time} {machine} {sender}: {body}{Environment.NewLine}");
+            return Encoding.ASCII.GetBytes($"{pri}{time} {machine} {sender}: {body}{Environment.NewLine}");
         }
 
         /// <summary>Builds rfc-5424 compatible message</summary>
@@ -234,8 +233,7 @@ namespace NLog.Targets
         /// <returns>Byte array containing formatted syslog message</returns>
         private byte[] BuildSyslogMessage5424(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity severity, string body)
         {
-            // Calculate PRI field
-            var priority = CalculatePriorityValue(facility, severity).ToString(CultureInfo.InvariantCulture);
+            var pri = Priority(facility, severity);
             var version = ProtocolVersion.ToString(CultureInfo.InvariantCulture);
             var time = logEvent.TimeStamp.ToString("o");
             // Get sender machine name
@@ -244,7 +242,7 @@ namespace NLog.Targets
             var procId = Left(ProcId.Render(logEvent), 128);
             var msgId = Left(MsgId.Render(logEvent), 32);
 
-            var headerData = Encoding.ASCII.GetBytes($"<{priority}>{version} {time} {machine} {sender} {procId} {msgId} ");
+            var headerData = Encoding.ASCII.GetBytes($"{pri}{version} {time} {machine} {sender} {procId} {msgId} ");
             var structuredData = Encoding.UTF8.GetBytes(StructuredData.Render(logEvent) + " ");
             var messageData = Encoding.UTF8.GetBytes(body);
 
@@ -254,6 +252,12 @@ namespace NLog.Targets
             allData.AddRange(_bom);
             allData.AddRange(messageData);
             return allData.ToArray();
+        }
+
+        private static string Priority(SyslogFacility facility, SyslogSeverity severity)
+        {
+            var priVal = CalculatePriorityValue(facility, severity).ToString(CultureInfo.InvariantCulture);
+            return $"<{priVal}>";
         }
 
         /// <summary>Gets at most length first symbols</summary>
