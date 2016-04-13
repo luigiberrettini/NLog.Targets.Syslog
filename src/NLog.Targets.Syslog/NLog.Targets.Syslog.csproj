@@ -50,6 +50,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Rfc3164.cs" />
     <Compile Include="SyslogTarget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RfcNumber.cs" />

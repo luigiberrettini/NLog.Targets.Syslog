@@ -73,6 +73,9 @@ namespace NLog.Targets
         /// <summary>RFC number for syslog protocol</summary> 
         public RfcNumber Rfc { get; set; }
 
+        /// <summary>RFC 3164 related fields</summary> 
+        public Rfc3164 Rfc3164 { get; set; }
+
         #region RFC 5424 members
 
         /// <summary>Syslog protocol version for RFC 5424</summary>
@@ -100,6 +103,7 @@ namespace NLog.Targets
             MachineName = Dns.GetHostName();
             SplitNewlines = true;
             Rfc = RfcNumber.Rfc3164;
+            Rfc3164 = new Rfc3164(Sender, MachineName);
 
             //Defaults for rfc 5424
             ProtocolVersion = 1;
@@ -189,35 +193,18 @@ namespace NLog.Targets
         /// <summary>Builds a syslog-compatible message using the information we have available</summary>
         /// <param name="logEvent">The NLog.LogEventInfo</param>
         /// <param name="facility">Syslog Facility to transmit message from</param>
-        /// <param name="priority">Syslog severity level</param>
+        /// <param name="severity">Syslog severity level</param>
         /// <param name="logEntry">The entry to be logged</param>
         /// <returns>Byte array containing formatted syslog message</returns>
-        private byte[] BuildSyslogMessage(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity priority, string logEntry)
+        private byte[] BuildSyslogMessage(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity severity, string logEntry)
         {
             switch (Rfc)
             {
                 case RfcNumber.Rfc5424:
-                    return BuildSyslogMessage5424(logEvent, facility, priority, logEntry);
+                    return BuildSyslogMessage5424(logEvent, facility, severity, logEntry);
                 default:
-                    return BuildSyslogMessage3164(logEvent, facility, priority, logEntry);
+                    return Rfc3164.BuildMessage(logEvent, Priority(facility, severity), logEntry);
             }
-        }
-
-        /// <summary>Builds rfc-3164 compatible message</summary>
-        /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <param name="facility">Syslog Facility to transmit message from</param>
-        /// <param name="severity">Syslog severity level</param>
-        /// <param name="logEntry">The entry to be logged</param>
-        /// <returns>Byte array containing formatted syslog message</returns>
-        private byte[] BuildSyslogMessage3164(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity severity, string logEntry)
-        {
-            var pri = Priority(facility, severity);
-            var header = Header3164(logEvent);
-            var msg = Message3164(logEvent, logEntry);
-
-            var syslogMessage = $"{pri}{header} {msg}";
-
-            return Encoding.ASCII.GetBytes(syslogMessage);
         }
 
         /// <summary>Builds rfc-5424 compatible message</summary>
@@ -285,29 +272,6 @@ namespace NLog.Targets
         private static int CalculatePriorityValue(SyslogFacility facility, SyslogSeverity severity)
         {
             return (int)facility * 8 + (int)severity;
-        }
-
-        /// <summary>Syslog HEADER part</summary>
-        /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <returns>String containing Syslog PRI part</returns>
-        private string Header3164(LogEventInfo logEvent)
-        {
-            var timestamp = string.Format(CultureInfo.InvariantCulture, "{0:MMM} {0,11:d HH:mm:ss}", logEvent.TimeStamp);
-            var hostname = MachineName.Render(logEvent);
-            var header = $"{timestamp} {hostname}";
-            return header;
-        }
-
-        /// <summary>Syslog MSG part</summary>
-        /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <param name="logEntry">The entry to be logged</param>
-        /// <returns>String containing Syslog MSG part</returns>
-        private string Message3164(LogEventInfo logEvent, string logEntry)
-        {
-            var tag = Sender.Render(logEvent);
-            var content = Char.IsLetterOrDigit(logEntry[0]) ? " {logEntry}" : logEntry;
-            var msg = $"{tag}{content}";
-            return msg;
         }
     }
 }
