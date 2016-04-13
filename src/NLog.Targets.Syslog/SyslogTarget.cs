@@ -183,23 +183,19 @@ namespace NLog.Targets
             foreach (var asyncLogEvent in logEvents)
             {
                 var logEvent = asyncLogEvent.LogEvent;
-                var formattedMessageLines = FormatMessageLines(logEvent);
-                var severity = (SyslogSeverity)logEvent.Level;
-                foreach (var formattedMessageLine in formattedMessageLines)
-                {
-                    var message = BuildSyslogMessage(logEvent, Facility, severity, formattedMessageLine);
-                    messageSendAction(message);
-                }
+                var pri = Priority(Facility, (SyslogSeverity)logEvent.Level);
+
+                foreach (var logEntry in LogEntries(logEvent))
+                    messageSendAction(BuildSyslogMessage(logEvent, pri, logEntry));
             }
         }
 
         /// <summary>Builds a syslog-compatible message using the information we have available</summary>
         /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <param name="facility">Syslog Facility to transmit message from</param>
-        /// <param name="severity">Syslog severity level</param>
         /// <param name="logEntry">The entry to be logged</param>
+        /// <param name="pri">The Syslog PRI part</param>
         /// <returns>Byte array containing formatted syslog message</returns>
-        private byte[] BuildSyslogMessage(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity severity, string logEntry)
+        private byte[] BuildSyslogMessage(LogEventInfo logEvent, string pri, string logEntry)
         {
             switch (Rfc)
             {
@@ -210,25 +206,26 @@ namespace NLog.Targets
                     Rfc5424.MsgId = MsgId;
                     Rfc5424.StructuredData = StructuredData;
 
-                    return Rfc5424.BuildMessage(logEvent, Priority(facility, severity), logEntry);
+                    return Rfc5424.BuildMessage(logEvent, pri, logEntry);
                 }
                 default:
-                    return Rfc3164.BuildMessage(logEvent, Priority(facility, severity), logEntry);
+                    return Rfc3164.BuildMessage(logEvent, pri, logEntry);
             }
         }
 
         /// <summary>Renders message lines</summary>
         /// <param name="logEvent">The NLog.LogEventInfo</param>
-        private IEnumerable<string> FormatMessageLines(LogEventInfo logEvent)
+        private IEnumerable<string> LogEntries(LogEventInfo logEvent)
         {
-            var msg = Layout.Render(logEvent);
-            return SplitNewlines ? msg.Split(_lineSeps, StringSplitOptions.RemoveEmptyEntries) : new[] { msg };
+            var originalLogEntry = Layout.Render(logEvent);
+            return SplitNewlines ? originalLogEntry.Split(_lineSeps, StringSplitOptions.RemoveEmptyEntries) : new[] { originalLogEntry };
         }
 
         /// <summary>Syslog PRI part</summary>
         /// <param name="facility">Syslog facility to transmit message from</param>
         /// <param name="severity">Syslog severity level</param>
         /// <returns>String containing Syslog PRI part</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static string Priority(SyslogFacility facility, SyslogSeverity severity)
         {
             var priVal = CalculatePriorityValue(facility, severity).ToString(CultureInfo.InvariantCulture);
