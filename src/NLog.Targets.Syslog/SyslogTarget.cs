@@ -295,7 +295,7 @@ namespace NLog.Targets
         /// <returns>String containing Syslog PRI field</returns>
         private string Header3164(LogEventInfo logEvent)
         {
-            var timestamp = logEvent.TimeStamp.ToString(TimestampFormat, _usCulture);
+            var timestamp = string.Format(CultureInfo.InvariantCulture, "{0:MMM} {0,11:d HH:mm:ss}", logEvent.TimeStamp);
             var hostname = MachineName.Render(logEvent);
             var header = $"{timestamp} {hostname}";
             return header;
