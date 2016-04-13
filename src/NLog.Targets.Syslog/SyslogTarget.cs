@@ -252,12 +252,6 @@ namespace NLog.Targets
             return allData.ToArray();
         }
 
-        private static string Priority(SyslogFacility facility, SyslogSeverity severity)
-        {
-            var priVal = CalculatePriorityValue(facility, severity).ToString(CultureInfo.InvariantCulture);
-            return $"<{priVal}>";
-        }
-
         /// <summary>Gets at most length first symbols</summary>
         /// <param name="value">Source string</param>
         /// <param name="length">Maximum symbols count</param>
@@ -276,10 +270,20 @@ namespace NLog.Targets
             return SplitNewlines ? msg.Split(_lineSeps, StringSplitOptions.RemoveEmptyEntries) : new[] { msg };
         }
 
+        /// <summary>Syslog PRI field</summary>
+        /// <param name="facility">Syslog facility to transmit message from</param>
+        /// <param name="severity">Syslog severity level</param>
+        /// <returns>String containing Syslog PRI field</returns>
+        private static string Priority(SyslogFacility facility, SyslogSeverity severity)
+        {
+            var priVal = CalculatePriorityValue(facility, severity).ToString(CultureInfo.InvariantCulture);
+            return $"<{priVal}>";
+        }
+
         /// <summary>Calculates syslog PRIVAL</summary>
         /// <param name="facility">Syslog facility to transmit message from</param>
         /// <param name="severity">Syslog severity level</param>
-        /// <returns>Byte array containing formatted syslog message</returns>
+        /// <returns>Int containing Syslog PRIVAL</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static int CalculatePriorityValue(SyslogFacility facility, SyslogSeverity severity)
         {
