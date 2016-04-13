@@ -42,7 +42,6 @@ namespace NLog.Targets
     public class SyslogTarget : TargetWithLayout
     {
         private const string NilValue = "-";
-        private static readonly CultureInfo _usCulture = new CultureInfo("en-US");
         private static readonly byte[] _bom = { 0xEF, 0xBB, 0xBF };
         private static readonly char[] _lineSeps = { '\r', '\n' };
 
@@ -54,9 +53,6 @@ namespace NLog.Targets
 
         /// <summary>Gets or sets the name of the application that will show up in the syslog log</summary>
         public Layout Sender { get; set; }
-
-        /// <summary>Gets or sets the timestamp format</summary>
-        public string TimestampFormat { get; set; }
 
         /// <summary>Gets or sets the machine name hosting syslog</summary>
         public Layout MachineName { get; set; }
@@ -100,7 +96,6 @@ namespace NLog.Targets
             Sender = Assembly.GetCallingAssembly().GetName().Name;
             Facility = SyslogFacility.Local1;
             Protocol = ProtocolType.Udp;
-            TimestampFormat = "MMM dd HH:mm:ss";
             MachineName = Dns.GetHostName();
             SplitNewlines = true;
             Rfc = RfcNumber.Rfc3164;
