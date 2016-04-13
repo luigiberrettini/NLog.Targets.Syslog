@@ -73,7 +73,7 @@ namespace NLog.Targets
         #region RFC 5424 members
 
         /// <summary>Syslog protocol version for RFC 5424</summary>
-        public byte ProtocolVersion { get; }
+        public byte ProtocolVersion { get; set; }
 
         /// <summary>Layout for PROCID protocol field</summary>
         public Layout ProcId { get; set; }
