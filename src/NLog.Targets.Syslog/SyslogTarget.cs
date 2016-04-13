@@ -216,13 +216,11 @@ namespace NLog.Targets
         private byte[] BuildSyslogMessage3164(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity severity, string body)
         {
             var pri = Priority(facility, severity);
-            var time = logEvent.TimeStamp.ToString(TimestampFormat, _usCulture);
-            // Get sender machine name
-            var machine = MachineName.Render(logEvent);
+            var header = Header3164(logEvent);
             // Get sender
             var sender = Sender.Render(logEvent);
 
-            return Encoding.ASCII.GetBytes($"{pri}{time} {machine} {sender}: {body}{Environment.NewLine}");
+            return Encoding.ASCII.GetBytes($"{pri}{header} {sender}: {body}{Environment.NewLine}");
         }
 
         /// <summary>Builds rfc-5424 compatible message</summary>
@@ -286,6 +284,14 @@ namespace NLog.Targets
         private static int CalculatePriorityValue(SyslogFacility facility, SyslogSeverity severity)
         {
             return (int)facility * 8 + (int)severity;
+        }
+
+        private string Header3164(LogEventInfo logEvent)
+        {
+            var timestamp = logEvent.TimeStamp.ToString(TimestampFormat, _usCulture);
+            var hostname = MachineName.Render(logEvent);
+            var header = $"{timestamp} {hostname}";
+            return header;
         }
     }
 }
