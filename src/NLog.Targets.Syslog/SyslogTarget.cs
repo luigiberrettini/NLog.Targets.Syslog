@@ -290,6 +290,9 @@ namespace NLog.Targets
             return (int)facility * 8 + (int)severity;
         }
 
+        /// <summary>Syslog HEADER field</summary>
+        /// <param name="logEvent">The NLog.LogEventInfo</param>
+        /// <returns>String containing Syslog PRI field</returns>
         private string Header3164(LogEventInfo logEvent)
         {
             var timestamp = logEvent.TimeStamp.ToString(TimestampFormat, _usCulture);
