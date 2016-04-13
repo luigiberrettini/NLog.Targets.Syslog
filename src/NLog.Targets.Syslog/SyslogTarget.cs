@@ -26,6 +26,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using NLog.Common;
 using NLog.Layouts;
 
@@ -189,16 +190,16 @@ namespace NLog.Targets
         /// <param name="logEvent">The NLog.LogEventInfo</param>
         /// <param name="facility">Syslog Facility to transmit message from</param>
         /// <param name="priority">Syslog severity level</param>
-        /// <param name="body">Message text</param>
+        /// <param name="logEntry">The entry to be logged</param>
         /// <returns>Byte array containing formatted syslog message</returns>
-        private byte[] BuildSyslogMessage(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity priority, string body)
+        private byte[] BuildSyslogMessage(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity priority, string logEntry)
         {
             switch (Rfc)
             {
                 case RfcNumber.Rfc5424:
-                    return BuildSyslogMessage5424(logEvent, facility, priority, body);
+                    return BuildSyslogMessage5424(logEvent, facility, priority, logEntry);
                 default:
-                    return BuildSyslogMessage3164(logEvent, facility, priority, body);
+                    return BuildSyslogMessage3164(logEvent, facility, priority, logEntry);
             }
         }
 
@@ -206,25 +207,26 @@ namespace NLog.Targets
         /// <param name="logEvent">The NLog.LogEventInfo</param>
         /// <param name="facility">Syslog Facility to transmit message from</param>
         /// <param name="severity">Syslog severity level</param>
-        /// <param name="body">Message text</param>
+        /// <param name="logEntry">The entry to be logged</param>
         /// <returns>Byte array containing formatted syslog message</returns>
-        private byte[] BuildSyslogMessage3164(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity severity, string body)
+        private byte[] BuildSyslogMessage3164(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity severity, string logEntry)
         {
             var pri = Priority(facility, severity);
             var header = Header3164(logEvent);
-            // Get sender
-            var sender = Sender.Render(logEvent);
+            var msg = Message3164(logEvent, logEntry);
 
-            return Encoding.ASCII.GetBytes($"{pri}{header} {sender}: {body}{Environment.NewLine}");
+            var syslogMessage = $"{pri}{header} {msg}";
+
+            return Encoding.ASCII.GetBytes(syslogMessage);
         }
 
         /// <summary>Builds rfc-5424 compatible message</summary>
         /// <param name="logEvent">The NLog.LogEventInfo</param>
         /// <param name="facility">Syslog Facility to transmit message from</param>
         /// <param name="severity">Syslog severity level</param>
-        /// <param name="body">Message text</param>
+        /// <param name="logEntry">The entry to be logged</param>
         /// <returns>Byte array containing formatted syslog message</returns>
-        private byte[] BuildSyslogMessage5424(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity severity, string body)
+        private byte[] BuildSyslogMessage5424(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity severity, string logEntry)
         {
             var pri = Priority(facility, severity);
             var version = ProtocolVersion.ToString(CultureInfo.InvariantCulture);
@@ -237,7 +239,7 @@ namespace NLog.Targets
 
             var headerData = Encoding.ASCII.GetBytes($"{pri}{version} {time} {machine} {sender} {procId} {msgId} ");
             var structuredData = Encoding.UTF8.GetBytes(StructuredData.Render(logEvent) + " ");
-            var messageData = Encoding.UTF8.GetBytes(body);
+            var messageData = Encoding.UTF8.GetBytes(logEntry);
 
             var allData = new List<byte>(headerData.Length + structuredData.Length + _bom.Length + messageData.Length);
             allData.AddRange(headerData);
@@ -265,10 +267,10 @@ namespace NLog.Targets
             return SplitNewlines ? msg.Split(_lineSeps, StringSplitOptions.RemoveEmptyEntries) : new[] { msg };
         }
 
-        /// <summary>Syslog PRI field</summary>
+        /// <summary>Syslog PRI part</summary>
         /// <param name="facility">Syslog facility to transmit message from</param>
         /// <param name="severity">Syslog severity level</param>
-        /// <returns>String containing Syslog PRI field</returns>
+        /// <returns>String containing Syslog PRI part</returns>
         private static string Priority(SyslogFacility facility, SyslogSeverity severity)
         {
             var priVal = CalculatePriorityValue(facility, severity).ToString(CultureInfo.InvariantCulture);
@@ -285,15 +287,27 @@ namespace NLog.Targets
             return (int)facility * 8 + (int)severity;
         }
 
-        /// <summary>Syslog HEADER field</summary>
+        /// <summary>Syslog HEADER part</summary>
         /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <returns>String containing Syslog PRI field</returns>
+        /// <returns>String containing Syslog PRI part</returns>
         private string Header3164(LogEventInfo logEvent)
         {
             var timestamp = string.Format(CultureInfo.InvariantCulture, "{0:MMM} {0,11:d HH:mm:ss}", logEvent.TimeStamp);
             var hostname = MachineName.Render(logEvent);
             var header = $"{timestamp} {hostname}";
             return header;
+        }
+
+        /// <summary>Syslog MSG part</summary>
+        /// <param name="logEvent">The NLog.LogEventInfo</param>
+        /// <param name="logEntry">The entry to be logged</param>
+        /// <returns>String containing Syslog MSG part</returns>
+        private string Message3164(LogEventInfo logEvent, string logEntry)
+        {
+            var tag = Sender.Render(logEvent);
+            var content = Char.IsLetterOrDigit(logEntry[0]) ? " {logEntry}" : logEntry;
+            var msg = $"{tag}{content}";
+            return msg;
         }
     }
 }
