@@ -53,6 +53,7 @@
     <Compile Include="LayoutExtensions.cs" />
     <Compile Include="Rfc3164.cs" />
     <Compile Include="Rfc5424.cs" />
+    <Compile Include="SyslogLogEventInfo.cs" />
     <Compile Include="SyslogTarget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RfcNumber.cs" />

@@ -16,19 +16,14 @@
 //   limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
 
+using NLog.Common;
+using NLog.Layouts;
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.RegularExpressions;
-using NLog.Common;
-using NLog.Layouts;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable MemberCanBePrivate.Global
@@ -42,10 +37,6 @@ namespace NLog.Targets
     [Target("Syslog")]
     public class SyslogTarget : TargetWithLayout
     {
-        private const string NilValue = "-";
-        private static readonly byte[] _bom = { 0xEF, 0xBB, 0xBF };
-        private static readonly char[] _lineSeps = { '\r', '\n' };
-
         /// <summary>Gets or sets the IP Address or Host name of your Syslog server</summary>
         public string SyslogServer { get; set; }
 
@@ -92,11 +83,6 @@ namespace NLog.Targets
 
         /// <summary>Layout for STRUCTURED-DATA protocol field</summary>
         public Layout StructuredData { get; set; }
-
-        public byte[] Bom
-        {
-            get { return _bom; }
-        }
 
         #endregion
 
@@ -176,18 +162,14 @@ namespace NLog.Targets
         }
 
         /// <summary>Processes array of events and sends messages bytes using action</summary>
-        /// <param name="logEvents">The array of NLog.AsyncLogEventInfo</param>
+        /// <param name="asyncLogEvents">The array of NLog.AsyncLogEventInfo</param>
         /// <param name="messageSendAction">Implementation of send data method</param>
-        void ProcessAndSendEvents(AsyncLogEventInfo[] logEvents, Action<byte[]> messageSendAction)
+        private void ProcessAndSendEvents(AsyncLogEventInfo[] asyncLogEvents, Action<byte[]> messageSendAction)
         {
-            foreach (var asyncLogEvent in logEvents)
-            {
-                var logEvent = asyncLogEvent.LogEvent;
-                var pri = Priority(Facility, (SyslogSeverity)logEvent.Level);
-
-                foreach (var logEntry in LogEntries(logEvent))
-                    messageSendAction(BuildSyslogMessage(logEvent, pri, logEntry));
-            }
+            asyncLogEvents
+                .Select(asyncLogEvent => new SyslogLogEventInfo(asyncLogEvent.LogEvent).Build(Facility, Layout, SplitNewlines))
+                .ToList()
+                .ForEach(x => x.LogEntries.ForEach(line => messageSendAction(BuildMessage(x.LogEvent, x.Pri, line))));
         }
 
         /// <summary>Builds a syslog-compatible message using the information we have available</summary>
@@ -195,7 +177,7 @@ namespace NLog.Targets
         /// <param name="logEntry">The entry to be logged</param>
         /// <param name="pri">The Syslog PRI part</param>
         /// <returns>Byte array containing formatted syslog message</returns>
-        private byte[] BuildSyslogMessage(LogEventInfo logEvent, string pri, string logEntry)
+        private byte[] BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
         {
             switch (Rfc)
             {
@@ -211,35 +193,6 @@ namespace NLog.Targets
                 default:
                     return Rfc3164.BuildMessage(logEvent, pri, logEntry);
             }
-        }
-
-        /// <summary>Renders message lines</summary>
-        /// <param name="logEvent">The NLog.LogEventInfo</param>
-        private IEnumerable<string> LogEntries(LogEventInfo logEvent)
-        {
-            var originalLogEntry = Layout.Render(logEvent);
-            return SplitNewlines ? originalLogEntry.Split(_lineSeps, StringSplitOptions.RemoveEmptyEntries) : new[] { originalLogEntry };
-        }
-
-        /// <summary>Syslog PRI part</summary>
-        /// <param name="facility">Syslog facility to transmit message from</param>
-        /// <param name="severity">Syslog severity level</param>
-        /// <returns>String containing Syslog PRI part</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static string Priority(SyslogFacility facility, SyslogSeverity severity)
-        {
-            var priVal = CalculatePriorityValue(facility, severity).ToString(CultureInfo.InvariantCulture);
-            return $"<{priVal}>";
-        }
-
-        /// <summary>Calculates syslog PRIVAL</summary>
-        /// <param name="facility">Syslog facility to transmit message from</param>
-        /// <param name="severity">Syslog severity level</param>
-        /// <returns>Int containing Syslog PRIVAL</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int CalculatePriorityValue(SyslogFacility facility, SyslogSeverity severity)
-        {
-            return (int)facility * 8 + (int)severity;
         }
     }
 }
