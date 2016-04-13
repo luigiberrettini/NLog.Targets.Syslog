@@ -76,10 +76,13 @@ namespace NLog.Targets
         /// <summary>RFC 3164 related fields</summary> 
         public Rfc3164 Rfc3164 { get; set; }
 
+        /// <summary>RFC 5424 related fields</summary> 
+        public Rfc5424 Rfc5424 { get; set; }
+
         #region RFC 5424 members
 
         /// <summary>Syslog protocol version for RFC 5424</summary>
-        private byte ProtocolVersion { get; }
+        public byte ProtocolVersion { get; }
 
         /// <summary>Layout for PROCID protocol field</summary>
         public Layout ProcId { get; set; }
@@ -89,6 +92,11 @@ namespace NLog.Targets
 
         /// <summary>Layout for STRUCTURED-DATA protocol field</summary>
         public Layout StructuredData { get; set; }
+
+        public byte[] Bom
+        {
+            get { return _bom; }
+        }
 
         #endregion
 
@@ -104,12 +112,7 @@ namespace NLog.Targets
             SplitNewlines = true;
             Rfc = RfcNumber.Rfc3164;
             Rfc3164 = new Rfc3164(Sender, MachineName);
-
-            //Defaults for rfc 5424
-            ProtocolVersion = 1;
-            ProcId = NilValue;
-            MsgId = NilValue;
-            StructuredData = NilValue;
+            Rfc5424 = new Rfc5424(Sender, MachineName);
         }
 
         /// <summary>
@@ -201,49 +204,17 @@ namespace NLog.Targets
             switch (Rfc)
             {
                 case RfcNumber.Rfc5424:
-                    return BuildSyslogMessage5424(logEvent, facility, severity, logEntry);
+                {
+                    Rfc5424.ProtocolVersion = ProtocolVersion;
+                    Rfc5424.ProcId = ProcId;
+                    Rfc5424.MsgId = MsgId;
+                    Rfc5424.StructuredData = StructuredData;
+
+                    return Rfc5424.BuildMessage(logEvent, Priority(facility, severity), logEntry);
+                }
                 default:
                     return Rfc3164.BuildMessage(logEvent, Priority(facility, severity), logEntry);
             }
-        }
-
-        /// <summary>Builds rfc-5424 compatible message</summary>
-        /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <param name="facility">Syslog Facility to transmit message from</param>
-        /// <param name="severity">Syslog severity level</param>
-        /// <param name="logEntry">The entry to be logged</param>
-        /// <returns>Byte array containing formatted syslog message</returns>
-        private byte[] BuildSyslogMessage5424(LogEventInfo logEvent, SyslogFacility facility, SyslogSeverity severity, string logEntry)
-        {
-            var pri = Priority(facility, severity);
-            var version = ProtocolVersion.ToString(CultureInfo.InvariantCulture);
-            var time = logEvent.TimeStamp.ToString("o");
-            // Get sender machine name
-            var machine = Left(MachineName.Render(logEvent), 255);
-            var sender = Left(Sender.Render(logEvent), 48);
-            var procId = Left(ProcId.Render(logEvent), 128);
-            var msgId = Left(MsgId.Render(logEvent), 32);
-
-            var headerData = Encoding.ASCII.GetBytes($"{pri}{version} {time} {machine} {sender} {procId} {msgId} ");
-            var structuredData = Encoding.UTF8.GetBytes(StructuredData.Render(logEvent) + " ");
-            var messageData = Encoding.UTF8.GetBytes(logEntry);
-
-            var allData = new List<byte>(headerData.Length + structuredData.Length + _bom.Length + messageData.Length);
-            allData.AddRange(headerData);
-            allData.AddRange(structuredData);
-            allData.AddRange(_bom);
-            allData.AddRange(messageData);
-            return allData.ToArray();
-        }
-
-        /// <summary>Gets at most length first symbols</summary>
-        /// <param name="value">Source string</param>
-        /// <param name="length">Maximum symbols count</param>
-        /// <returns>String that contains at most length symbols</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static string Left(string value, int length)
-        {
-            return value.Length <= length ? value : value.Substring(0, length);
         }
 
         /// <summary>Renders message lines</summary>
