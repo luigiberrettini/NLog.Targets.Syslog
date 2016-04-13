@@ -19,6 +19,7 @@ namespace NLog.Targets
 
         public List<string> LogEntries { get; private set; }
 
+        /// <summary>Initializes a new instance of the SyslogLogEventInfo class</summary>
         public SyslogLogEventInfo(LogEventInfo logEvent)
         {
             LogEvent = logEvent;

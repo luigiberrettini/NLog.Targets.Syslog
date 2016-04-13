@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using NLog.Config;
+using NLog.Layouts;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
-using NLog.Config;
-using NLog.Layouts;
 
 // ReSharper disable CheckNamespace
 namespace NLog.Targets
@@ -45,7 +45,7 @@ namespace NLog.Targets
         /// <summary>Builds the Syslog message according to the RFC</summary>
         /// <param name="logEvent">The NLog.LogEventInfo</param>
         /// <param name="pri">The Syslog PRI part</param>
-        /// <param name="logEntry">Message logEntry</param>
+        /// <param name="logEntry">The entry to be logged</param>
         /// <returns>Byte array containing the Syslog message</returns>
         public byte[] BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
         {
