@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
@@ -45,7 +44,6 @@ namespace NLog.Targets
         /// <returns>Byte array containing the Syslog message</returns>
         public abstract byte[] BuildMessage(LogEventInfo logEvent, string pri, string logEntry);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static string Pri(SyslogFacility facility, SyslogSeverity severity)
         {
             var priVal = (int)facility * 8 + (int)severity;
@@ -53,7 +51,6 @@ namespace NLog.Targets
             return $"<{priValString}>";
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static IEnumerable<string> LogEntries(LogEventInfo logEvent, Layout layout, bool splitNewlines)
         {
             var originalLogEntry = layout.Render(logEvent);

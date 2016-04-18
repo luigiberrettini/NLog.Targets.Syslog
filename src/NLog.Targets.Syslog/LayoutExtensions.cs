@@ -1,5 +1,4 @@
 ﻿using NLog.Layouts;
-using System.Runtime.CompilerServices;
 
 // ReSharper disable CheckNamespace
 namespace NLog.Targets
@@ -17,7 +16,6 @@ namespace NLog.Targets
             return layout.Render(logEvent).Left(maxLength);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static string Left(this string str, int maxLength)
         {
             return str.Length <= maxLength ? str : str.Substring(0, maxLength);
