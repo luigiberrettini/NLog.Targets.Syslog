@@ -19,6 +19,7 @@
 using NLog.Common;
 using NLog.Layouts;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
@@ -145,24 +146,22 @@ namespace NLog.Targets
         private void TcpSend(string ipAddress, IEnumerable<byte[]> syslogMessages)
         {
             using (var tcp = new TcpClient(ipAddress, Port))
+            using (var stream = SslDecorate(tcp))
             {
-                // TcpClient disposes also the stream
-                var stream = tcp.GetStream();
-
-                if (Ssl)
-                {
-                    // To avoid a double dispose leaveInnerStreamOpen is set to true
-                    using (var sslStream = new SslStream(stream, true))
-                    {
-                        sslStream.AuthenticateAsClient(SyslogServer);
-                        syslogMessages.ForEach(messageData => sslStream.Write(messageData, 0, messageData.Length));
-                    }
-                }
-                else
-                {
-                    syslogMessages.ForEach(messageData => stream.Write(messageData, 0, messageData.Length));
-                }
+                syslogMessages.ForEach(messageData => stream.Write(messageData, 0, messageData.Length));
             }
+        }
+
+        private Stream SslDecorate(TcpClient tcp)
+        {
+            var tcpStream = tcp.GetStream();
+
+            if (!Ssl)
+                return tcpStream;
+
+            var sslStream = new SslStream(tcpStream, true);
+            sslStream.AuthenticateAsClient(SyslogServer);
+            return sslStream;
         }
     }
 }
