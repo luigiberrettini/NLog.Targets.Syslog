@@ -9,7 +9,7 @@ namespace NLog.Targets
 // ReSharper restore CheckNamespace
 {
     [NLogConfigurationItem]
-    public class Rfc5424
+    public class Rfc5424 : MessageBuilder
     {
         private const string NilValue = "-";
         private const int MachineNameMaxLength = 255;
@@ -47,7 +47,7 @@ namespace NLog.Targets
         /// <param name="pri">The Syslog PRI part</param>
         /// <param name="logEntry">The entry to be logged</param>
         /// <returns>Byte array containing the Syslog message</returns>
-        public byte[] BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
+        protected override byte[] BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
         {
             var version = ProtocolVersion.ToString(CultureInfo.InvariantCulture);
             var time = logEvent.TimeStamp.ToString("o");

@@ -18,8 +18,6 @@
 
 using NLog.Common;
 using NLog.Layouts;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
@@ -85,14 +83,17 @@ namespace NLog.Targets
             Rfc = RfcNumber.Rfc3164;
             Rfc3164 = new Rfc3164(Sender, MachineName);
             Rfc5424 = new Rfc5424(Sender, MachineName);
+            messageBuilders = new MessageBuilder[] {Rfc3164, Rfc5424};
         }
+
+        private readonly MessageBuilder[] messageBuilders;
 
         /// <summary>Writes a single event</summary>
         /// <param name="logEvent">The NLog.AsyncLogEventInfo</param>
         /// <remarks>Write(LogEventInfo) is called only by Write(AsyncLogEventInfo/AsyncLogEventInfo[]): no need to ovveride it</remarks>
         protected override void Write(AsyncLogEventInfo logEvent)
         {
-            SendEvents(logEvent);
+            SendMessages(logEvent);
         }
 
         /// <summary>Writes array of events</summary>
@@ -100,17 +101,20 @@ namespace NLog.Targets
         /// <remarks>Write(LogEventInfo) is called only by Write(AsyncLogEventInfo/AsyncLogEventInfo[]): no need to ovveride it</remarks>
         protected override void Write(AsyncLogEventInfo[] logEvents)
         {
-            SendEvents(logEvents);
+            SendMessages(logEvents);
         }
 
         /// <summary>Sends array of events to Syslog server</summary>
         /// <param name="logEvents">The array of NLog.AsyncLogEventInfo</param>
-        private void SendEvents(params AsyncLogEventInfo[] logEvents)
+        private void SendMessages(params AsyncLogEventInfo[] logEvents)
         {
             var logServerIp = Dns.GetHostAddresses(SyslogServer).FirstOrDefault();
             if (logServerIp == null)
                 return;
             var ipAddress = logServerIp.ToString();
+
+            var rfcToFollow = messageBuilders.Single(x => (RfcNumber)x == Rfc);
+            var syslogMessages = logEvents.SelectMany(asyncLogEvent => rfcToFollow.BuildMessages(Facility, asyncLogEvent.LogEvent, Layout, SplitNewlines));
 
             switch (Protocol)
             {
@@ -118,7 +122,7 @@ namespace NLog.Targets
                 {
                     using (var udp = new UdpClient(ipAddress, Port))
                     {
-                        SendMessages(logEvents, messageData => udp.Send(messageData, messageData.Length));
+                        syslogMessages.ForEach(messageData => udp.Send(messageData, messageData.Length));
                     }
                     break;
                 }
@@ -128,18 +132,19 @@ namespace NLog.Targets
                     {
                         // TcpClient disposes also the stream
                         var stream = tcp.GetStream();
+
                         if (Ssl)
                         {
                             // To avoid a double dispose leaveInnerStreamOpen is set to true
                             using (var sslStream = new SslStream(stream, true))
                             {
                                 sslStream.AuthenticateAsClient(SyslogServer);
-                                SendMessages(logEvents, messageData => sslStream.Write(messageData, 0, messageData.Length));
+                                syslogMessages.ForEach(messageData => sslStream.Write(messageData, 0, messageData.Length));
                             }
                         }
                         else
                         {
-                            SendMessages(logEvents, messageData => stream.Write(messageData, 0, messageData.Length));
+                            syslogMessages.ForEach(messageData => stream.Write(messageData, 0, messageData.Length));
                         }
                     }
                     break;
@@ -147,41 +152,6 @@ namespace NLog.Targets
                 default:
                 {
                     throw new NLogConfigurationException($"Protocol '{Protocol}' is not supported.");
-                }
-            }
-        }
-
-        /// <summary>Processes array of events and sends messages bytes using action</summary>
-        /// <param name="asyncLogEvents">The array of NLog.AsyncLogEventInfo</param>
-        /// <param name="send">Implementation of the send method</param>
-        private void SendMessages(IEnumerable<AsyncLogEventInfo> asyncLogEvents, Action<byte[]> send)
-        {
-            asyncLogEvents
-                .Select(asyncLogEvent => new SyslogLogEventInfo(asyncLogEvent.LogEvent).Build(Facility, Layout, SplitNewlines))
-                .ToList()
-                .ForEach(x => x.LogEntries.ForEach(line => send(BuildMessage(x.LogEvent, x.Pri, line))));
-        }
-
-        /// <summary>Builds a Syslog-compatible message using the information we have available</summary>
-        /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <param name="pri">The Syslog PRI part</param>
-        /// <param name="logEntry">The entry to be logged</param>
-        /// <returns>Byte array containing formatted Syslog message</returns>
-        private byte[] BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
-        {
-            switch (Rfc)
-            {
-                case RfcNumber.Rfc3164:
-                {
-                    return Rfc3164.BuildMessage(logEvent, pri, logEntry);
-                }
-                case RfcNumber.Rfc5424:
-                {
-                    return Rfc5424.BuildMessage(logEvent, pri, logEntry);
-                }
-                default:
-                {
-                    throw new NLogConfigurationException($"RFC '{Rfc}' is not supported.");
                 }
             }
         }

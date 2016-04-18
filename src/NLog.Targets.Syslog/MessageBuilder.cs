@@ -1,36 +1,38 @@
-﻿using NLog.Layouts;
+// ReSharper disable CheckNamespace
+
+
+using NLog.Layouts;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-// ReSharper disable CheckNamespace
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
 {
-    internal class SyslogLogEventInfo
+    /// <summary>Allows to build Syslog messages</summary>
+    public abstract class MessageBuilder
     {
         private static readonly char[] LineSeps = { '\r', '\n' };
 
-        public LogEventInfo LogEvent { get; }
-
-        public string Pri { get; private set; }
-
-        public List<string> LogEntries { get; private set; }
-
-        /// <summary>Initializes a new instance of the SyslogLogEventInfo class</summary>
-        public SyslogLogEventInfo(LogEventInfo logEvent)
+        /// <summary>Convert a message builder to an RFC number</summary>
+        /// <param name="messageBuilder">Syslog messageBuilder to convert</param>
+        /// <returns>The RFC number which corresponds to the message builder</returns>
+        public static explicit operator RfcNumber(MessageBuilder messageBuilder)
         {
-            LogEvent = logEvent;
+            return (RfcNumber)Enum.Parse(typeof(RfcNumber), messageBuilder.GetType().Name);
         }
 
-        public SyslogLogEventInfo Build(SyslogFacility facility, Layout layout, bool splitNewlines)
+        public IEnumerable<byte[]> BuildMessages(SyslogFacility facility, LogEventInfo logEvent, Layout layout, bool splitNewlines)
         {
-            Pri = Priority(facility, (SyslogSeverity)LogEvent.Level);
-            LogEntries = RenderedLogEntries(layout, splitNewlines).ToList();
-            return this;
+            var pri = Priority(facility, (SyslogSeverity)logEvent.Level);
+            var logEntries = RenderedLogEntries(logEvent, layout, splitNewlines).ToList();
+            var toBeSent = logEntries.Select(logEntry => BuildMessage(logEvent, pri, logEntry));
+            return toBeSent;
         }
+
+        protected abstract byte[] BuildMessage(LogEventInfo logEvent, string pri, string logEntry);
 
         /// <summary>Determines the Syslog PRI part</summary>
         /// <param name="facility">Syslog facility to transmit message from</param>
@@ -45,11 +47,12 @@ namespace NLog.Targets
         }
 
         /// <summary>Renders log entries</summary>
+        /// <param name="logEvent"></param>
         /// <param name="layout">The NLog.LogEventInfo</param>
         /// <param name="splitNewlines">Determines if the original log entry is to be split by newlines</param>
-        private IEnumerable<string> RenderedLogEntries(Layout layout, bool splitNewlines)
+        private static IEnumerable<string> RenderedLogEntries(LogEventInfo logEvent, Layout layout, bool splitNewlines)
         {
-            var originalLogEntry = layout.Render(LogEvent);
+            var originalLogEntry = layout.Render(logEvent);
             return splitNewlines ? originalLogEntry.Split(LineSeps, StringSplitOptions.RemoveEmptyEntries) : new[] { originalLogEntry };
         }
     }

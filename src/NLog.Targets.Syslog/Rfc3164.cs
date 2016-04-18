@@ -1,20 +1,19 @@
-﻿using System;
+﻿using NLog.Config;
+using NLog.Layouts;
+using System;
 using System.Globalization;
 using System.Text;
-using NLog.Config;
-using NLog.Layouts;
 
 // ReSharper disable CheckNamespace
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
 {
     [NLogConfigurationItem]
-    public class Rfc3164
+    public class Rfc3164 : MessageBuilder
     {
         private const string TimestampFormat = "{0:MMM} {0,11:d HH:mm:ss}";
-
-        private Layout Sender { get; }
         private Layout MachineName { get; }
+        private Layout Sender { get; }
 
         /// <summary>Initializes a new instance of the Rfc3164 class</summary>
         public Rfc3164(Layout sender, Layout machineName)
@@ -28,7 +27,7 @@ namespace NLog.Targets
         /// <param name="pri">The Syslog PRI part</param>
         /// <param name="logEntry">The entry to be logged</param>
         /// <returns>Byte array containing the Syslog message</returns>
-        public byte[] BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
+        protected override byte[] BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
         {
             var header = Header(logEvent);
             var msg = Msg(logEvent, logEntry);
