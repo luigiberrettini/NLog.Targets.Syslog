@@ -5,6 +5,7 @@ using System.Collections.Generic;
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
 {
+    /// <summary>Allows to extend the behavior of enumerables</summary>
     public static class EnumerableExtensions
     {
         /// <summary>Performs an action on each element of the enumerable</summary>

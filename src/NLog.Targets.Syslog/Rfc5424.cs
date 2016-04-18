@@ -2,44 +2,50 @@
 using NLog.Layouts;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 
 // ReSharper disable CheckNamespace
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
 {
+    /// <summary>Allows to build Syslog messages comliant with RFC 5424</summary>
     [NLogConfigurationItem]
     public class Rfc5424 : MessageBuilder
     {
+        private const string TimestampFormat = "{0:yyyy-MM-ddTHH:mm:ss.ffffffK}";
+        private readonly byte[] spaceBytes = Encoding.ASCII.GetBytes(" ");
         private const string NilValue = "-";
-        private const int MachineNameMaxLength = 255;
-        private const int SenderMaxLength = 48;
+        private const int HostnameMaxLength = 255;
+        private const int AppNameMaxLength = 48;
         private const int ProcIdMaxLength = 128;
         private const int MsgIdMaxLength = 32;
         private static readonly byte[] Bom = { 0xEF, 0xBB, 0xBF };
-        private Layout MachineName { get; }
+        private Layout Hostname { get; }
         private Layout Sender { get; }
 
-        /// <summary>The protocol version</summary>
+        /// <summary>The VERSION field of the header</summary>
         public byte ProtocolVersion { get; set; }
 
-        /// <summary>Layout for PROCID protocol field</summary>
+        /// <summary>The PROCID field of the header</summary>
         public Layout ProcId { get; set; }
 
-        /// <summary>Layout for MSGID protocol field</summary>
+        /// <summary>The MSGID field of the header</summary>
         public Layout MsgId { get; set; }
 
-        /// <summary>Layout for STRUCTURED-DATA protocol field</summary>
-        public Layout StructuredData { get; set; }
+        /// <summary>The STRUCTURED-DATA part of the message</summary>
+        [ArrayParameter(typeof(SdElement), nameof(SdElement))]
+        public IList<SdElement> StructuredData { get; set; }
 
-        public Rfc5424(Layout sender, Layout machineName)
+        /// <summary>Initializes a new instance of the Rfc5424 class</summary>
+        public Rfc5424(Layout sender, Layout hostname)
         {
             Sender = sender;
-            MachineName = machineName;
+            Hostname = hostname;
             ProtocolVersion = 1;
             ProcId = NilValue;
             MsgId = NilValue;
-            StructuredData = NilValue;
+            StructuredData = new List<SdElement>();
         }
 
         /// <summary>Builds the Syslog message according to the RFC</summary>
@@ -47,26 +53,40 @@ namespace NLog.Targets
         /// <param name="pri">The Syslog PRI part</param>
         /// <param name="logEntry">The entry to be logged</param>
         /// <returns>Byte array containing the Syslog message</returns>
-        protected override byte[] BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
+        public override byte[] BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
+        {
+            var message = new List<byte>();
+            message.AddRange(HeaderBytes(pri, logEvent));
+            message.AddRange(spaceBytes);
+            message.AddRange(StructuredDataBytes(logEvent));
+            message.AddRange(spaceBytes);
+            message.AddRange(MsgBytes(logEntry));
+            return message.ToArray();
+        }
+
+        private IEnumerable<byte> HeaderBytes(string pri, LogEventInfo logEvent)
         {
             var version = ProtocolVersion.ToString(CultureInfo.InvariantCulture);
-            var time = logEvent.TimeStamp.ToString("o");
-            var machineName = MachineName.Render(logEvent, MachineNameMaxLength);
-            var sender = Sender.Render(logEvent, SenderMaxLength);
-            var procId = ProcId.Render(logEvent, ProcIdMaxLength);
-            var msgId = MsgId.Render(logEvent, MsgIdMaxLength);
+            var timestamp = string.Format(CultureInfo.InvariantCulture, TimestampFormat, logEvent.TimeStamp);
+            var hostname = Hostname.Render(logEvent, HostnameMaxLength, NilValue);
+            var appName = Sender.Render(logEvent, AppNameMaxLength, NilValue);
+            var procId = ProcId.Render(logEvent, ProcIdMaxLength, NilValue);
+            var msgId = MsgId.Render(logEvent, MsgIdMaxLength, NilValue);
+            var header = $"{pri}{version} {timestamp} {hostname} {appName} {procId} {msgId}";
+            return Encoding.ASCII.GetBytes(header);
+        }
 
-            var headerData = Encoding.ASCII.GetBytes($"{pri}{version} {time} {machineName} {sender} {procId} {msgId} ");
-            var structuredData = Encoding.UTF8.GetBytes($"{StructuredData.Render(logEvent)} ");
-            var messageData = Encoding.UTF8.GetBytes(logEntry);
+        private IEnumerable<byte> StructuredDataBytes(LogEventInfo logEvent)
+        {
+            return StructuredData.Count == 0 ? Encoding.ASCII.GetBytes(NilValue) : StructuredData.SelectMany(sdElement => sdElement.Bytes(logEvent));
+        }
 
-            var allData = new List<byte>(headerData.Length + structuredData.Length + Bom.Length + messageData.Length);
-            allData.AddRange(headerData);
-            allData.AddRange(structuredData);
-            allData.AddRange(Bom);
-            allData.AddRange(messageData);
-
-            return allData.ToArray();
+        private static IEnumerable<byte> MsgBytes(string logEntry)
+        {
+            var msgBytes = new List<byte>();
+            msgBytes.AddRange(Bom);
+            msgBytes.AddRange(Encoding.UTF8.GetBytes(logEntry));
+            return msgBytes;
         }
     }
 }
