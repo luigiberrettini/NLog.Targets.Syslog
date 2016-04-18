@@ -34,7 +34,6 @@ namespace NLog.Targets
         /// <summary>Debug-level messages</summary>
         public static readonly SyslogSeverity Debug = new SyslogSeverity(7, "Debug");
 
-        /// <summary>Initializes a new instance of the SyslogSeverity class</summary>
         private SyslogSeverity(int value, string displayName)
         {
             this.value = value;
@@ -48,7 +47,7 @@ namespace NLog.Targets
             return ((int)this).CompareTo((int)other);
         }
 
-        /// <summary>Convert a syslog severity to an integer</summary>
+        /// <summary>Convert a Syslog severity to an integer</summary>
         /// <param name="severity">Syslog severity to convert</param>
         /// <returns>SyslogSeverity which corresponds to the NLog level</returns>
         public static explicit operator int(SyslogSeverity severity)
@@ -56,7 +55,7 @@ namespace NLog.Targets
             return severity.value;
         }
 
-        /// <summary>Convert an NLog level to a syslog severity as they are not exactly one to one</summary>
+        /// <summary>Convert an NLog level to a Syslog severity as they are not exactly one to one</summary>
         /// <param name="logLevel">NLog log level to convert</param>
         /// <returns>SyslogSeverity which corresponds to the NLog level</returns>
         public static explicit operator SyslogSeverity(LogLevel logLevel)
@@ -82,8 +81,8 @@ namespace NLog.Targets
             throw new InvalidOperationException($"Unsupported log level {logLevel}");
         }
 
-        /// <summary>Convert a syslog severity to a string</summary>
-        /// <returns>The name of the syslog severity</returns>
+        /// <summary>Convert a Syslog severity to a string</summary>
+        /// <returns>The name of the Syslog severity</returns>
         public override string ToString()
         {
             return displayName;

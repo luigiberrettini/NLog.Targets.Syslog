@@ -27,7 +27,7 @@ namespace NLog.Targets
         /// <param name="pri">The Syslog PRI part</param>
         /// <param name="logEntry">The entry to be logged</param>
         /// <returns>Byte array containing the Syslog message</returns>
-        protected override byte[] BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
+        public override byte[] BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
         {
             var header = Header(logEvent);
             var msg = Msg(logEvent, logEntry);
@@ -37,9 +37,6 @@ namespace NLog.Targets
             return Encoding.ASCII.GetBytes(syslogMessage);
         }
 
-        /// <summary>Syslog HEADER part</summary>
-        /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <returns>String containing Syslog PRI part</returns>
         private string Header(LogEventInfo logEvent)
         {
             var timestamp = string.Format(CultureInfo.InvariantCulture, TimestampFormat, logEvent.TimeStamp);
@@ -48,10 +45,6 @@ namespace NLog.Targets
             return header;
         }
 
-        /// <summary>Syslog MSG part</summary>
-        /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <param name="logEntry">The entry to be logged</param>
-        /// <returns>String containing Syslog MSG part</returns>
         private string Msg(LogEventInfo logEvent, string logEntry)
         {
             var tag = Sender.Render(logEvent);

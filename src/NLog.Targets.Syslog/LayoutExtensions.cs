@@ -1,5 +1,5 @@
-﻿using System.Runtime.CompilerServices;
-using NLog.Layouts;
+﻿using NLog.Layouts;
+using System.Runtime.CompilerServices;
 
 // ReSharper disable CheckNamespace
 namespace NLog.Targets
@@ -14,17 +14,13 @@ namespace NLog.Targets
         /// <returns>String that contains at most <paramref name="maxLength" /> characters</returns>
         public static string Render(this Layout layout, LogEventInfo logEvent, int maxLength)
         {
-            return Left(layout.Render(logEvent), maxLength);
+            return layout.Render(logEvent).Left(maxLength);
         }
 
-        /// <summary>Gets at most the first <paramref name="maxLength"/> characters</summary>
-        /// <param name="value">Source string</param>
-        /// <param name="maxLength">Maximum number of characters</param>
-        /// <returns>String that contains at most <paramref name="maxLength" /> characters</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static string Left(string value, int maxLength)
+        private static string Left(this string str, int maxLength)
         {
-            return value.Length <= maxLength ? value : value.Substring(0, maxLength);
+            return str.Length <= maxLength ? str : str.Substring(0, maxLength);
         }
     }
 }

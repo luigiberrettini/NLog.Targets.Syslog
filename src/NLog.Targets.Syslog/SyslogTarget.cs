@@ -18,6 +18,7 @@
 
 using NLog.Common;
 using NLog.Layouts;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
@@ -36,6 +37,8 @@ namespace NLog.Targets
     [Target("Syslog")]
     public class SyslogTarget : TargetWithLayout
     {
+        private readonly MessageBuilder[] messageBuilders;
+
         /// <summary>The IP Address or Host name of your Syslog server</summary>
         public string SyslogServer { get; set; }
 
@@ -86,8 +89,6 @@ namespace NLog.Targets
             messageBuilders = new MessageBuilder[] {Rfc3164, Rfc5424};
         }
 
-        private readonly MessageBuilder[] messageBuilders;
-
         /// <summary>Writes a single event</summary>
         /// <param name="logEvent">The NLog.AsyncLogEventInfo</param>
         /// <remarks>Write(LogEventInfo) is called only by Write(AsyncLogEventInfo/AsyncLogEventInfo[]): no need to ovveride it</remarks>
@@ -104,8 +105,6 @@ namespace NLog.Targets
             SendMessages(logEvents);
         }
 
-        /// <summary>Sends array of events to Syslog server</summary>
-        /// <param name="logEvents">The array of NLog.AsyncLogEventInfo</param>
         private void SendMessages(params AsyncLogEventInfo[] logEvents)
         {
             var logServerIp = Dns.GetHostAddresses(SyslogServer).FirstOrDefault();
@@ -120,38 +119,48 @@ namespace NLog.Targets
             {
                 case ProtocolType.Udp:
                 {
-                    using (var udp = new UdpClient(ipAddress, Port))
-                    {
-                        syslogMessages.ForEach(messageData => udp.Send(messageData, messageData.Length));
-                    }
+                    UdpSend(ipAddress, syslogMessages);
                     break;
                 }
                 case ProtocolType.Tcp:
                 {
-                    using (var tcp = new TcpClient(ipAddress, Port))
-                    {
-                        // TcpClient disposes also the stream
-                        var stream = tcp.GetStream();
-
-                        if (Ssl)
-                        {
-                            // To avoid a double dispose leaveInnerStreamOpen is set to true
-                            using (var sslStream = new SslStream(stream, true))
-                            {
-                                sslStream.AuthenticateAsClient(SyslogServer);
-                                syslogMessages.ForEach(messageData => sslStream.Write(messageData, 0, messageData.Length));
-                            }
-                        }
-                        else
-                        {
-                            syslogMessages.ForEach(messageData => stream.Write(messageData, 0, messageData.Length));
-                        }
-                    }
+                    TcpSend(ipAddress, syslogMessages);
                     break;
                 }
                 default:
                 {
                     throw new NLogConfigurationException($"Protocol '{Protocol}' is not supported.");
+                }
+            }
+        }
+
+        private void UdpSend(string ipAddress, IEnumerable<byte[]> syslogMessages)
+        {
+            using (var udp = new UdpClient(ipAddress, Port))
+            {
+                syslogMessages.ForEach(messageData => udp.Send(messageData, messageData.Length));
+            }
+        }
+
+        private void TcpSend(string ipAddress, IEnumerable<byte[]> syslogMessages)
+        {
+            using (var tcp = new TcpClient(ipAddress, Port))
+            {
+                // TcpClient disposes also the stream
+                var stream = tcp.GetStream();
+
+                if (Ssl)
+                {
+                    // To avoid a double dispose leaveInnerStreamOpen is set to true
+                    using (var sslStream = new SslStream(stream, true))
+                    {
+                        sslStream.AuthenticateAsClient(SyslogServer);
+                        syslogMessages.ForEach(messageData => sslStream.Write(messageData, 0, messageData.Length));
+                    }
+                }
+                else
+                {
+                    syslogMessages.ForEach(messageData => stream.Write(messageData, 0, messageData.Length));
                 }
             }
         }
