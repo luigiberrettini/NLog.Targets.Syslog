@@ -15,13 +15,13 @@ namespace NLog.Targets
     [NLogConfigurationItem]
     public class Rfc5424 : MessageBuilder
     {
+        private const string NilValue = "-";
         private const string TimestampFormat = "{0:yyyy-MM-ddTHH:mm:ss.ffffffK}";
         private const int HostnameMaxLength = 255;
         private const int AppNameMaxLength = 48;
         private const int ProcIdMaxLength = 128;
         private const int MsgIdMaxLength = 32;
         private static readonly byte[] SpaceBytes = Encoding.ASCII.GetBytes(" ");
-        private const string NilValue = "-";
         private static readonly byte[] Bom = { 0xEF, 0xBB, 0xBF };
 
         /// <summary>The VERSION field of the HEADER part</summary>
@@ -40,8 +40,7 @@ namespace NLog.Targets
         public Layout MsgId { get; set; }
 
         /// <summary>The STRUCTURED-DATA part</summary>
-        [ArrayParameter(typeof(SdElement), nameof(SdElement))]
-        public IList<SdElement> StructuredData { get; set; }
+        public StructuredData StructuredData { get; set; }
 
         /// <summary>Initializes a new instance of the Rfc5424 class</summary>
         public Rfc5424()
@@ -51,7 +50,6 @@ namespace NLog.Targets
             AppName = Assembly.GetCallingAssembly().GetName().Name;
             ProcId = NilValue;
             MsgId = NilValue;
-            StructuredData = new List<SdElement>();
         }
 
         /// <summary>Builds the Syslog message according to the RFC</summary>
@@ -63,7 +61,7 @@ namespace NLog.Targets
         {
             return HeaderBytes(pri, logEvent)
                 .Concat(SpaceBytes)
-                .Concat(StructuredDataBytes(logEvent))
+                .Concat(StructuredData.Bytes(logEvent))
                 .Concat(SpaceBytes)
                 .Concat(MsgBytes(logEntry));
         }
@@ -78,13 +76,6 @@ namespace NLog.Targets
             var msgId = MsgId.RenderOrDefault(logEvent, MsgIdMaxLength);
             var header = $"{pri}{version} {timestamp} {hostname} {appName} {procId} {msgId}";
             return Encoding.ASCII.GetBytes(header);
-        }
-
-        private IEnumerable<byte> StructuredDataBytes(LogEventInfo logEvent)
-        {
-            return StructuredData.Count == 0 ?
-                Encoding.ASCII.GetBytes(NilValue) :
-                StructuredData.SelectMany(sdElement => sdElement.Bytes(logEvent));
         }
 
         private static IEnumerable<byte> MsgBytes(string logEntry)

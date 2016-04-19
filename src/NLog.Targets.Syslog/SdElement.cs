@@ -24,7 +24,7 @@ namespace NLog.Targets
         public IList<SdParam> SdParams { get; set; }
 
         /// <summary>Initializes a new instance of the SdElement class</summary>
-        public SdElement(Layout sender, Layout hostname)
+        public SdElement()
         {
             SdParams = new List<SdParam>();
         }
@@ -49,7 +49,7 @@ namespace NLog.Targets
 
         private IEnumerable<byte> SdParamsBytes(LogEventInfo logEvent)
         {
-            return SdParams.SelectMany(x => SpaceBytes.Concat(x.Bytes(logEvent)));
+            return SdParams.SelectMany(sdParam => SpaceBytes.Concat(sdParam.Bytes(logEvent)));
         }
     }
 }

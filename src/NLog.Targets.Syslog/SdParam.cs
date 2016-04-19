@@ -38,6 +38,7 @@ namespace NLog.Targets
             var paramName = Name.Render(logEvent);
             return Encoding.ASCII.GetBytes(paramName);
         }
+
         private IEnumerable<byte> ValueBytes(LogEventInfo logEvent)
         {
             var paramValue = Value.Render(logEvent);
