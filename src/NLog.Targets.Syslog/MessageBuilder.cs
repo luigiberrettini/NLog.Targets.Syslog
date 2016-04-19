@@ -33,7 +33,7 @@ namespace NLog.Targets
         {
             var pri = Pri(facility, (SyslogSeverity)logEvent.Level);
             var logEntries = LogEntries(logEvent, layout, splitNewlines).ToList();
-            var toBeSent = logEntries.Select(logEntry => BuildMessage(logEvent, pri, logEntry));
+            var toBeSent = logEntries.Select(logEntry => BuildMessage(logEvent, pri, logEntry).ToArray());
             return toBeSent;
         }
 
@@ -42,7 +42,7 @@ namespace NLog.Targets
         /// <param name="pri">The Syslog PRI part</param>
         /// <param name="logEntry">The entry to be logged</param>
         /// <returns>Byte array containing the Syslog message</returns>
-        public abstract byte[] BuildMessage(LogEventInfo logEvent, string pri, string logEntry);
+        public abstract IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry);
 
         private static string Pri(SyslogFacility facility, SyslogSeverity severity)
         {

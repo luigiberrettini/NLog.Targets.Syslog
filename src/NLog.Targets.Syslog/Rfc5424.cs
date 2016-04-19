@@ -3,6 +3,8 @@ using NLog.Layouts;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
+using System.Reflection;
 using System.Text;
 
 // ReSharper disable CheckNamespace
@@ -14,35 +16,39 @@ namespace NLog.Targets
     public class Rfc5424 : MessageBuilder
     {
         private const string TimestampFormat = "{0:yyyy-MM-ddTHH:mm:ss.ffffffK}";
-        private readonly byte[] spaceBytes = Encoding.ASCII.GetBytes(" ");
-        private const string NilValue = "-";
         private const int HostnameMaxLength = 255;
         private const int AppNameMaxLength = 48;
         private const int ProcIdMaxLength = 128;
         private const int MsgIdMaxLength = 32;
+        private static readonly byte[] SpaceBytes = Encoding.ASCII.GetBytes(" ");
+        private const string NilValue = "-";
         private static readonly byte[] Bom = { 0xEF, 0xBB, 0xBF };
-        private Layout Hostname { get; }
-        private Layout Sender { get; }
 
-        /// <summary>The VERSION field of the header</summary>
+        /// <summary>The VERSION field of the HEADER part</summary>
         public byte ProtocolVersion { get; set; }
 
-        /// <summary>The PROCID field of the header</summary>
+        /// <summary>The HOSTNAME field of the HEADER part</summary>
+        public Layout Hostname { get; set; }
+
+        /// <summary>The APPNAME field of the HEADER part</summary>
+        public Layout AppName { get; set; }
+
+        /// <summary>The PROCID field of the HEADER part</summary>
         public Layout ProcId { get; set; }
 
-        /// <summary>The MSGID field of the header</summary>
+        /// <summary>The MSGID field of the HEADER part</summary>
         public Layout MsgId { get; set; }
 
-        /// <summary>The STRUCTURED-DATA part of the message</summary>
+        /// <summary>The STRUCTURED-DATA part</summary>
         [ArrayParameter(typeof(SdElement), nameof(SdElement))]
         public IList<SdElement> StructuredData { get; set; }
 
         /// <summary>Initializes a new instance of the Rfc5424 class</summary>
-        public Rfc5424(Layout sender, Layout hostname)
+        public Rfc5424()
         {
-            Sender = sender;
-            Hostname = hostname;
             ProtocolVersion = 1;
+            Hostname = Dns.GetHostName();
+            AppName = Assembly.GetCallingAssembly().GetName().Name;
             ProcId = NilValue;
             MsgId = NilValue;
             StructuredData = new List<SdElement>();
@@ -53,40 +59,37 @@ namespace NLog.Targets
         /// <param name="pri">The Syslog PRI part</param>
         /// <param name="logEntry">The entry to be logged</param>
         /// <returns>Byte array containing the Syslog message</returns>
-        public override byte[] BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
+        public override IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
         {
-            var message = new List<byte>();
-            message.AddRange(HeaderBytes(pri, logEvent));
-            message.AddRange(spaceBytes);
-            message.AddRange(StructuredDataBytes(logEvent));
-            message.AddRange(spaceBytes);
-            message.AddRange(MsgBytes(logEntry));
-            return message.ToArray();
+            return HeaderBytes(pri, logEvent)
+                .Concat(SpaceBytes)
+                .Concat(StructuredDataBytes(logEvent))
+                .Concat(SpaceBytes)
+                .Concat(MsgBytes(logEntry));
         }
 
         private IEnumerable<byte> HeaderBytes(string pri, LogEventInfo logEvent)
         {
             var version = ProtocolVersion.ToString(CultureInfo.InvariantCulture);
             var timestamp = string.Format(CultureInfo.InvariantCulture, TimestampFormat, logEvent.TimeStamp);
-            var hostname = Hostname.Render(logEvent, HostnameMaxLength, NilValue);
-            var appName = Sender.Render(logEvent, AppNameMaxLength, NilValue);
-            var procId = ProcId.Render(logEvent, ProcIdMaxLength, NilValue);
-            var msgId = MsgId.Render(logEvent, MsgIdMaxLength, NilValue);
+            var hostname = Hostname.RenderOrDefault(logEvent, HostnameMaxLength);
+            var appName = AppName.RenderOrDefault(logEvent, AppNameMaxLength);
+            var procId = ProcId.RenderOrDefault(logEvent, ProcIdMaxLength);
+            var msgId = MsgId.RenderOrDefault(logEvent, MsgIdMaxLength);
             var header = $"{pri}{version} {timestamp} {hostname} {appName} {procId} {msgId}";
             return Encoding.ASCII.GetBytes(header);
         }
 
         private IEnumerable<byte> StructuredDataBytes(LogEventInfo logEvent)
         {
-            return StructuredData.Count == 0 ? Encoding.ASCII.GetBytes(NilValue) : StructuredData.SelectMany(sdElement => sdElement.Bytes(logEvent));
+            return StructuredData.Count == 0 ?
+                Encoding.ASCII.GetBytes(NilValue) :
+                StructuredData.SelectMany(sdElement => sdElement.Bytes(logEvent));
         }
 
         private static IEnumerable<byte> MsgBytes(string logEntry)
         {
-            var msgBytes = new List<byte>();
-            msgBytes.AddRange(Bom);
-            msgBytes.AddRange(Encoding.UTF8.GetBytes(logEntry));
-            return msgBytes;
+            return Bom.Concat(Encoding.UTF8.GetBytes(logEntry));
         }
     }
 }

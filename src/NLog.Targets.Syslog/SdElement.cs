@@ -1,6 +1,7 @@
 using NLog.Config;
 using NLog.Layouts;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 // ReSharper disable CheckNamespace
@@ -11,14 +12,14 @@ namespace NLog.Targets
     [NLogConfigurationItem]
     public class SdElement
     {
-        private readonly byte[] leftBracketBytes = Encoding.ASCII.GetBytes("[");
-        private readonly byte[] spaceBytes = Encoding.ASCII.GetBytes(" ");
-        private readonly byte[] rightBracketBytes = Encoding.ASCII.GetBytes("]");
+        private static readonly byte[] LeftBracketBytes = Encoding.ASCII.GetBytes("[");
+        private static readonly byte[] SpaceBytes = Encoding.ASCII.GetBytes(" ");
+        private static readonly byte[] RightBracketBytes = Encoding.ASCII.GetBytes("]");
 
-        /// <summary>The SD-ID field of an SD-ELEMENT field in the STRUCTURED-DATA part of the message</summary>
+        /// <summary>The SD-ID field of an SD-ELEMENT field in the STRUCTURED-DATA part</summary>
         public Layout SdId { get; set; }
 
-        /// <summary>The SD-PARAM fields belonging to an SD-ELEMENT field in the STRUCTURED-DATA part of the message</summary>
+        /// <summary>The SD-PARAM fields belonging to an SD-ELEMENT field in the STRUCTURED-DATA part</summary>
         [ArrayParameter(typeof(SdParam), nameof(SdParam))]
         public IList<SdParam> SdParams { get; set; }
 
@@ -33,12 +34,11 @@ namespace NLog.Targets
         /// <returns>Byte array containing this SD-ELEMENT field</returns>
         public IEnumerable<byte> Bytes(LogEventInfo logEvent)
         {
-            var sdElementBytes = new List<byte>();
-            sdElementBytes.AddRange(leftBracketBytes);
-            sdElementBytes.AddRange(SdIdBytes(logEvent));
-            sdElementBytes.AddRange(SdParamsBytes(logEvent));
-            sdElementBytes.AddRange(rightBracketBytes);
-            return sdElementBytes.ToArray();
+            return LeftBracketBytes
+                .Concat(LeftBracketBytes)
+                .Concat(SdIdBytes(logEvent))
+                .Concat(SdParamsBytes(logEvent))
+                .Concat(RightBracketBytes);
         }
 
         private IEnumerable<byte> SdIdBytes(LogEventInfo logEvent)
@@ -49,37 +49,7 @@ namespace NLog.Targets
 
         private IEnumerable<byte> SdParamsBytes(LogEventInfo logEvent)
         {
-            var sdParamsBytes = new List<byte>();
-            SdParams.ForEach(sdParam =>
-            {
-                sdParamsBytes.AddRange(spaceBytes);
-                sdParamsBytes.AddRange(sdParam.Bytes(logEvent));
-            });
-            return sdParamsBytes.ToArray();
+            return SdParams.SelectMany(x => SpaceBytes.Concat(x.Bytes(logEvent)));
         }
     }
-
-    /*
-        SDELEMENT = [ SDID (one or more SPACE PARAMNAME = " PARAMVALUE ") ]
-            SDID
-                At most 32 SAFEPRINTUSASCII specifying a unique identifier within STRUCTUREDDATA
-                The identifier can be a CUSTOMID or IANAID:
-                    CUSTOMID = NAME @ PEN
-                        NAME
-                            SAFEPRINTUSASCII except @
-                        PEN
-                            A private enterprise number
-                            Digits or digits separated by periods
-                    IANAID = TIMEQUALITY or ORIGIN or META
-                        TIMEQUALITY
-                            Parameters are tzKnown, isSynced, syncAccuracy
-                        ORIGIN
-                            Parameters are ip, enterpriseId, software, swVersion
-                        META
-                            Parameters are sequenceId, sysUpTime, language
-            PARAMNAME
-                1 to 32 SAFEPRINTUSASCII
-            PARAMVALUE
-                UTF8 STRING with ", \ and ] escaped as \", \\ and \]
-    */
 }

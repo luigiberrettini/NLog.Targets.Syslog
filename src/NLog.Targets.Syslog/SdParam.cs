@@ -1,6 +1,7 @@
 using NLog.Config;
 using NLog.Layouts;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 // ReSharper disable CheckNamespace
@@ -11,8 +12,8 @@ namespace NLog.Targets
     [NLogConfigurationItem]
     public class SdParam
     {
-        private readonly byte[] equalBytes = Encoding.ASCII.GetBytes("=");
-        private readonly byte[] quotesBytes = Encoding.ASCII.GetBytes("\"");
+        private static readonly byte[] EqualBytes = Encoding.ASCII.GetBytes("=");
+        private static readonly byte[] QuotesBytes = Encoding.ASCII.GetBytes("\"");
 
         /// <summary>The PARAM-NAME field of this SD-PARAM</summary>
         public Layout Name { get; set; }
@@ -25,13 +26,11 @@ namespace NLog.Targets
         /// <returns>Byte array containing this SD-PARAM field</returns>
         public IEnumerable<byte> Bytes(LogEventInfo logEvent)
         {
-            var sdParamBytes = new List<byte>();
-            sdParamBytes.AddRange(NameBytes(logEvent));
-            sdParamBytes.AddRange(equalBytes);
-            sdParamBytes.AddRange(quotesBytes);
-            sdParamBytes.AddRange(ValueBytes(logEvent));
-            sdParamBytes.AddRange(quotesBytes);
-            return sdParamBytes.ToArray();
+            return NameBytes(logEvent)
+                .Concat(EqualBytes)
+                .Concat(QuotesBytes)
+                .Concat(ValueBytes(logEvent))
+                .Concat(QuotesBytes);
         }
 
         private IEnumerable<byte> NameBytes(LogEventInfo logEvent)

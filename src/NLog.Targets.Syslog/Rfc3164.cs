@@ -1,7 +1,10 @@
 ﻿using NLog.Config;
 using NLog.Layouts;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Net;
+using System.Reflection;
 using System.Text;
 
 // ReSharper disable CheckNamespace
@@ -13,14 +16,18 @@ namespace NLog.Targets
     public class Rfc3164 : MessageBuilder
     {
         private const string TimestampFormat = "{0:MMM} {0,11:d HH:mm:ss}";
-        private Layout MachineName { get; }
-        private Layout Sender { get; }
+
+        /// <summary>The HOSTNAME field of the HEADER part</summary>
+        public Layout Hostname { get; set; }
+
+        /// <summary>The TAG field of the MSG part</summary>
+        private Layout Tag { get; }
 
         /// <summary>Initializes a new instance of the Rfc3164 class</summary>
-        public Rfc3164(Layout sender, Layout machineName)
+        public Rfc3164()
         {
-            Sender = sender;
-            MachineName = machineName;
+            Hostname = Dns.GetHostName();
+            Tag = Assembly.GetCallingAssembly().GetName().Name;
         }
 
         /// <summary>Builds the Syslog message according to RFC 3164</summary>
@@ -28,7 +35,7 @@ namespace NLog.Targets
         /// <param name="pri">The Syslog PRI part</param>
         /// <param name="logEntry">The entry to be logged</param>
         /// <returns>Byte array containing the Syslog message</returns>
-        public override byte[] BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
+        public override IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
         {
             var header = Header(logEvent);
             var msg = Msg(logEvent, logEntry);
@@ -41,14 +48,14 @@ namespace NLog.Targets
         private string Header(LogEventInfo logEvent)
         {
             var timestamp = string.Format(CultureInfo.InvariantCulture, TimestampFormat, logEvent.TimeStamp);
-            var hostname = MachineName.Render(logEvent);
+            var hostname = Hostname.Render(logEvent);
             var header = $"{timestamp} {hostname}";
             return header;
         }
 
         private string Msg(LogEventInfo logEvent, string logEntry)
         {
-            var tag = Sender.Render(logEvent);
+            var tag = Tag.Render(logEvent);
             var content = Char.IsLetterOrDigit(logEntry[0]) ? " {logEntry}" : logEntry;
             var msg = $"{tag}{content}";
             return msg;

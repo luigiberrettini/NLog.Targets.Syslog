@@ -17,14 +17,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 using NLog.Common;
-using NLog.Layouts;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
-using System.Reflection;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable MemberCanBePrivate.Global
@@ -45,12 +43,6 @@ namespace NLog.Targets
 
         /// <summary>The port number Syslog is running on (usually 514)</summary>
         public int Port { get; set; }
-
-        /// <summary>The name of the application that will show up in the Syslog log</summary>
-        public Layout Sender { get; set; }
-
-        /// <summary>The name of the machine to log from</summary>
-        public Layout MachineName { get; set; }
 
         /// <summary>The Syslog facility name to log from (e.g. local0 or local7)</summary>
         public SyslogFacility Facility { get; set; }
@@ -78,15 +70,13 @@ namespace NLog.Targets
         {
             SyslogServer = "127.0.0.1";
             Port = 514;
-            Sender = Assembly.GetCallingAssembly().GetName().Name;
-            MachineName = Dns.GetHostName();
             Facility = SyslogFacility.Local1;
             Protocol = ProtocolType.Udp;
             Ssl = false;
             SplitNewlines = true;
             Rfc = RfcNumber.Rfc3164;
-            Rfc3164 = new Rfc3164(Sender, MachineName);
-            Rfc5424 = new Rfc5424(Sender, MachineName);
+            Rfc3164 = new Rfc3164();
+            Rfc5424 = new Rfc5424();
             messageBuilders = new MessageBuilder[] {Rfc3164, Rfc5424};
         }
 
