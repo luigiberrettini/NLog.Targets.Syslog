@@ -11,7 +11,7 @@ namespace TestApp
             InitializeComponent();
         }
 
-        private void ButtonLog_Click(object sender, EventArgs e)
+        private void ButtonLogClick(object sender, EventArgs e)
         {
             var btn = (Button)sender;
             switch (btn.Name)
