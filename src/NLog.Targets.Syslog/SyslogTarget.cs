@@ -74,7 +74,7 @@ namespace NLog.Targets
             Protocol = ProtocolType.Udp;
             Ssl = false;
             SplitNewlines = true;
-            Rfc = RfcNumber.Rfc3164;
+            Rfc = RfcNumber.Rfc5424;
             Rfc3164 = new Rfc3164();
             Rfc5424 = new Rfc5424();
             messageBuilders = new MessageBuilder[] {Rfc3164, Rfc5424};
