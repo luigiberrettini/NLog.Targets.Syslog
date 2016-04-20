@@ -1,4 +1,6 @@
-﻿using System;
+﻿using NLog;
+using NLog.Common;
+using System;
 using System.Windows.Forms;
 
 namespace TestApp
@@ -6,8 +8,11 @@ namespace TestApp
     public partial class Form1 : Form
     {
         private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+
         public Form1()
         {
+            InternalLogger.LogLevel = LogLevel.Trace;
+            InternalLogger.LogToTrace = true;
             InitializeComponent();
         }
 
