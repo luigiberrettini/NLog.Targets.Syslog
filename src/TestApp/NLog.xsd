@@ -2179,12 +2179,6 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-
-
-
-
-
-
   <xs:complexType name="Syslog">
     <xs:complexContent>
       <xs:extension base="Target">
@@ -2206,7 +2200,8 @@
                   <xs:attribute name="tag" type="xs:string" />
                 </xs:extension>
               </xs:simpleContent>
-            </xs:complexType>          </xs:element>
+            </xs:complexType>
+          </xs:element>
           <xs:element name="rfc5424" minOccurs="0" maxOccurs="1">
             <xs:complexType>
               <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2259,12 +2254,6 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-
-
-
-
-
-
   <xs:complexType name="WebService">
     <xs:complexContent>
       <xs:extension base="Target">
