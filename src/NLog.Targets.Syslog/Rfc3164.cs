@@ -21,7 +21,7 @@ namespace NLog.Targets
         public Layout Hostname { get; set; }
 
         /// <summary>The TAG field of the MSG part</summary>
-        public Layout Tag { get; }
+        public Layout Tag { get; set; }
 
         /// <summary>Initializes a new instance of the Rfc3164 class</summary>
         public Rfc3164()
