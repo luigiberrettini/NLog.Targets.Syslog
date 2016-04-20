@@ -7,7 +7,7 @@ namespace TestApp
 {
     public partial class Form1 : Form
     {
-        private static readonly NLog.Logger Logger = NLog.LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         public Form1()
         {
