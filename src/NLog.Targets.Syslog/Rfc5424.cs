@@ -50,6 +50,7 @@ namespace NLog.Targets
             AppName = Assembly.GetCallingAssembly().GetName().Name;
             ProcId = NilValue;
             MsgId = NilValue;
+            StructuredData = new StructuredData();
         }
 
         /// <summary>Builds the Syslog message according to the RFC</summary>
