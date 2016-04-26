@@ -11,7 +11,7 @@ using System.Text;
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
 {
-    /// <summary>Allows to build Syslog messages comliant with RFC 3164</summary>
+    /// <summary>Allows to build Syslog messages compliant with RFC 3164</summary>
     [NLogConfigurationItem]
     public class Rfc3164 : MessageBuilder
     {
