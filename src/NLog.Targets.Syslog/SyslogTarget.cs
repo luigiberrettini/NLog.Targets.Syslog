@@ -149,6 +149,7 @@ namespace NLog.Targets
             if (!Ssl)
                 return tcpStream;
 
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             var sslStream = new SslStream(tcpStream, true);
             sslStream.AuthenticateAsClient(SyslogServer);
             return sslStream;
