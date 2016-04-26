@@ -53,6 +53,7 @@
     <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="MessageBuilder.cs" />
     <Compile Include="LayoutExtensions.cs" />
+    <Compile Include="MessageBuilderFacade.cs" />
     <Compile Include="Rfc3164.cs" />
     <Compile Include="Rfc5424.cs" />
     <Compile Include="SdElement.cs" />

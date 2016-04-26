@@ -25,9 +25,9 @@ using System.Net.Security;
 using System.Net.Sockets;
 
 // ReSharper disable UnusedMember.Global
-// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+// ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable CheckNamespace
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
@@ -36,8 +36,6 @@ namespace NLog.Targets
     [Target("Syslog")]
     public class SyslogTarget : TargetWithLayout
     {
-        private readonly MessageBuilder[] messageBuilders;
-
         /// <summary>The IP Address or Host name of your Syslog server</summary>
         public string SyslogServer { get; set; }
 
@@ -56,14 +54,7 @@ namespace NLog.Targets
         /// <summary>Whether or not to split each log entry by newlines and send each line separately</summary>
         public bool SplitNewlines { get; set; }
 
-        /// <summary>The Syslog protocol RFC to be followed</summary> 
-        public RfcNumber Rfc { get; set; }
-
-        /// <summary>RFC 3164 related fields</summary> 
-        public Rfc3164 Rfc3164 { get; set; }
-
-        /// <summary>RFC 5424 related fields</summary> 
-        public Rfc5424 Rfc5424 { get; set; }
+        public MessageBuilderFacade MessageBuilder { get; set; }
 
         /// <summary>Initializes a new instance of the SyslogTarget class</summary>
         public SyslogTarget()
@@ -74,10 +65,7 @@ namespace NLog.Targets
             Protocol = ProtocolType.Udp;
             Ssl = false;
             SplitNewlines = true;
-            Rfc = RfcNumber.Rfc5424;
-            Rfc3164 = new Rfc3164();
-            Rfc5424 = new Rfc5424();
-            messageBuilders = new MessageBuilder[] {Rfc3164, Rfc5424};
+            MessageBuilder = new MessageBuilderFacade();
         }
 
         /// <summary>Writes a single event</summary>
@@ -103,8 +91,7 @@ namespace NLog.Targets
                 return;
             var ipAddress = logServerIp.ToString();
 
-            var rfcToFollow = messageBuilders.Single(x => (RfcNumber)x == Rfc);
-            var syslogMessages = logEvents.SelectMany(asyncLogEvent => rfcToFollow.BuildMessages(Facility, asyncLogEvent.LogEvent, Layout, SplitNewlines));
+            var syslogMessages = logEvents.SelectMany(asyncLogEvent => MessageBuilder.BuildMessages(Facility, asyncLogEvent.LogEvent, Layout, SplitNewlines));
 
             switch (Protocol)
             {
