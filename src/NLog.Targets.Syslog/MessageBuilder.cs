@@ -1,12 +1,10 @@
-// ReSharper disable CheckNamespace
-
-
 using NLog.Layouts;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
+// ReSharper disable CheckNamespace
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
 {

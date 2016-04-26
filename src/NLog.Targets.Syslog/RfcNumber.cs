@@ -1,4 +1,5 @@
-﻿// ReSharper disable CheckNamespace
+﻿// ReSharper disable UnusedMember.Global
+// ReSharper disable CheckNamespace
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
 {

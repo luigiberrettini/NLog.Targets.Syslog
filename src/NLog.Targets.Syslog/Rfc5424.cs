@@ -7,6 +7,8 @@ using System.Net;
 using System.Reflection;
 using System.Text;
 
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+// ReSharper disable MemberCanBePrivate.Global
 // ReSharper disable CheckNamespace
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
