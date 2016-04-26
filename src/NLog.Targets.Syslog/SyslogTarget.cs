@@ -44,14 +44,14 @@ namespace NLog.Targets
         /// <summary>The port number Syslog is running on (usually 514)</summary>
         public int Port { get; set; }
 
-        /// <summary>The Syslog facility name to log from (e.g. local0 or local7)</summary>
-        public SyslogFacility Facility { get; set; }
-
         /// <summary>The Syslog server protocol (TCP/UDP)</summary>
         public ProtocolType Protocol { get; set; }
 
         /// <summary>Whether to use SSL or not (TCP only)</summary>
         public bool Ssl { get; set; }
+
+        /// <summary>The Syslog facility name to log from (e.g. local0 or local7)</summary>
+        public SyslogFacility Facility { get; set; }
 
         /// <summary>Whether or not to split each log entry by newlines and send each line separately</summary>
         public bool SplitNewlines { get; set; }
