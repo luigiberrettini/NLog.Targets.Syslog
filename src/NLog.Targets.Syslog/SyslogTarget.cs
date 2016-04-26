@@ -54,7 +54,7 @@ namespace NLog.Targets
         /// <summary>Whether or not to split each log entry by newlines and send each line separately</summary>
         public bool SplitNewlines { get; set; }
 
-        public MessageBuilderFacade MessageBuilder { get; set; }
+        public MessageBuildersFacade MessageBuilder { get; set; }
 
         /// <summary>Initializes a new instance of the SyslogTarget class</summary>
         public SyslogTarget()
@@ -65,7 +65,7 @@ namespace NLog.Targets
             Protocol = ProtocolType.Udp;
             Ssl = false;
             SplitNewlines = true;
-            MessageBuilder = new MessageBuilderFacade();
+            MessageBuilder = new MessageBuildersFacade();
         }
 
         /// <summary>Writes a single event</summary>

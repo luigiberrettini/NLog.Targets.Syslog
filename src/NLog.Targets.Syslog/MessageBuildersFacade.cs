@@ -8,11 +8,10 @@ using System.Linq;
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
 {
-    public class MessageBuilderFacade : MessageBuilder
+    public class MessageBuildersFacade : MessageBuilder
     {
         private readonly MessageBuilder[] messageBuilders;
-
-        private MessageBuilder RfcToFollow { get; set; }
+        private MessageBuilder rfcToFollow;
 
         /// <summary>The Syslog protocol RFC to be followed</summary> 
         public RfcNumber Rfc { get; set; }
@@ -23,7 +22,7 @@ namespace NLog.Targets
         /// <summary>RFC 5424 related fields</summary> 
         public Rfc5424 Rfc5424 { get; set; }
 
-        public MessageBuilderFacade()
+        public MessageBuildersFacade()
         {
             Rfc = RfcNumber.Rfc5424;
             Rfc3164 = new Rfc3164();
@@ -33,13 +32,13 @@ namespace NLog.Targets
 
         public new IEnumerable<byte[]> BuildMessages(SyslogFacility facility, LogEventInfo logEvent, Layout layout, bool splitNewlines)
         {
-            RfcToFollow = messageBuilders.Single(x => (RfcNumber)x == Rfc);
-            return RfcToFollow.BuildMessages(facility, logEvent, layout, splitNewlines);
+            rfcToFollow = messageBuilders.Single(x => (RfcNumber)x == Rfc);
+            return base.BuildMessages(facility, logEvent, layout, splitNewlines);
         }
 
         public override IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
         {
-            return RfcToFollow.BuildMessage(logEvent, pri, logEntry);
+            return rfcToFollow.BuildMessage(logEvent, pri, logEntry);
         }
     }
 }
