@@ -92,7 +92,8 @@ See more about NLog at: [http://nlog-project.org](http://nlog-project.org)
       config.ssh.username = "vagrant"
       config.ssh.password = "vagrant"
       config.vm.network :forwarded_port, id: 'ssh', guest: 22, host: 2222, auto_correct: false
-      config.vm.network :forwarded_port, guest: 514, host: 1514, auto_correct: false
+      config.vm.network :forwarded_port, guest: 514, host: 1514, protocol: "tcp", auto_correct: false
+      config.vm.network :forwarded_port, guest: 514, host: 1514, protocol: "udp", auto_correct: false
     end
     ```
  5. `[HOST]` Add the box to the list
