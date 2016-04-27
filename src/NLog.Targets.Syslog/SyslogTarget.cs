@@ -18,11 +18,7 @@
 
 using NLog.Common;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Security;
-using System.Net.Sockets;
 
 // ReSharper disable UnusedMember.Global
 // ReSharper disable UnusedAutoPropertyAccessor.Global
@@ -36,35 +32,24 @@ namespace NLog.Targets
     [Target("Syslog")]
     public class SyslogTarget : TargetWithLayout
     {
-        /// <summary>The IP Address or Host name of your Syslog server</summary>
-        public string SyslogServer { get; set; }
-
-        /// <summary>The port number Syslog is running on (usually 514)</summary>
-        public int Port { get; set; }
-
-        /// <summary>The Syslog server protocol (TCP/UDP)</summary>
-        public ProtocolType Protocol { get; set; }
-
-        /// <summary>Whether to use SSL or not (TCP only)</summary>
-        public bool Ssl { get; set; }
-
-        /// <summary>The Syslog facility name to log from (e.g. local0 or local7)</summary>
-        public SyslogFacility Facility { get; set; }
+        /// <summary>The transmitter used to send messages to the Syslog server</summary>
+        public MessageTransmittersFacade MessageTransmitter { get; set; }
 
         /// <summary>Whether or not to split each log entry by newlines and send each line separately</summary>
         public bool SplitNewlines { get; set; }
 
+        /// <summary>The Syslog facility to log from (its name e.g. local0 or local7)</summary>
+        public SyslogFacility Facility { get; set; }
+
+        /// <summary>The builder used to create messages according to RFCs</summary>
         public MessageBuildersFacade MessageBuilder { get; set; }
 
         /// <summary>Initializes a new instance of the SyslogTarget class</summary>
         public SyslogTarget()
         {
-            SyslogServer = "127.0.0.1";
-            Port = 514;
-            Facility = SyslogFacility.Local1;
-            Protocol = ProtocolType.Udp;
-            Ssl = false;
+            MessageTransmitter = new MessageTransmittersFacade();
             SplitNewlines = true;
+            Facility = SyslogFacility.Local1;
             MessageBuilder = new MessageBuildersFacade();
         }
 
@@ -84,62 +69,16 @@ namespace NLog.Targets
             SendMessages(logEvents);
         }
 
-        private void SendMessages(params AsyncLogEventInfo[] logEvents)
+        private void SendMessages(params AsyncLogEventInfo[] asyncLogEvents)
         {
-            var logServerIp = Dns.GetHostAddresses(SyslogServer).FirstOrDefault();
-            if (logServerIp == null)
-                return;
-            var ipAddress = logServerIp.ToString();
-
-            var syslogMessages = logEvents.SelectMany(asyncLogEvent => MessageBuilder.BuildMessages(Facility, asyncLogEvent.LogEvent, Layout, SplitNewlines));
-
-            switch (Protocol)
-            {
-                case ProtocolType.Udp:
-                {
-                    UdpSend(ipAddress, syslogMessages);
-                    break;
-                }
-                case ProtocolType.Tcp:
-                {
-                    TcpSend(ipAddress, syslogMessages);
-                    break;
-                }
-                default:
-                {
-                    throw new NLogConfigurationException($"Protocol '{Protocol}' is not supported.");
-                }
-            }
+            MessageTransmitter.SendMessages(asyncLogEvents.SelectMany(ToMessages));
         }
 
-        private void UdpSend(string ipAddress, IEnumerable<byte[]> syslogMessages)
+        private IEnumerable<byte[]> ToMessages(AsyncLogEventInfo asyncLogEvent)
         {
-            using (var udp = new UdpClient(ipAddress, Port))
-            {
-                syslogMessages.ForEach(messageData => udp.Send(messageData, messageData.Length));
-            }
-        }
-
-        private void TcpSend(string ipAddress, IEnumerable<byte[]> syslogMessages)
-        {
-            using (var tcp = new TcpClient(ipAddress, Port))
-            using (var stream = SslDecorate(tcp))
-            {
-                syslogMessages.ForEach(messageData => stream.Write(messageData, 0, messageData.Length));
-            }
-        }
-
-        private Stream SslDecorate(TcpClient tcp)
-        {
-            var tcpStream = tcp.GetStream();
-
-            if (!Ssl)
-                return tcpStream;
-
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            var sslStream = new SslStream(tcpStream, true);
-            sslStream.AuthenticateAsClient(SyslogServer);
-            return sslStream;
+            return MessageBuilder
+                .BuildMessages(Facility, asyncLogEvent.LogEvent, Layout, SplitNewlines)
+                .Select(message => MessageTransmitter.FrameMessageOrLeaveItUnchanged(message).ToArray());
         }
     }
 }
