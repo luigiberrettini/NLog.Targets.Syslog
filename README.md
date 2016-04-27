@@ -1,6 +1,8 @@
-Syslog Target for NLog
+Syslog target for NLog
 ======================
-**NLog Syslog** is a custom target for [NLog](http://nlog-project.org/) version 4.2.2 allowing you to send logging messages to a UNIX-style Syslog server.
+**NLog Syslog** is a custom target for **NLog**: [http://nlog-project.org](http://nlog-project.org/).
+
+It can be used with version 4.3.2 and later of NLog and allows to send logging messages to a UNIX-style Syslog server.
 
 
 
@@ -10,20 +12,35 @@ Then use as you would any NLog target.
 Below is a sample NLog.config file:
 
 ```xml
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-
   <extensions>
     <add assembly="NLog.Targets.Syslog" />
   </extensions>
-
+  <variable name="enterpriseId" value="12345"/>
+  <variable name="sequenceId" value="1"/>
   <targets>
-    <target name="syslog" type="Syslog" syslogserver="127.0.0.1" port="514" facility="Local7" sender="MyProgram" layout="[CustomPrefix] ${machinename} ${message}" />
+    <target type="Syslog" name="cee-udp">
+      <splitNewlines>false</splitNewlines>
+      <facility>Local4</facility>
+      <layout type="SimpleLayout" text="@cee: {&quot;message&quot;: &quot;${message}&quot;}" />
+      <messageBuilder>
+        <rfc>Rfc5424</rfc>
+        <rfc5424>
+          <protocolVersion>1</protocolVersion>
+          <hostname type="SimpleLayout" text="${machinename}" />
+          <appName type="SimpleLayout" text="DAEMON.MyAppName" />
+          <procId type="SimpleLayout" text="${processid}" />
+          <msgId type="SimpleLayout" text="${threadid}" />
+          <disableBom>true</disableBom>
+        </rfc5424>
+      </messageBuilder>
+    </target>
   </targets>
-
   <rules>
-    <logger name="*" minLevel="Trace" appendTo="syslog"/>
+    <logger name="*" minlevel="Trace" maxlevel="Trace" writeTo="file-tgt" />
+    <logger name="*" minlevel="Debug" writeTo="cee-udp" />
   </rules>
 </nlog>
 ```
@@ -33,46 +50,39 @@ The package is also available through NuGet. Simply search for "NLog.Targets.Sys
 ### Options
 This NLog target provides default values for all configuration options.
 Optionally, your configuration can override them using attributes on `target`, as shown in the example configuration above.
+A more detailed example is included as the [TestApp configuration](./src/TestApp/NLog.config).
 
-#### Destination
-* `syslogserver`: IP or hostname (default: `127.0.0.1`)
-* `port`: Port of Syslog listener (default: `514`)
-* `protocol`: `udp` or `tcp` (default: `udp`)
-* `ssl`: `false` or `true`; TCP only (default: `false`)
-* `rfc`: Rfc compatibility for Syslog message `Rfc3164` or `Rfc5424` (default: `Rfc3164`)
+#### Message transmitter element
+* `protocol` - `udp` or `tcp` (default: `udp`)
+* `udpProtocol` - settings related to UDP:
+  * `server` - IP or hostname of the Syslog server (default: `127.0.0.1`)
+  * `port` - port the Syslog server is listening on (default: `514`)
+* `tcpProtocol` - settings related to TCP:
+  * `server` - IP or hostname of the Syslog server (default: `127.0.0.1`)
+  * `port` - port the Syslog server is listening on (default: `514`)
+  * `useTls` - `false` or `true` (default: `true`)
+  * `framing` - `nonTransparent` or `octectCounting` (default: `octectCounting`)
 
-#### Syslog packet elements
-The following Syslog elements can be overridden for RFC 3164:
+#### Message builder element
+* `rfc` - `rfc3164` or `rfc5424` (default: `rfc5424`)
+* `rfc3164` - settings related to RFC 3164:
+  * `hostname` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the HOSTNAME part (default: the hostname of the computer that is creating the message)
+  * `tag` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the TAG part (default: the name of the assembly that is creating the message)
+* `rfc5424` - settings related to RFC 5424:
+  * `protocolVersion` - the VERSION field of the HEADER part (default: `1`)
+  * `hostname` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the HOSTNAME field of the HEADER part (default: the hostname of the computer that is creating the message)
+  * `appName` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the APPNAME field of the HEADER part (default: the name of the assembly that is creating the message)
+  * `procId` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the PROCID field of the HEADER part (default: `-`)
+  * `msgId` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the MSGID field of the HEADER part (default: `-`)
+  * `structuredData` - the STRUCTUREDDATA part containing the SD-ELEMENTs each composed by an SD-ID ([Layout](http://github.com/NLog/NLog/wiki/Layouts))
+                       and optional SD-PARAM fields, i.e. the PARAM-NAME ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) and
+                       PARAM-VALUE ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) fields (default: `-`)
+  * `disableBom` - `true` or `false` to handle RSyslog [issue 284](http://github.com/rsyslog/rsyslog/issues/284) (default: `false`)
 
-* `machinename` ([Layout](https://github.com/NLog/NLog/wiki/Layouts)): name of sending system or entity (default: machine 
-  [hostname](http://msdn.microsoft.com/en-us/library/system.net.dns.gethostname(v=vs.110).aspx)).
-For example, ${machinename}
-* `sender` ([Layout](https://github.com/NLog/NLog/wiki/Layouts)): name of sending component or application (default: 
-  [calling method](http://msdn.microsoft.com/en-us/library/system.reflection.assembly.getcallingassembly(v=vs.110).aspx)).
-For example, ${logger}
+#### Other elements
+* `splitNewLines` - `false` or `true` (default: `true`)
 * `facility`: facility name (default: `Local1`)
-
-For example, to make logs from multiple systems use the same device identifier (rather than each system's hostname), one could set `machinename` to `app-cloud`.
-The logs from different systems would all appear to be from the same single entity called `app-cloud`.
-
-The following additional Syslog elements can be overridden for [RFC 5424](http://tools.ietf.org/html/rfc5424):
-
-* `procid` ([Layout](https://github.com/NLog/NLog/wiki/Layouts)): [identifier](http://tools.ietf.org/html/rfc5424#section-6.2.6) (numeric or alphanumeric) of sending entity 
-(default: -). For example, ${processid} or ${processname}
-* `msgid` ([Layout](https://github.com/NLog/NLog/wiki/Layouts)): [message type identifier](http://tools.ietf.org/html/rfc5424#section-6.2.7) (numeric or alphanumeric) of sending entity 
-(default: -). For example, ${callsite}
-* `structureddata` ([Layout](https://github.com/NLog/NLog/wiki/Layouts)): [additional data](http://tools.ietf.org/html/rfc5424#section-6.3) of sending entity (default: -).
-For example, [thread@12345 id="${threadid}" name="${threadname}"][mydata2@12345 num="1" code="mycode"]
-
-#### Log message body
-This target supports the standard NLog 
-[layout](https://github.com/NLog/NLog/wiki/Layouts) directive to modify
-the log message body. The Syslog packet elements are not affected.
-
-
-
-## NLog
-See more about NLog at: [http://nlog-project.org](http://nlog-project.org)
+* `layout`: the standard NLog [layout](https://github.com/NLog/NLog/wiki/Layouts) directive to modify the log message body (Syslog packet elements are not affected)
 
 
 
@@ -105,7 +115,7 @@ See more about NLog at: [http://nlog-project.org](http://nlog-project.org)
     ```shell
     vagrant up
     ```
- 7. `[HOST]` Connect to the VM with SSH
+ 7. `[HOST]` Connect to the VM with SSH on port 2222
  8. `[GUEST]` Switch to the root user
     ```shell
     su
@@ -154,9 +164,13 @@ See more about NLog at: [http://nlog-project.org](http://nlog-project.org)
     ```shell
     tail -f /var/log/syslog
     ```
+    OR
+    ```shell
+    tcpdump port 514 -vv
+    ```
 18. `[HOST]` Perform a remote test
     ```shell
-    telnet 127.0.0.1 514
+    telnet 127.0.0.1 1514
     ```
 19. `[HOST]` Perform a remote test with the NLog target (configuring it to use the Local4 facility)
 
@@ -168,13 +182,17 @@ See more about NLog at: [http://nlog-project.org](http://nlog-project.org)
 
 
 # Syslog message format
-Messages are sent using the format defined in
-[RFC 3164](http://www.ietf.org/rfc/rfc3164.txt) or
+Messages are built using the format defined in
+[RFC 3164](http://tools.ietf.org/html/rfc3164) or
 [RFC 5424](http://tools.ietf.org/html/rfc5424).
+They are then sent using one of the protocols defined in
+[RFC 5426](http://tools.ietf.org/html/rfc5426) or
+[RFC 6587](http://tools.ietf.org/html/rfc6587) or
+[RFC 5425](http://tools.ietf.org/html/rfc5425).
 
 
 ### RFC 3164
-There are no set requirements on the contents of the Syslog message: the payload of any Syslog message must be considered to be a valid syslog message.
+There are no set requirements on the contents of the Syslog message: the payload of any Syslog message must be considered to be a valid Syslog message.
 It is, however, recommended for the Syslog message to have all the parts described here.
 
 #### Conventions
@@ -231,7 +249,7 @@ A Syslog message is at most 480 to 2048 or more bytes
 
 This is the detail of the format:
 ```
-SYSLOG MESSAGE = HEADER SPACE STRUCTUREDDATA (SPACE MSG)
+SYSLOG MESSAGE = HEADER SPACE STRUCTURED-DATA (SPACE MSG)
 
 HEADER = PRI VERSION SPACE TIMESTAMP SPACE HOSTNAME SPACE APPNAME SPACE PROCID SPACE MSGID
     PRI = < PRIVAL >
@@ -258,9 +276,9 @@ HEADER = PRI VERSION SPACE TIMESTAMP SPACE HOSTNAME SPACE APPNAME SPACE PROCID S
             NILVALUE or 1 to 32 PRINTUSASCII
             The type of message that should be the same for events with the same semantics
 
-STRUCTUREDDATA = NILVALUE or 1 or more SDELEMENT
-    SDELEMENT = [ SDID (one or more SPACE PARAMNAME = " PARAMVALUE ") ]
-        SDID
+STRUCTURED-DATA = NILVALUE or 1 or more SD-ELEMENT
+    SD-ELEMENT = [ SD-ID (one or more SPACE SD-PARAM) ]
+        SD-ID
             At most 32 SAFEPRINTUSASCII specifying a unique identifier within STRUCTUREDDATA
             The identifier can be a CUSTOMID or IANAID:
                 CUSTOMID = NAME @ PEN
@@ -276,10 +294,11 @@ STRUCTUREDDATA = NILVALUE or 1 or more SDELEMENT
                         Parameters are ip, enterpriseId, software, swVersion
                     meta
                         Parameters are sequenceId, sysUpTime, language
-        PARAMNAME
-            1 to 32 SAFEPRINTUSASCII
-        PARAMVALUE
-            UTF8 STRING with ", \ and ] escaped as \", \\ and \]
+        SD-PARAM = PARAM-NAME = " PARAM-VALUE "
+            PARAM-NAME
+                1 to 32 SAFEPRINTUSASCII
+            PARAM-VALUE
+                UTF8 STRING with ", \ and ] escaped as \", \\ and \]
 
 MSG = MSGANY or MSGUTF8
     MSGANY
