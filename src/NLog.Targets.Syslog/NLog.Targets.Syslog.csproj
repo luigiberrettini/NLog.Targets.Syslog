@@ -49,7 +49,6 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EnumerableExtensions.cs" />
     <Compile Include="FramingMethod.cs" />
     <Compile Include="MessageBuilder.cs" />
     <Compile Include="LayoutExtensions.cs" />
