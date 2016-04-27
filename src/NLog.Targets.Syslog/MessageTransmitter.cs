@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 // ReSharper disable MemberCanBeProtected.Global
@@ -44,7 +46,8 @@ namespace NLog.Targets
         /// <returns>The protocol type which corresponds to the MessageTransmitter</returns>
         public static explicit operator ProtocolType(MessageTransmitter messageTransmitter)
         {
-            return (ProtocolType)Enum.Parse(typeof(ProtocolType), messageTransmitter.GetType().Name);
+            var displayName = messageTransmitter.GetType().GetCustomAttributes().Select(x => x as DisplayNameAttribute).First().DisplayName;
+            return (ProtocolType)Enum.Parse(typeof(ProtocolType), displayName);
         }
 
         /// <summary>Sends a set of Syslog messages with a protocol and the related settings</summary>

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -13,6 +14,7 @@ using System.Text;
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
 {
+    [DisplayName("Tcp")]
     public class TcpProtocol : MessageTransmitter
     {
         private static readonly byte[] LineFeedBytes = { 0x0A };

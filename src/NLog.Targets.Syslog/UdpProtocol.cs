@@ -1,10 +1,12 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Net.Sockets;
 
 // ReSharper disable CheckNamespace
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
 {
+    [DisplayName("Udp")]
     public class UdpProtocol : MessageTransmitter
     {
         /// <summary>Sends a set of Syslog messages with UDP and the related settings</summary>
