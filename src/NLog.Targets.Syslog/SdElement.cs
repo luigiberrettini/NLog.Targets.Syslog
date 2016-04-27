@@ -35,7 +35,7 @@ namespace NLog.Targets
 
         /// <summary>Gives the binary representation of this SD-ELEMENT field</summary>
         /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <returns>Byte array containing this SD-ELEMENT field</returns>
+        /// <returns>Bytes containing this SD-ELEMENT field</returns>
         public IEnumerable<byte> Bytes(LogEventInfo logEvent)
         {
             return LeftBracketBytes

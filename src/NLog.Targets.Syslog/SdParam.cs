@@ -26,7 +26,7 @@ namespace NLog.Targets
 
         /// <summary>Gives the binary representation of this SD-PARAM field</summary>
         /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <returns>Byte array containing this SD-PARAM field</returns>
+        /// <returns>Bytes containing this SD-PARAM field</returns>
         public IEnumerable<byte> Bytes(LogEventInfo logEvent)
         {
             return NameBytes(logEvent)

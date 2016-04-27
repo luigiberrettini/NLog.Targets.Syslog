@@ -36,7 +36,7 @@ namespace NLog.Targets
         /// <param name="logEvent">The NLog.LogEventInfo</param>
         /// <param name="pri">The Syslog PRI part</param>
         /// <param name="logEntry">The entry to be logged</param>
-        /// <returns>Byte array containing the Syslog message</returns>
+        /// <returns>Bytes containing the Syslog message</returns>
         public override IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
         {
             var header = Header(logEvent);
