@@ -16,9 +16,9 @@ namespace NLog.Targets
     [NLogConfigurationItem]
     public class SdElement
     {
-        private static readonly byte[] LeftBracketBytes = Encoding.ASCII.GetBytes("[");
-        private static readonly byte[] SpaceBytes = Encoding.ASCII.GetBytes(" ");
-        private static readonly byte[] RightBracketBytes = Encoding.ASCII.GetBytes("]");
+        private static readonly byte[] LeftBracketBytes = { 0x5B };
+        private static readonly byte[] SpaceBytes = { 0x20 };
+        private static readonly byte[] RightBracketBytes = { 0x5D };
 
         /// <summary>The SD-ID field of an SD-ELEMENT field in the STRUCTURED-DATA part</summary>
         public Layout SdId { get; set; }
@@ -48,7 +48,7 @@ namespace NLog.Targets
         private IEnumerable<byte> SdIdBytes(LogEventInfo logEvent)
         {
             var sdId = SdId.Render(logEvent);
-            return Encoding.ASCII.GetBytes(sdId);
+            return new ASCIIEncoding().GetBytes(sdId);
         }
 
         private IEnumerable<byte> SdParamsBytes(LogEventInfo logEvent)

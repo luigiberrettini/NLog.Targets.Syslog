@@ -23,8 +23,7 @@ namespace NLog.Targets
         private const int AppNameMaxLength = 48;
         private const int ProcIdMaxLength = 128;
         private const int MsgIdMaxLength = 32;
-        private static readonly byte[] SpaceBytes = Encoding.ASCII.GetBytes(" ");
-        private static readonly byte[] Bom = { 0xEF, 0xBB, 0xBF };
+        private static readonly byte[] SpaceBytes = { 0x20 };
 
         /// <summary>The VERSION field of the HEADER part</summary>
         public byte ProtocolVersion { get; set; }
@@ -83,13 +82,15 @@ namespace NLog.Targets
             var procId = ProcId.RenderOrDefault(logEvent, ProcIdMaxLength);
             var msgId = MsgId.RenderOrDefault(logEvent, MsgIdMaxLength);
             var header = $"{pri}{version} {timestamp} {hostname} {appName} {procId} {msgId}";
-            return Encoding.ASCII.GetBytes(header);
+            return new ASCIIEncoding().GetBytes(header);
         }
 
         private IEnumerable<byte> MsgBytes(string logEntry)
         {
-            var logEntryBytes = Encoding.UTF8.GetBytes(logEntry);
-            return DisableBom ? logEntryBytes : Bom.Concat(logEntryBytes);
+            var utf8Encoding = new UTF8Encoding(!DisableBom);
+            var preamble = utf8Encoding.GetPreamble();
+            var logEntryBytes = utf8Encoding.GetBytes(logEntry);
+            return preamble.Concat(logEntryBytes);
         }
     }
 }

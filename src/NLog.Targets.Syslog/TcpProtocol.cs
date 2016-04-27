@@ -60,7 +60,7 @@ namespace NLog.Targets
 
             var src = syslogMessage.ToArray();
             var octetCount = src.Length;
-            var prefix = Encoding.ASCII.GetBytes($"{octetCount} ");
+            var prefix = new ASCIIEncoding().GetBytes($"{octetCount} ");
             return prefix.Concat(src);
         }
 

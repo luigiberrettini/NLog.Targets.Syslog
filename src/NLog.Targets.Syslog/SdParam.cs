@@ -15,8 +15,8 @@ namespace NLog.Targets
     [NLogConfigurationItem]
     public class SdParam
     {
-        private static readonly byte[] EqualBytes = Encoding.ASCII.GetBytes("=");
-        private static readonly byte[] QuotesBytes = Encoding.ASCII.GetBytes("\"");
+        private static readonly byte[] EqualBytes = { 0x3D };
+        private static readonly byte[] QuotesBytes = { 0x22 };
 
         /// <summary>The PARAM-NAME field of this SD-PARAM</summary>
         public Layout Name { get; set; }
@@ -39,13 +39,13 @@ namespace NLog.Targets
         private IEnumerable<byte> NameBytes(LogEventInfo logEvent)
         {
             var paramName = Name.Render(logEvent);
-            return Encoding.ASCII.GetBytes(paramName);
+            return new ASCIIEncoding().GetBytes(paramName);
         }
 
         private IEnumerable<byte> ValueBytes(LogEventInfo logEvent)
         {
             var paramValue = Value.Render(logEvent);
-            return Encoding.UTF8.GetBytes(paramValue);
+            return new UTF8Encoding().GetBytes(paramValue);
         }
     }
 }

@@ -1,7 +1,6 @@
 using NLog.Config;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
@@ -13,7 +12,7 @@ namespace NLog.Targets
     [NLogConfigurationItem]
     public class StructuredData
     {
-        private const string NilValue = "-";
+        private static readonly byte[] NilValueBytes = { 0x2D };
 
         /// <summary>The SD-ELEMENTs contained in the STRUCTURED-DATA part</summary>
         [ArrayParameter(typeof(SdElement), nameof(SdElement))]
@@ -27,9 +26,7 @@ namespace NLog.Targets
 
         public IEnumerable<byte> Bytes(LogEventInfo logEvent)
         {
-            return SdElements.Count == 0 ?
-                Encoding.ASCII.GetBytes(NilValue) :
-                SdElements.SelectMany(sdElement => sdElement.Bytes(logEvent));
+            return SdElements.Count == 0 ? NilValueBytes : SdElements.SelectMany(sdElement => sdElement.Bytes(logEvent));
         }
     }
 }

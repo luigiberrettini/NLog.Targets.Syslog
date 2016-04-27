@@ -44,7 +44,7 @@ namespace NLog.Targets
 
             var syslogMessage = $"{pri}{header} {msg}";
 
-            return Encoding.ASCII.GetBytes(syslogMessage);
+            return new ASCIIEncoding().GetBytes(syslogMessage);
         }
 
         private string Header(LogEventInfo logEvent)
