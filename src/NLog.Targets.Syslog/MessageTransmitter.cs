@@ -31,9 +31,9 @@ namespace NLog.Targets
             Port = DefaultSyslogPort;
         }
 
-        /// <summary>Applies a protocol specific framing method, if supported, to a Syslog message</summary>
+        /// <summary>Applies a protocol specific framing method, if supported, to a Syslog syslogMessage</summary>
         /// <param name="syslogMessage">The message to be framed</param>
-        /// <returns>Bytes containing the framed Syslog message or the original Syslog message</returns>
+        /// <returns>Bytes containing the framed Syslog message or the original Syslog syslogMessage</returns>
         public virtual IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> syslogMessage)
         {
             return syslogMessage;

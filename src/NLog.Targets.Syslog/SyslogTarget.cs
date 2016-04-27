@@ -78,7 +78,7 @@ namespace NLog.Targets
         {
             return MessageBuilder
                 .BuildMessages(Facility, asyncLogEvent.LogEvent, Layout, SplitNewlines)
-                .Select(message => MessageTransmitter.FrameMessageOrLeaveItUnchanged(message).ToArray());
+                .Select(syslogMessage => MessageTransmitter.FrameMessageOrLeaveItUnchanged(syslogMessage).ToArray());
         }
     }
 }

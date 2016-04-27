@@ -53,20 +53,20 @@ namespace NLog.Targets
             }
         }
 
-        private IEnumerable<byte> OctectCountingFramedOrUnchanged(IEnumerable<byte> source)
+        private IEnumerable<byte> OctectCountingFramedOrUnchanged(IEnumerable<byte> syslogMessage)
         {
             if (Framing == FramingMethod.OctetCounting)
-                return source;
+                return syslogMessage;
 
-            var src = source.ToArray();
+            var src = syslogMessage.ToArray();
             var octetCount = src.Length;
             var prefix = Encoding.ASCII.GetBytes($"{octetCount} ");
             return prefix.Concat(src);
         }
 
-        private IEnumerable<byte> NonTransparentFramedOrUnchanged(IEnumerable<byte> source)
+        private IEnumerable<byte> NonTransparentFramedOrUnchanged(IEnumerable<byte> syslogMessage)
         {
-            return Framing == FramingMethod.NonTransparent ? source.Concat(LineFeedBytes) : source;
+            return Framing == FramingMethod.NonTransparent ? syslogMessage.Concat(LineFeedBytes) : syslogMessage;
         }
 
         private Stream SslDecorate(TcpClient tcp)

@@ -33,7 +33,7 @@ namespace NLog.Targets
 
         /// <summary>Applies the framing method of the protocol to use to a Syslog message</summary>
         /// <param name="syslogMessage">The message to be framed</param>
-        /// <returns>Bytes containing the framed Syslog message or the original Syslog message</returns>
+        /// <returns>Bytes containing the framed Syslog message or the original Syslog syslogMessage</returns>
         public override IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> syslogMessage)
         {
             return ProtocolToUse.FrameMessageOrLeaveItUnchanged(syslogMessage);
