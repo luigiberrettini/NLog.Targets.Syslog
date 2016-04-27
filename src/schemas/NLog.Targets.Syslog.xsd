@@ -4,80 +4,110 @@
            targetNamespace="https://github.com/luigiberrettini/NLog.Targets.Syslog/tree/master/src/schemas/NLog.Targets.Syslog.xsd"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xmlns:syslog="https://github.com/luigiberrettini/NLog.Targets.Syslog/tree/master/src/schemas/NLog.Targets.Syslog.xsd"
+           xmlns:sl="https://github.com/luigiberrettini/NLog.Targets.Syslog/tree/master/src/schemas/NLog.Targets.Syslog.xsd"
            xmlns:nlog="http://www.nlog-project.org/schemas/NLog.xsd">
   <xs:import namespace="http://www.nlog-project.org/schemas/NLog.xsd" />
   <xs:complexType name="Syslog">
     <xs:complexContent>
       <xs:extension base="nlog:Target">
         <xs:choice minOccurs="0" maxOccurs="unbounded">
-          <xs:element name="name" minOccurs="0" maxOccurs="1" type="xs:string" />
-          <xs:element name="sysLogServer" minOccurs="0" maxOccurs="1" type="xs:string" />
-          <xs:element name="port" minOccurs="0" maxOccurs="1" type="xs:integer" />
-          <xs:element name="facility" minOccurs="0" maxOccurs="1" type="xs:string" />
-          <xs:element name="protocol" minOccurs="0" maxOccurs="1" type="xs:string" />
-          <xs:element name="ssl" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="splitNewlines" minOccurs="0" maxOccurs="1" type="xs:boolean" />
-          <xs:element name="rfc" minOccurs="0" maxOccurs="1" type="xs:string" />
-          <xs:element name="layout" minOccurs="0" maxOccurs="1" type="nlog:Layout" />
-          <xs:element name="rfc3164" minOccurs="0" maxOccurs="1">
-            <xs:complexType>
-              <xs:simpleContent>
-                <xs:extension base="xs:string">
-                  <xs:attribute name="hostname" type="xs:string" />
-                  <xs:attribute name="tag" type="xs:string" />
-                </xs:extension>
-              </xs:simpleContent>
-            </xs:complexType>
-          </xs:element>
-          <xs:element name="rfc5424" minOccurs="0" maxOccurs="1">
+          <xs:element name="name" type="xs:string" minOccurs="0" maxOccurs="1" />
+          <xs:element name="messageTransmitter" minOccurs="0" maxOccurs="1">
             <xs:complexType>
               <xs:choice minOccurs="0" maxOccurs="unbounded">
-                <xs:element name="protocolVersion" minOccurs="0" maxOccurs="1" type="xs:string" />
-                <xs:element name="hostname" minOccurs="0" maxOccurs="1" type="xs:string" />
-                <xs:element name="appName" minOccurs="0" maxOccurs="1" type="xs:string" />
-                <xs:element name="procId" minOccurs="0" maxOccurs="1" type="xs:string" />
-                <xs:element name="msgId" minOccurs="0" maxOccurs="1" type="xs:string" />
-                <xs:element name="structuredData" minOccurs="0" maxOccurs="1">
+                <xs:element name="protocol" type="xs:string" minOccurs="0" maxOccurs="1" />
+                <xs:element name="udpProtocol" minOccurs="0" maxOccurs="1">
                   <xs:complexType>
                     <xs:choice minOccurs="0" maxOccurs="unbounded">
-                      <xs:element name="sdElement" minOccurs="1" maxOccurs="unbounded">
-                        <xs:complexType>
-                          <xs:sequence>
-                            <xs:element name="sdParam" minOccurs="1" maxOccurs="unbounded">
-                              <xs:complexType>
-                                <xs:simpleContent>
-                                  <xs:extension base="xs:string">
-                                    <xs:attribute name="name" type="xs:string" use="required" />
-                                    <xs:attribute name="value" type="xs:string" use="required" />
-                                  </xs:extension>
-                                </xs:simpleContent>
-                              </xs:complexType>
-                            </xs:element>
-                          </xs:sequence>
-                          <xs:attribute name="sdId" type="xs:string" use="required" />
-                        </xs:complexType>
-                      </xs:element>
+                      <xs:element name="server" type="xs:string" minOccurs="1" maxOccurs="1" />
+                      <xs:element name="port" type="xs:integer" minOccurs="0" maxOccurs="1" />
                     </xs:choice>
+                    <xs:attribute name="server" type="xs:string" />
+                    <xs:attribute name="port" type="xs:integer" />
+                  </xs:complexType>
+                </xs:element>
+                <xs:element name="tcpProtocol" minOccurs="0" maxOccurs="1">
+                  <xs:complexType>
+                    <xs:choice minOccurs="0" maxOccurs="unbounded">
+                      <xs:element name="server" type="xs:string" minOccurs="1" maxOccurs="1" />
+                      <xs:element name="port" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                      <xs:element name="useTls" type="xs:boolean" minOccurs="0" maxOccurs="1" />
+                      <xs:element name="framing" type="xs:string" minOccurs="0" maxOccurs="1" />
+                    </xs:choice>
+                    <xs:attribute name="server" type="xs:string" />
+                    <xs:attribute name="port" type="xs:integer" />
+                    <xs:attribute name="useTls" type="xs:boolean" />
+                    <xs:attribute name="framing" type="xs:string" />
                   </xs:complexType>
                 </xs:element>
               </xs:choice>
-              <xs:attribute type="xs:string" name="protocolVersion"/>
-              <xs:attribute type="xs:string" name="hostname"/>
-              <xs:attribute type="xs:string" name="appName"/>
-              <xs:attribute type="xs:string" name="procId"/>
-              <xs:attribute type="xs:string" name="msgId"/>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="splitNewlines" type="xs:boolean" minOccurs="0" maxOccurs="1" />
+          <xs:element name="facility" type="xs:string" minOccurs="0" maxOccurs="1" />
+          <xs:element name="layout" type="nlog:Layout" minOccurs="0" maxOccurs="1" />
+          <xs:element name="messageBuilder" minOccurs="0" maxOccurs="1">
+            <xs:complexType>
+              <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="rfc" type="xs:string" minOccurs="0" maxOccurs="1" />
+                <xs:element name="rfc3164" minOccurs="0" maxOccurs="1">
+                  <xs:complexType>
+                    <xs:choice minOccurs="0" maxOccurs="unbounded">
+                      <xs:element name="hostname" type="xs:string" minOccurs="0" maxOccurs="1" />
+                      <xs:element name="tag" type="xs:string" minOccurs="0" maxOccurs="1" />
+                    </xs:choice>
+                    <xs:attribute name="hostname" type="xs:string" />
+                    <xs:attribute name="tag" type="xs:string" />
+                  </xs:complexType>
+                </xs:element>
+                <xs:element name="rfc5424" minOccurs="0" maxOccurs="1">
+                  <xs:complexType>
+                    <xs:choice minOccurs="0" maxOccurs="unbounded">
+                      <xs:element name="protocolVersion" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                      <xs:element name="hostname" type="nlog:Layout" minOccurs="0" maxOccurs="1" />
+                      <xs:element name="appName" type="nlog:Layout" minOccurs="0" maxOccurs="1" />
+                      <xs:element name="procId" type="nlog:Layout" minOccurs="0" maxOccurs="1" />
+                      <xs:element name="msgId" type="nlog:Layout" minOccurs="0" maxOccurs="1" />
+                      <xs:element name="disableBom" type="xs:boolean" minOccurs="0" maxOccurs="1" />
+                      <xs:element name="structuredData" minOccurs="0" maxOccurs="1">
+                        <xs:complexType>
+                          <xs:choice minOccurs="0" maxOccurs="unbounded">
+                            <xs:element name="sdElement" minOccurs="1" maxOccurs="unbounded">
+                              <xs:complexType>
+                                <xs:sequence>
+                                  <xs:element name="sdParam" minOccurs="1" maxOccurs="unbounded">
+                                    <xs:complexType>
+                                      <xs:simpleContent>
+                                        <xs:extension base="xs:string">
+                                          <xs:attribute name="name" type="xs:string" use="required" />
+                                          <xs:attribute name="value" type="xs:string" use="required" />
+                                        </xs:extension>
+                                      </xs:simpleContent>
+                                    </xs:complexType>
+                                  </xs:element>
+                                </xs:sequence>
+                                <xs:attribute name="sdId" type="xs:string" use="required" />
+                              </xs:complexType>
+                            </xs:element>
+                          </xs:choice>
+                        </xs:complexType>
+                      </xs:element>
+                    </xs:choice>
+                    <xs:attribute name="protocolVersion" type="xs:integer" />
+                    <xs:attribute name="hostname" type="nlog:SimpleLayoutAttribute" />
+                    <xs:attribute name="appName" type="nlog:SimpleLayoutAttribute" />
+                    <xs:attribute name="procId" type="nlog:SimpleLayoutAttribute" />
+                    <xs:attribute name="msgId" type="nlog:SimpleLayoutAttribute" />
+                    <xs:attribute name="disableBom" type="xs:boolean" />
+                  </xs:complexType>
+                </xs:element>
+              </xs:choice>
             </xs:complexType>
           </xs:element>
         </xs:choice>
         <xs:attribute name="name" type="xs:string" />
-        <xs:attribute name="sysLogServer" type="xs:string" />
-        <xs:attribute name="port" type="xs:integer" />
-        <xs:attribute name="facility" type="xs:string" />
-        <xs:attribute name="protocol" type="xs:string" />
-        <xs:attribute name="ssl" type="xs:boolean" />
         <xs:attribute name="splitNewlines" type="xs:boolean" />
-        <xs:attribute name="rfc" type="xs:string" />
+        <xs:attribute name="facility" type="xs:string" />
         <xs:attribute name="layout" type="nlog:SimpleLayoutAttribute" />
       </xs:extension>
     </xs:complexContent>
