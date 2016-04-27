@@ -44,6 +44,10 @@ namespace NLog.Targets
         /// <summary>The STRUCTURED-DATA part</summary>
         public StructuredData StructuredData { get; set; }
 
+        /// <summary>Whether to remove or not BOM in the MSG part</summary>
+        /// <see href="https://github.com/rsyslog/rsyslog/issues/284">RSyslog issue #284</see>
+        public bool DisableBom { get; set; }
+
         /// <summary>Initializes a new instance of the Rfc5424 class</summary>
         public Rfc5424()
         {
@@ -53,13 +57,14 @@ namespace NLog.Targets
             ProcId = NilValue;
             MsgId = NilValue;
             StructuredData = new StructuredData();
+            DisableBom = false;
         }
 
         /// <summary>Builds the Syslog message according to the RFC</summary>
         /// <param name="logEvent">The NLog.LogEventInfo</param>
         /// <param name="pri">The Syslog PRI part</param>
         /// <param name="logEntry">The entry to be logged</param>
-        /// <returns>Byte array containing the Syslog message</returns>
+        /// <returns>Bytes containing the Syslog message</returns>
         public override IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
         {
             return HeaderBytes(pri, logEvent)
@@ -81,9 +86,10 @@ namespace NLog.Targets
             return Encoding.ASCII.GetBytes(header);
         }
 
-        private static IEnumerable<byte> MsgBytes(string logEntry)
+        private IEnumerable<byte> MsgBytes(string logEntry)
         {
-            return Bom.Concat(Encoding.UTF8.GetBytes(logEntry));
+            var logEntryBytes = Encoding.UTF8.GetBytes(logEntry);
+            return DisableBom ? logEntryBytes : Bom.Concat(logEntryBytes);
         }
     }
 }
