@@ -1,4 +1,3 @@
-using NLog.Layouts;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,8 +9,9 @@ namespace NLog.Targets
 {
     public class MessageBuildersFacade : MessageBuilder
     {
-        private readonly MessageBuilder[] messageBuilders;
+        private readonly MessageBuilder[] builders;
         private MessageBuilder rfcToFollow;
+        private MessageBuilder RfcToFollow => rfcToFollow ?? (rfcToFollow = builders.Single(x => (RfcNumber)x == Rfc));
 
         /// <summary>The Syslog protocol RFC to be followed</summary> 
         public RfcNumber Rfc { get; set; }
@@ -22,23 +22,23 @@ namespace NLog.Targets
         /// <summary>RFC 5424 related fields</summary> 
         public Rfc5424 Rfc5424 { get; set; }
 
+        /// <summary>Initializes a new instance of the MessageBuildersFacade class</summary>
         public MessageBuildersFacade()
         {
             Rfc = RfcNumber.Rfc5424;
             Rfc3164 = new Rfc3164();
             Rfc5424 = new Rfc5424();
-            messageBuilders = new MessageBuilder[] { Rfc3164, Rfc5424 };
+            builders = new MessageBuilder[] { Rfc3164, Rfc5424 };
         }
 
-        public new IEnumerable<byte[]> BuildMessages(SyslogFacility facility, LogEventInfo logEvent, Layout layout, bool splitNewlines)
-        {
-            rfcToFollow = messageBuilders.Single(x => (RfcNumber)x == Rfc);
-            return base.BuildMessages(facility, logEvent, layout, splitNewlines);
-        }
-
+        /// <summary>Builds the Syslog message according to the RFC to follow</summary>
+        /// <param name="logEvent">The NLog.LogEventInfo</param>
+        /// <param name="pri">The Syslog PRI part</param>
+        /// <param name="logEntry">The entry to be logged</param>
+        /// <returns>Bytes containing the Syslog message</returns>
         public override IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
         {
-            return rfcToFollow.BuildMessage(logEvent, pri, logEntry);
+            return RfcToFollow.BuildMessage(logEvent, pri, logEntry);
         }
     }
 }
