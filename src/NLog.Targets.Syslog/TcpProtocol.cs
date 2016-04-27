@@ -58,10 +58,10 @@ namespace NLog.Targets
             if (Framing == FramingMethod.OctetCounting)
                 return syslogMessage;
 
-            var src = syslogMessage.ToArray();
-            var octetCount = src.Length;
+            var slMessage = syslogMessage.ToArray();
+            var octetCount = slMessage.Length;
             var prefix = new ASCIIEncoding().GetBytes($"{octetCount} ");
-            return prefix.Concat(src);
+            return prefix.Concat(slMessage);
         }
 
         private IEnumerable<byte> NonTransparentFramedOrUnchanged(IEnumerable<byte> syslogMessage)
