@@ -27,7 +27,7 @@ namespace NLog.Targets
         /// <param name="layout">The NLog.LogEventInfo</param>
         /// <param name="splitNewlines">Determines if the original log entry is to be split by newlines</param>
         /// <returns>For each Syslog messages the bytes containing it</returns>
-        public IEnumerable<byte[]> BuildMessages(SyslogFacility facility, LogEventInfo logEvent, Layout layout, bool splitNewlines)
+        public IEnumerable<IEnumerable<byte>> BuildMessages(SyslogFacility facility, LogEventInfo logEvent, Layout layout, bool splitNewlines)
         {
             var pri = Pri(facility, (SyslogSeverity)logEvent.Level);
             var logEntries = LogEntries(logEvent, layout, splitNewlines).ToList();
