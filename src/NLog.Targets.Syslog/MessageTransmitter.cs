@@ -16,13 +16,18 @@ namespace NLog.Targets
     {
         private const string Localhost = "localhost";
         private const int DefaultSyslogPort = 514;
-        private string ipAddress;
 
         /// <summary>The IP address of the Syslog server or an empty string</summary>
-        protected string IpAddress => ipAddress ?? (ipAddress = Dns.GetHostAddresses(Server).FirstOrDefault()?.ToString() ?? string.Empty);
+        protected string IpAddress { get; private set; }
+
+        private string server;
 
         /// <summary>The IP address or hostname of the Syslog server</summary>
-        public string Server { get; set; }
+        public string Server
+        {
+            get { return server; }
+            set { server = value; IpAddress = Dns.GetHostAddresses(Server).FirstOrDefault()?.ToString(); }
+        }
 
         /// <summary>The port number the Syslog server is listening on</summary>
         public int Port { get; set; }

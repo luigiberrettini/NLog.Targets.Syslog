@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
@@ -9,9 +8,8 @@ namespace NLog.Targets
 {
     public class MessageTransmittersFacade : MessageTransmitter
     {
-        private readonly MessageTransmitter[] transmitters;
-        private MessageTransmitter protocolToUse;
-        private MessageTransmitter ProtocolToUse => protocolToUse ?? (protocolToUse = transmitters.Single(x => (ProtocolType) x == Protocol));
+        private readonly Dictionary<ProtocolType, MessageTransmitter> transmitters;
+        private MessageTransmitter ProtocolToUse => transmitters[Protocol];
 
         /// <summary>The Syslog server protocol</summary>
         public ProtocolType Protocol { get; set; }
@@ -28,7 +26,11 @@ namespace NLog.Targets
             Protocol = ProtocolType.Tcp;
             UdpProtocol = new UdpProtocol();
             TcpProtocol = new TcpProtocol();
-            transmitters = new MessageTransmitter[] { UdpProtocol, TcpProtocol };
+            transmitters = new Dictionary<ProtocolType, MessageTransmitter>
+            {
+                {ProtocolType.Udp, UdpProtocol},
+                {ProtocolType.Tcp, TcpProtocol}
+            };
         }
 
         /// <summary>Applies the framing method of the protocol to use to a Syslog message</summary>

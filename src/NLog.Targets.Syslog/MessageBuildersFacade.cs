@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
@@ -9,9 +8,7 @@ namespace NLog.Targets
 {
     public class MessageBuildersFacade : MessageBuilder
     {
-        private readonly MessageBuilder[] builders;
-        private MessageBuilder rfcToFollow;
-        private MessageBuilder RfcToFollow => rfcToFollow ?? (rfcToFollow = builders.Single(x => (RfcNumber)x == Rfc));
+        private readonly Dictionary<RfcNumber,MessageBuilder> builders;
 
         /// <summary>The Syslog protocol RFC to be followed</summary> 
         public RfcNumber Rfc { get; set; }
@@ -28,7 +25,11 @@ namespace NLog.Targets
             Rfc = RfcNumber.Rfc5424;
             Rfc3164 = new Rfc3164();
             Rfc5424 = new Rfc5424();
-            builders = new MessageBuilder[] { Rfc3164, Rfc5424 };
+            builders = new Dictionary<RfcNumber, MessageBuilder>
+            {
+                { RfcNumber.Rfc3164, Rfc3164 },
+                { RfcNumber.Rfc5424, Rfc5424 }
+            };
         }
 
         /// <summary>Builds the Syslog message according to the RFC to follow</summary>
@@ -38,7 +39,8 @@ namespace NLog.Targets
         /// <returns>Bytes containing the Syslog message</returns>
         public override IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
         {
-            return RfcToFollow.BuildMessage(logEvent, pri, logEntry);
+            var rfcToFollow = builders[Rfc];
+            return rfcToFollow.BuildMessage(logEvent, pri, logEntry);
         }
     }
 }
