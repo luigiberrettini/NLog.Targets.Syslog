@@ -17,6 +17,7 @@ namespace NLog.Targets
     public class Rfc3164 : MessageBuilder
     {
         private const string TimestampFormat = "{0:MMM} {0,11:d HH:mm:ss}";
+        private const int TagMaxLength = 32;
 
         /// <summary>The HOSTNAME field of the HEADER part</summary>
         public Layout Hostname { get; set; }
@@ -56,7 +57,7 @@ namespace NLog.Targets
 
         private string Msg(LogEventInfo logEvent, string logEntry)
         {
-            var tag = Tag.Render(logEvent);
+            var tag = Tag.RenderOrDefault(logEvent, TagMaxLength, string.Empty);
             var content = char.IsLetterOrDigit(logEntry[0]) ? " {logEntry}" : logEntry;
             var msg = $"{tag}{content}";
             return msg;
