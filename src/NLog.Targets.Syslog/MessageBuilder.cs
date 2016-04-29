@@ -13,14 +13,6 @@ namespace NLog.Targets
     {
         private static readonly char[] LineSeps = { '\r', '\n' };
 
-        /// <summary>Convert a message builder to an RFC number</summary>
-        /// <param name="messageBuilder">MessageBuilder to convert</param>
-        /// <returns>The RFC number which corresponds to the message builder</returns>
-        public static explicit operator RfcNumber(MessageBuilder messageBuilder)
-        {
-            return (RfcNumber)Enum.Parse(typeof(RfcNumber), messageBuilder.GetType().Name);
-        }
-
         /// <summary>Builds a set of Syslog messages according to an RFC</summary>
         /// <param name="facility">Syslog facility to transmit message from</param>
         /// <param name="logEvent">The NLog.LogEventInfo</param>

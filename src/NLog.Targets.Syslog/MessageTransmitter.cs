@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Reflection;
 
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 // ReSharper disable MemberCanBeProtected.Global
@@ -44,15 +41,6 @@ namespace NLog.Targets
         public virtual IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> syslogMessage)
         {
             return syslogMessage;
-        }
-
-        /// <summary>Convert a MessageTransmitter to a protocol type</summary>
-        /// <param name="messageTransmitter">MessageTransmitter to convert</param>
-        /// <returns>The protocol type which corresponds to the MessageTransmitter</returns>
-        public static explicit operator ProtocolType(MessageTransmitter messageTransmitter)
-        {
-            var displayName = messageTransmitter.GetType().GetCustomAttributes().Select(x => x as DisplayNameAttribute).First().DisplayName;
-            return (ProtocolType)Enum.Parse(typeof(ProtocolType), displayName);
         }
 
         /// <summary>Sends a set of Syslog messages with a protocol and the related settings</summary>
