@@ -17,13 +17,20 @@ namespace NLog.Targets
     [DisplayName("Tcp")]
     public class TcpProtocol : MessageTransmitter
     {
+        private FramingMethod framing;
         private static readonly byte[] LineFeedBytes = { 0x0A };
 
         /// <summary>Whether to use TLS or not (TLS 1.2 only)</summary>
         public bool UseTls { get; set; }
 
-        /// <summary>Which framing method to use</summary>
-        public FramingMethod Framing { get; set; }
+
+        /// <summary>Which framing method to use/></summary>
+        /// <remarks>If <see cref="UseTls">is true</see> get will always return OctetCounting (RFC 5425)</remarks>
+        public FramingMethod Framing
+        {
+            get { return UseTls ? FramingMethod.OctetCounting : framing; }
+            set { framing = value; }
+        }
 
         /// <summary>Initializes a new instance of the TcpProtocol class</summary>
         public TcpProtocol()
