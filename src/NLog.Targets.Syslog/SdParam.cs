@@ -3,6 +3,7 @@ using NLog.Layouts;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
@@ -17,6 +18,8 @@ namespace NLog.Targets
     {
         private static readonly byte[] EqualBytes = { 0x3D };
         private static readonly byte[] QuotesBytes = { 0x22 };
+        private const string ValueSearchPattern = @"([^\\""\]]*)([\\""\]])([^\\""\]]*)";
+        private const string ValueReplacementPattern = "$1\\$2$3";
 
         /// <summary>The PARAM-NAME field of this SD-PARAM</summary>
         public Layout Name { get; set; }
@@ -44,7 +47,7 @@ namespace NLog.Targets
 
         private IEnumerable<byte> ValueBytes(LogEventInfo logEvent)
         {
-            var paramValue = Value.Render(logEvent);
+            var paramValue = Regex.Replace(Value.Render(logEvent), ValueSearchPattern, ValueReplacementPattern);
             return new UTF8Encoding().GetBytes(paramValue);
         }
     }
