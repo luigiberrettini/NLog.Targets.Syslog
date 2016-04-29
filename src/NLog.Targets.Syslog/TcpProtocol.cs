@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Authentication;
 using System.Text;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
@@ -78,9 +78,8 @@ namespace NLog.Targets
             if (!UseTls)
                 return tcpStream;
 
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
             var sslStream = new SslStream(tcpStream, true);
-            sslStream.AuthenticateAsClient(Server);
+            sslStream.AuthenticateAsClient(Server, null, SslProtocols.Tls12, false);
             return sslStream;
         }
     }
