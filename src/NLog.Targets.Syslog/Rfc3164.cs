@@ -1,6 +1,5 @@
 ﻿using NLog.Config;
 using NLog.Layouts;
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
@@ -58,7 +57,7 @@ namespace NLog.Targets
         private string Msg(LogEventInfo logEvent, string logEntry)
         {
             var tag = Tag.Render(logEvent);
-            var content = Char.IsLetterOrDigit(logEntry[0]) ? " {logEntry}" : logEntry;
+            var content = char.IsLetterOrDigit(logEntry[0]) ? " {logEntry}" : logEntry;
             var msg = $"{tag}{content}";
             return msg;
         }
