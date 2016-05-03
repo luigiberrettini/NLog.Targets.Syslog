@@ -23,8 +23,7 @@ namespace NLog.Targets
         /// <summary>Whether to use TLS or not (TLS 1.2 only)</summary>
         public bool UseTls { get; set; }
 
-
-        /// <summary>Which framing method to use/></summary>
+        /// <summary>Which framing method to use</summary>
         /// <remarks>If <see cref="UseTls">is true</see> get will always return OctetCounting (RFC 5425)</remarks>
         public FramingMethod Framing
         {
@@ -32,7 +31,7 @@ namespace NLog.Targets
             set { framing = value; }
         }
 
-        /// <summary>Initializes a new instance of the TcpProtocol class</summary>
+        /// <summary>Builds a new instance of the TcpProtocol class</summary>
         public TcpProtocol()
         {
             UseTls = true;
