@@ -276,7 +276,7 @@ HEADER = PRI VERSION SPACE TIMESTAMP SPACE HOSTNAME SPACE APPNAME SPACE PROCID S
             NILVALUE or 1 to 32 PRINTUSASCII
             The type of message that should be the same for events with the same semantics
 
-STRUCTURED-DATA = NILVALUE or 1 or more SD-ELEMENT
+STRUCTURED-DATA = NILVALUE or one or more SD-ELEMENT
     SD-ELEMENT = [ SD-ID (one or more SPACE SD-PARAM) ]
         SD-ID
             At most 32 SAFEPRINTUSASCII specifying a unique identifier within STRUCTUREDDATA
