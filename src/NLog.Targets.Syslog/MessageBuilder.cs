@@ -1,9 +1,11 @@
 using NLog.Layouts;
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable CheckNamespace
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
@@ -11,19 +13,32 @@ namespace NLog.Targets
     /// <summary>Allows to build Syslog messages</summary>
     public abstract class MessageBuilder
     {
-        private static readonly char[] LineSeps = { '\r', '\n' };
+        private SplitOnNewLinePolicy splitOnNewLinePolicy;
+
+        /// <summary>The Syslog facility to log from (its name e.g. local0 or local7)</summary>
+        public SyslogFacility Facility { get; set; }
+
+        protected MessageBuilder()
+        {
+            Facility = SyslogFacility.Local1;
+        }
+
+        /// <summary>Initializes the MessageBuilder</summary>
+        /// <param name="initedEnforcement">The enforcement to apply</param>
+        internal virtual void Initialize(Enforcement initedEnforcement)
+        {
+            splitOnNewLinePolicy = new SplitOnNewLinePolicy(initedEnforcement);
+        }
 
         /// <summary>Builds a set of Syslog messages according to an RFC</summary>
-        /// <param name="facility">Syslog facility to transmit message from</param>
         /// <param name="logEvent">The NLog.LogEventInfo</param>
         /// <param name="layout">The NLog.LogEventInfo</param>
-        /// <param name="splitNewlines">Determines if the original log entry is to be split by newlines</param>
-        /// <returns>For each Syslog messages the bytes containing it</returns>
-        public IEnumerable<IEnumerable<byte>> BuildMessages(SyslogFacility facility, LogEventInfo logEvent, Layout layout, bool splitNewlines)
+        /// <returns>For each Syslog message the bytes containing it</returns>
+        internal IEnumerable<IEnumerable<byte>> BuildMessages(LogEventInfo logEvent, Layout layout)
         {
-            var pri = Pri(facility, (SyslogSeverity)logEvent.Level);
-            var logEntries = LogEntries(logEvent, layout, splitNewlines).ToList();
-            var toBeSent = logEntries.Select(logEntry => BuildMessage(logEvent, pri, logEntry).ToArray());
+            var pri = Pri(Facility, (SyslogSeverity)logEvent.Level);
+            var logEntries = LogEntries(logEvent, layout).ToList();
+            var toBeSent = logEntries.Select(logEntry => BuildMessage(logEvent, pri, logEntry));
             return toBeSent;
         }
 
@@ -32,7 +47,7 @@ namespace NLog.Targets
         /// <param name="pri">The Syslog PRI part</param>
         /// <param name="logEntry">The entry to be logged</param>
         /// <returns>Bytes containing the Syslog message</returns>
-        public abstract IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry);
+        protected abstract IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry);
 
         private static string Pri(SyslogFacility facility, SyslogSeverity severity)
         {
@@ -41,10 +56,10 @@ namespace NLog.Targets
             return $"<{priValString}>";
         }
 
-        private static IEnumerable<string> LogEntries(LogEventInfo logEvent, Layout layout, bool splitNewlines)
+        private IEnumerable<string> LogEntries(LogEventInfo logEvent, Layout layout)
         {
             var originalLogEntry = layout.Render(logEvent);
-            return splitNewlines ? originalLogEntry.Split(LineSeps, StringSplitOptions.RemoveEmptyEntries) : new[] { originalLogEntry };
+            return splitOnNewLinePolicy.IsApplicable() ? splitOnNewLinePolicy.Apply(originalLogEntry) : new[] { originalLogEntry };
         }
     }
 }

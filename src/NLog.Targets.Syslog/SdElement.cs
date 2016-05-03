@@ -1,8 +1,6 @@
 using NLog.Config;
-using NLog.Layouts;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable CollectionNeverUpdated.Global
@@ -16,44 +14,63 @@ namespace NLog.Targets
     [NLogConfigurationItem]
     public class SdElement
     {
+        private SdIdToInvalidParamNamePattern sdIdToInvalidParamNamePattern;
         private static readonly byte[] LeftBracketBytes = { 0x5B };
-        private static readonly byte[] SpaceBytes = { 0x20 };
         private static readonly byte[] RightBracketBytes = { 0x5D };
 
         /// <summary>The SD-ID field of an SD-ELEMENT field in the STRUCTURED-DATA part</summary>
-        public Layout SdId { get; set; }
+        public SdId SdId { get; set; }
 
         /// <summary>The SD-PARAM fields belonging to an SD-ELEMENT field in the STRUCTURED-DATA part</summary>
         [ArrayParameter(typeof(SdParam), nameof(SdParam))]
         public IList<SdParam> SdParams { get; set; }
 
-        /// <summary>Initializes a new instance of the SdElement class</summary>
+        /// <summary>Builds a new instance of the SdElement class</summary>
         public SdElement()
         {
+            sdIdToInvalidParamNamePattern = new SdIdToInvalidParamNamePattern();
             SdParams = new List<SdParam>();
         }
 
-        /// <summary>Gives the binary representation of this SD-ELEMENT field</summary>
+        /// <summary>Initializes the SdElement</summary>
+        /// <param name="enforcement">The enforcement to apply</param>
+        internal void Initialize(Enforcement enforcement)
+        {
+            SdId.Initialize(enforcement);
+            SdParams.ForEach(sdParam => sdParam.Initialize(enforcement));
+        }
+
+        /// <summary>Gives the binary representation of a list of SD-ELEMENT fields</summary>
+        /// <param name="sdElements">The SD-ELEMENT fields to be represented as binary</param>
         /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <returns>Bytes containing this SD-ELEMENT field</returns>
-        public IEnumerable<byte> Bytes(LogEventInfo logEvent)
+        /// <param name="encodings">The encodings to be used</param>
+        /// <returns>Bytes containing the list of SD-ELEMENT fields</returns>
+        internal static IEnumerable<byte> Bytes(IEnumerable<SdElement> sdElements, LogEventInfo logEvent, EncodingSet encodings)
+        {
+            var elements = sdElements.ToList();
+
+            var ids = elements.Select(x => x.SdId);
+            var encodedIds = SdId.Bytes(ids, logEvent, encodings).ToList();
+
+            var encodedparamLists = elements
+                .Select(x =>
+                {
+                    var renderedId = x.SdId.Render(logEvent);
+                    var invalidParamNames = SdIdToInvalidParamNamePattern.Map(renderedId);
+                    return SdParam.Bytes(x.SdParams, logEvent, invalidParamNames, encodings);
+                })
+                .ToList();
+
+            return elements.SelectMany((e, i) => Bytes(encodedIds[i], encodedparamLists[i]));
+        }
+
+        private static IEnumerable<byte> Bytes(IEnumerable<byte> sdIdBytes, IEnumerable<byte> sdParamsBytes)
         {
             return LeftBracketBytes
                 .Concat(LeftBracketBytes)
-                .Concat(SdIdBytes(logEvent))
-                .Concat(SdParamsBytes(logEvent))
+                .Concat(sdIdBytes)
+                .Concat(sdParamsBytes)
                 .Concat(RightBracketBytes);
-        }
-
-        private IEnumerable<byte> SdIdBytes(LogEventInfo logEvent)
-        {
-            var sdId = SdId.Render(logEvent);
-            return new ASCIIEncoding().GetBytes(sdId);
-        }
-
-        private IEnumerable<byte> SdParamsBytes(LogEventInfo logEvent)
-        {
-            return SdParams.SelectMany(sdParam => SpaceBytes.Concat(sdParam.Bytes(logEvent)));
         }
     }
 }

@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Reflection;
-using System.Text;
 
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
@@ -17,16 +17,20 @@ namespace NLog.Targets
     [NLogConfigurationItem]
     public class Rfc5424 : MessageBuilder
     {
+        private readonly string defaultHostname;
+        private readonly string defaultAppName;
+        private const string DefaultVersion = "1";
         private const string NilValue = "-";
+        private FqdnHostnamePolicySet hostnamePolicySet;
+        private AppNamePolicySet appNamePolicySet;
+        private ProcIdPolicySet procIdPolicySet;
+        private MsgIdPolicySet msgIdPolicySet;
+        private MsgWithoutPreamblePolicy msgWithoutPreamblePolicy;
         private const string TimestampFormat = "{0:yyyy-MM-ddTHH:mm:ss.ffffffK}";
-        private const int HostnameMaxLength = 255;
-        private const int AppNameMaxLength = 48;
-        private const int ProcIdMaxLength = 128;
-        private const int MsgIdMaxLength = 32;
         private static readonly byte[] SpaceBytes = { 0x20 };
 
         /// <summary>The VERSION field of the HEADER part</summary>
-        public byte ProtocolVersion { get; set; }
+        public string Version { get; }
 
         /// <summary>The HOSTNAME field of the HEADER part</summary>
         public Layout Hostname { get; set; }
@@ -47,16 +51,31 @@ namespace NLog.Targets
         /// <see href="https://github.com/rsyslog/rsyslog/issues/284">RSyslog issue #284</see>
         public bool DisableBom { get; set; }
 
-        /// <summary>Initializes a new instance of the Rfc5424 class</summary>
+        /// <summary>Builds a new instance of the Rfc5424 class</summary>
         public Rfc5424()
         {
-            ProtocolVersion = 1;
-            Hostname = Dns.GetHostName();
-            AppName = Assembly.GetCallingAssembly().GetName().Name;
+            defaultHostname = HostFqdn();
+            defaultAppName = Assembly.GetCallingAssembly().GetName().Name;
+            Version = DefaultVersion;
+            Hostname = defaultHostname;
+            AppName = defaultAppName;
             ProcId = NilValue;
             MsgId = NilValue;
             StructuredData = new StructuredData();
             DisableBom = false;
+        }
+
+        /// <summary>Initializes the Rfc5424</summary>
+        /// <param name="enforcement">The enforcement to apply</param>
+        internal override void Initialize(Enforcement enforcement)
+        {
+            base.Initialize(enforcement);
+            hostnamePolicySet = new FqdnHostnamePolicySet(enforcement, defaultHostname);
+            appNamePolicySet = new AppNamePolicySet(enforcement, defaultAppName);
+            procIdPolicySet = new ProcIdPolicySet(enforcement);
+            msgIdPolicySet = new MsgIdPolicySet(enforcement);
+            msgWithoutPreamblePolicy = new MsgWithoutPreamblePolicy(enforcement);
+            StructuredData.Initialize(enforcement);
         }
 
         /// <summary>Builds the Syslog message according to the RFC</summary>
@@ -64,33 +83,45 @@ namespace NLog.Targets
         /// <param name="pri">The Syslog PRI part</param>
         /// <param name="logEntry">The entry to be logged</param>
         /// <returns>Bytes containing the Syslog message</returns>
-        public override IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
+        protected override IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
         {
-            return HeaderBytes(pri, logEvent)
+            var encodings = new EncodingSet(!DisableBom);
+
+            var msgPrefixBytes = HeaderBytes(pri, logEvent, encodings)
                 .Concat(SpaceBytes)
-                .Concat(StructuredData.Bytes(logEvent))
+                .Concat(StructuredData.Bytes(logEvent, encodings))
                 .Concat(SpaceBytes)
-                .Concat(MsgBytes(logEntry));
+                .ToArray();
+            var msgBytes = MsgBytes(logEntry, msgPrefixBytes.Length, encodings);
+            return msgPrefixBytes.Concat(msgBytes);
         }
 
-        private IEnumerable<byte> HeaderBytes(string pri, LogEventInfo logEvent)
+        private static string HostFqdn()
         {
-            var version = ProtocolVersion.ToString(CultureInfo.InvariantCulture);
+            var hostname = Dns.GetHostName();
+            var domainName = IPGlobalProperties.GetIPGlobalProperties().DomainName;
+            var domainAsSuffix = $".{domainName}";
+            return hostname.EndsWith(domainAsSuffix) ? hostname : $"{hostname}{domainAsSuffix}";
+        }
+
+        private IEnumerable<byte> HeaderBytes(string pri, LogEventInfo logEvent, EncodingSet encodings)
+        {
             var timestamp = string.Format(CultureInfo.InvariantCulture, TimestampFormat, logEvent.TimeStamp);
-            var hostname = Hostname.RenderOrDefault(logEvent, HostnameMaxLength);
-            var appName = AppName.RenderOrDefault(logEvent, AppNameMaxLength);
-            var procId = ProcId.RenderOrDefault(logEvent, ProcIdMaxLength);
-            var msgId = MsgId.RenderOrDefault(logEvent, MsgIdMaxLength);
-            var header = $"{pri}{version} {timestamp} {hostname} {appName} {procId} {msgId}";
-            return new ASCIIEncoding().GetBytes(header);
+            var hostname = hostnamePolicySet.Apply(Hostname.Render(logEvent));
+            var appName = appNamePolicySet.Apply(AppName.Render(logEvent));
+            var procId = procIdPolicySet.Apply(ProcId.Render(logEvent));
+            var msgId = msgIdPolicySet.Apply(MsgId.Render(logEvent));
+            var header = $"{pri}{Version} {timestamp} {hostname} {appName} {procId} {msgId}";
+            return encodings.Ascii.GetBytes(header);
         }
 
-        private IEnumerable<byte> MsgBytes(string logEntry)
+        private IEnumerable<byte> MsgBytes(string logEntry, int msgPrefixLength, EncodingSet encodings)
         {
-            var utf8Encoding = new UTF8Encoding(!DisableBom);
-            var preamble = utf8Encoding.GetPreamble();
-            var logEntryBytes = utf8Encoding.GetBytes(logEntry);
-            return preamble.Concat(logEntryBytes);
+            var preambleBytes = encodings.Utf8.GetPreamble();
+            var logEntryBytes = encodings.Utf8.GetBytes(logEntry);
+            var msgWithoutPreamblePrefixLength = msgPrefixLength + preambleBytes.Length;
+            var msgWithoutPreambleBytes = msgWithoutPreamblePolicy.Apply(logEntryBytes, msgWithoutPreamblePrefixLength);
+            return preambleBytes.Concat(msgWithoutPreambleBytes);
         }
     }
 }

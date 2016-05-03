@@ -1,3 +1,4 @@
+using NLog.Layouts;
 using System.Collections.Generic;
 
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
@@ -6,9 +7,10 @@ using System.Collections.Generic;
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
 {
-    public class MessageBuildersFacade : MessageBuilder
+    public class MessageBuildersFacade
     {
-        private readonly Dictionary<RfcNumber,MessageBuilder> builders;
+        private MessageBuilder activeBuilder;
+        private readonly Dictionary<RfcNumber, MessageBuilder> builders;
 
         /// <summary>The Syslog protocol RFC to be followed</summary> 
         public RfcNumber Rfc { get; set; }
@@ -19,7 +21,7 @@ namespace NLog.Targets
         /// <summary>RFC 5424 related fields</summary> 
         public Rfc5424 Rfc5424 { get; set; }
 
-        /// <summary>Initializes a new instance of the MessageBuildersFacade class</summary>
+        /// <summary>Builds a new instance of the MessageBuildersFacade class</summary>
         public MessageBuildersFacade()
         {
             Rfc = RfcNumber.Rfc5424;
@@ -32,15 +34,17 @@ namespace NLog.Targets
             };
         }
 
-        /// <summary>Builds the Syslog message according to the RFC to follow</summary>
-        /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <param name="pri">The Syslog PRI part</param>
-        /// <param name="logEntry">The entry to be logged</param>
-        /// <returns>Bytes containing the Syslog message</returns>
-        public override IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
+        /// <summary>Initializes the MessageBuildersFacade</summary>
+        /// <param name="enforcement">The enforcement to apply</param>
+        public void Initialize(Enforcement enforcement)
         {
-            var rfcToFollow = builders[Rfc];
-            return rfcToFollow.BuildMessage(logEvent, pri, logEntry);
+            activeBuilder = builders[Rfc];
+            activeBuilder.Initialize(enforcement);
+        }
+
+        public IEnumerable<IEnumerable<byte>> BuildMessages(LogEventInfo logEvent, Layout layout)
+        {
+            return activeBuilder.BuildMessages(logEvent, layout);
         }
     }
 }

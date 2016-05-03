@@ -49,30 +49,57 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppNamePolicySet.cs" />
+    <Compile Include="DefaultIfEmptyPolicy.cs" />
+    <Compile Include="EncodedContentPolicy.cs" />
+    <Compile Include="EncodingSet.cs" />
+    <Compile Include="Enforcement.cs" />
+    <Compile Include="FqdnHostnamePolicySet.cs" />
     <Compile Include="FramingMethod.cs" />
+    <Compile Include="IBasicPolicy.cs" />
     <Compile Include="MessageBuilder.cs" />
-    <Compile Include="LayoutExtensions.cs" />
+    <Compile Include="Extension.cs" />
     <Compile Include="MessageBuildersFacade.cs" />
+    <Compile Include="MsgIdPolicySet.cs" />
+    <Compile Include="MsgWithoutPreamblePolicy.cs" />
+    <Compile Include="ParamNamePolicySet.cs" />
+    <Compile Include="ParamValuePolicySet.cs" />
+    <Compile Include="PlainContentPolicySet.cs" />
+    <Compile Include="PlainHostnamePolicySet.cs" />
+    <Compile Include="PolicySet.cs" />
+    <Compile Include="ProcIdPolicySet.cs" />
     <Compile Include="ProtocolType.cs" />
+    <Compile Include="ReplaceComputedValuePolicy.cs" />
+    <Compile Include="ReplaceKnownValuePolicy.cs" />
     <Compile Include="Rfc3164.cs" />
     <Compile Include="Rfc5424.cs" />
+    <Compile Include="InternalLogDuplicatesPolicy.cs" />
     <Compile Include="SdElement.cs" />
+    <Compile Include="SdId.cs" />
+    <Compile Include="SdIdPolicySet.cs" />
+    <Compile Include="SdIdToInvalidParamNamePattern.cs" />
     <Compile Include="SdParam.cs" />
+    <Compile Include="SplitOnNewLinePolicy.cs" />
     <Compile Include="StructuredData.cs" />
     <Compile Include="SyslogTarget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RfcNumber.cs" />
     <Compile Include="SyslogFacility.cs" />
     <Compile Include="SyslogSeverity.cs" />
+    <Compile Include="TagPolicySet.cs" />
     <Compile Include="TcpProtocol.cs" />
     <Compile Include="MessageTransmitter.cs" />
     <Compile Include="MessageTransmittersFacade.cs" />
+    <Compile Include="TransliteratePolicy.cs" />
+    <Compile Include="TruncateToComputedValuePolicy.cs" />
+    <Compile Include="TruncateToKnownValuePolicy.cs" />
     <Compile Include="UdpProtocol.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="NLog.Targets.Syslog.snk" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

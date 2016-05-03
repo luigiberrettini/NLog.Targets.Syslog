@@ -6,10 +6,10 @@ using System.Collections.Generic;
 namespace NLog.Targets
 // ReSharper restore CheckNamespace
 {
-    public class MessageTransmittersFacade : MessageTransmitter
+    public class MessageTransmittersFacade
     {
+        private MessageTransmitter activeTransmitter;
         private readonly Dictionary<ProtocolType, MessageTransmitter> transmitters;
-        private MessageTransmitter ProtocolToUse => transmitters[Protocol];
 
         /// <summary>The Syslog server protocol</summary>
         public ProtocolType Protocol { get; set; }
@@ -20,7 +20,7 @@ namespace NLog.Targets
         /// <summary>TCP related fields</summary> 
         public TcpProtocol TcpProtocol { get; set; }
 
-        /// <summary>Initializes a new instance of the MessageTransmittersFacade class</summary>
+        /// <summary>Builds a new instance of the MessageTransmittersFacade class</summary>
         public MessageTransmittersFacade()
         {
             Protocol = ProtocolType.Tcp;
@@ -33,19 +33,19 @@ namespace NLog.Targets
             };
         }
 
-        /// <summary>Applies the framing method of the protocol to use to a Syslog message</summary>
-        /// <param name="syslogMessage">The message to be framed</param>
-        /// <returns>Bytes containing the framed Syslog message or the original Syslog message</returns>
-        public override IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> syslogMessage)
+        public void Initialize()
         {
-            return ProtocolToUse.FrameMessageOrLeaveItUnchanged(syslogMessage);
+            activeTransmitter = transmitters[Protocol];
         }
 
-        /// <summary>Sends a set of Syslog messages with the protocol to use</summary>
-        /// <param name="syslogMessages">The messages to be sent</param>
-        public override void SendMessages(IEnumerable<byte[]> syslogMessages)
+        public IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> syslogMessage)
         {
-            ProtocolToUse.SendMessages(syslogMessages);
+            return activeTransmitter.FrameMessageOrLeaveItUnchanged(syslogMessage);
+        }
+
+        public void SendMessages(IEnumerable<byte[]> syslogMessages)
+        {
+            activeTransmitter.SendMessages(syslogMessages);
         }
     }
 }

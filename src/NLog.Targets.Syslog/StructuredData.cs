@@ -1,6 +1,5 @@
 using NLog.Config;
 using System.Collections.Generic;
-using System.Linq;
 
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 // ReSharper disable MemberCanBePrivate.Global
@@ -18,15 +17,26 @@ namespace NLog.Targets
         [ArrayParameter(typeof(SdElement), nameof(SdElement))]
         public IList<SdElement> SdElements { get; set; }
 
-        /// <summary>Initializes a new instance of the StructuredData class</summary>
+        /// <summary>Builds a new instance of the StructuredData class</summary>
         public StructuredData()
         {
             SdElements = new List<SdElement>();
         }
 
-        public IEnumerable<byte> Bytes(LogEventInfo logEvent)
+        /// <summary>Initializes the StructuredData</summary>
+        /// <param name="enforcement">The enforcement to apply</param>
+        internal void Initialize(Enforcement enforcement)
         {
-            return SdElements.Count == 0 ? NilValueBytes : SdElements.SelectMany(sdElement => sdElement.Bytes(logEvent));
+            SdElements.ForEach(sdElem => sdElem.Initialize(enforcement));
+        }
+
+        /// <summary>Gives the binary representation of the STRUCTURED_DATA part</summary>
+        /// <param name="logEvent">The NLog.LogEventInfo</param>
+        /// <param name="encodings">The encodings to be used</param>
+        /// <returns>Bytes containing the STRUCTURED_DATA part</returns>
+        internal IEnumerable<byte> Bytes(LogEventInfo logEvent, EncodingSet encodings)
+        {
+            return SdElements.Count == 0 ? NilValueBytes : SdElement.Bytes(SdElements, logEvent, encodings);
         }
     }
 }

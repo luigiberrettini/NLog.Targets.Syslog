@@ -35,22 +35,25 @@ namespace NLog.Targets
         /// <summary>The transmitter used to send messages to the Syslog server</summary>
         public MessageTransmittersFacade MessageTransmitter { get; set; }
 
-        /// <summary>Whether or not to split each log entry by newlines and send each line separately</summary>
-        public bool SplitNewlines { get; set; }
-
-        /// <summary>The Syslog facility to log from (its name e.g. local0 or local7)</summary>
-        public SyslogFacility Facility { get; set; }
+        /// <summary>The enforcement to be applied on the Syslog message</summary>
+        public Enforcement Enforcement { get; set; }
 
         /// <summary>The builder used to create messages according to RFCs</summary>
         public MessageBuildersFacade MessageBuilder { get; set; }
 
-        /// <summary>Initializes a new instance of the SyslogTarget class</summary>
+        /// <summary>Builds a new instance of the SyslogTarget class</summary>
         public SyslogTarget()
         {
             MessageTransmitter = new MessageTransmittersFacade();
-            SplitNewlines = true;
-            Facility = SyslogFacility.Local1;
+            Enforcement = new Enforcement();
             MessageBuilder = new MessageBuildersFacade();
+        }
+
+        protected override void InitializeTarget()
+        {
+            base.InitializeTarget();
+            MessageTransmitter.Initialize();
+            MessageBuilder.Initialize(Enforcement);
         }
 
         /// <summary>Writes a single event</summary>
@@ -71,14 +74,16 @@ namespace NLog.Targets
 
         private void SendMessages(params AsyncLogEventInfo[] asyncLogEvents)
         {
-            MessageTransmitter.SendMessages(asyncLogEvents.SelectMany(ToMessages));
+            var messages = asyncLogEvents.SelectMany(ToMessages);
+            MessageTransmitter.SendMessages(messages);
         }
 
         private IEnumerable<byte[]> ToMessages(AsyncLogEventInfo asyncLogEvent)
         {
-            return MessageBuilder
-                .BuildMessages(Facility, asyncLogEvent.LogEvent, Layout, SplitNewlines)
+            var messages = MessageBuilder
+                .BuildMessages(asyncLogEvent.LogEvent, Layout)
                 .Select(syslogMessage => MessageTransmitter.FrameMessageOrLeaveItUnchanged(syslogMessage).ToArray());
+            return messages;
         }
     }
 }

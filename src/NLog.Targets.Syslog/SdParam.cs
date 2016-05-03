@@ -2,8 +2,6 @@ using NLog.Config;
 using NLog.Layouts;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 
 // ReSharper disable UnusedAutoPropertyAccessor.Global
 // ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
@@ -16,10 +14,11 @@ namespace NLog.Targets
     [NLogConfigurationItem]
     public class SdParam
     {
+        private ParamNamePolicySet paramNamePolicySet;
+        private ParamValuePolicySet paramValuePolicySet;
+        private static readonly byte[] SpaceBytes = { 0x20 };
         private static readonly byte[] EqualBytes = { 0x3D };
         private static readonly byte[] QuotesBytes = { 0x22 };
-        private const string ValueSearchPattern = @"([^\\""\]]*)([\\""\]])([^\\""\]]*)";
-        private const string ValueReplacementPattern = "$1\\$2$3";
 
         /// <summary>The PARAM-NAME field of this SD-PARAM</summary>
         public Layout Name { get; set; }
@@ -27,28 +26,44 @@ namespace NLog.Targets
         /// <summary>The PARAM-VALUE field of this SD-PARAM</summary>
         public Layout Value { get; set; }
 
-        /// <summary>Gives the binary representation of this SD-PARAM field</summary>
-        /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <returns>Bytes containing this SD-PARAM field</returns>
-        public IEnumerable<byte> Bytes(LogEventInfo logEvent)
+        /// <summary>Initializes the SdParam</summary>
+        /// <param name="enforcement">The enforcement to apply</param>
+        internal void Initialize(Enforcement enforcement)
         {
-            return NameBytes(logEvent)
+            paramNamePolicySet = new ParamNamePolicySet(enforcement); 
+            paramValuePolicySet = new ParamValuePolicySet(enforcement); 
+        }
+
+        /// <summary>Gives the binary representation of a list of SD-PARAMs field</summary>
+        /// <param name="sdParams">The SD-PARAMs to be represented as binary</param>
+        /// <param name="logEvent">The NLog.LogEventInfo</param>
+        /// <param name="encodings"></param>
+        /// <param name="invalidNamesPattern"></param>
+        /// <returns>Bytes containing this SD-PARAM field</returns>
+        internal static IEnumerable<byte> Bytes(IEnumerable<SdParam> sdParams, LogEventInfo logEvent, string invalidNamesPattern, EncodingSet encodings)
+        {
+            return  sdParams.SelectMany(sdParam => SpaceBytes.Concat(sdParam.Bytes(logEvent, invalidNamesPattern, encodings)));
+        }
+
+        private IEnumerable<byte> Bytes(LogEventInfo logEvent, string invalidNamesPattern, EncodingSet encodings)
+        {
+            return NameBytes(logEvent, invalidNamesPattern, encodings)
                 .Concat(EqualBytes)
                 .Concat(QuotesBytes)
-                .Concat(ValueBytes(logEvent))
+                .Concat(ValueBytes(logEvent, encodings))
                 .Concat(QuotesBytes);
         }
 
-        private IEnumerable<byte> NameBytes(LogEventInfo logEvent)
+        private IEnumerable<byte> NameBytes(LogEventInfo logEvent, string invalidNamesPattern, EncodingSet encodings)
         {
-            var paramName = Name.Render(logEvent);
-            return new ASCIIEncoding().GetBytes(paramName);
+            var paramName = paramNamePolicySet.Apply(Name.Render(logEvent), invalidNamesPattern);
+            return encodings.Ascii.GetBytes(paramName);
         }
 
-        private IEnumerable<byte> ValueBytes(LogEventInfo logEvent)
+        private IEnumerable<byte> ValueBytes(LogEventInfo logEvent, EncodingSet encodings)
         {
-            var paramValue = Regex.Replace(Value.Render(logEvent), ValueSearchPattern, ValueReplacementPattern);
-            return new UTF8Encoding().GetBytes(paramValue);
+            var paramValue = paramValuePolicySet.Apply(Value.Render(logEvent));
+            return encodings.Utf8.GetBytes(paramValue);
         }
     }
 }
