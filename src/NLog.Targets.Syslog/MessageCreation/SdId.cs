@@ -44,5 +44,11 @@ namespace NLog.Targets.Syslog.MessageCreation
             var sdId = sdIdPolicySet.Apply(Render(logEvent));
             return encodings.Ascii.GetBytes(sdId);
         }
+
+        public override string ToString()
+        {
+            var nullEvent = LogEventInfo.CreateNullEvent();
+            return Render(nullEvent);
+        }
     }
 }

@@ -27,19 +27,22 @@ namespace NLog.Targets.Syslog.MessageCreation
             SdParams = new List<SdParam>();
         }
 
-        /// <summary>Initializes the SdElement</summary>
-        /// <param name="enforcement">The enforcement to apply</param>
         internal void Initialize(Enforcement enforcement)
         {
             SdId.Initialize(enforcement);
             SdParams.ForEach(sdParam => sdParam.Initialize(enforcement));
         }
 
-        /// <summary>Gives the binary representation of a list of SD-ELEMENT fields</summary>
-        /// <param name="sdElements">The SD-ELEMENT fields to be represented as binary</param>
-        /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <param name="encodings">The encodings to be used</param>
-        /// <returns>Bytes containing the list of SD-ELEMENT fields</returns>
+        internal static string ToString(IEnumerable<SdElement> sdElements)
+        {
+            return sdElements.Aggregate(string.Empty, (acc, curr) => acc.ToString() + curr.ToString());
+        }
+
+        public override string ToString()
+        {
+            return $"[{SdId}{SdParam.ToString(SdParams)}]";
+        }
+
         internal static IEnumerable<byte> Bytes(IEnumerable<SdElement> sdElements, LogEventInfo logEvent, EncodingSet encodings)
         {
             var elements = sdElements.ToList();

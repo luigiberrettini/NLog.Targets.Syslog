@@ -28,6 +28,17 @@ namespace NLog.Targets.Syslog.MessageCreation
             paramValuePolicySet = new ParamValuePolicySet(enforcement);
         }
 
+        internal static string ToString(IEnumerable<SdParam> sdParams)
+        {
+            return sdParams.Aggregate(string.Empty, (acc, cur) => $"{acc} {cur.ToString()}");
+        }
+
+        public override string ToString()
+        {
+            var nullEvent = LogEventInfo.CreateNullEvent();
+            return $"{Name.Render(nullEvent)}=\"{Value.Render(nullEvent)}\"";
+        }
+
         internal static IEnumerable<byte> Bytes(IEnumerable<SdParam> sdParams, LogEventInfo logEvent, string invalidNamesPattern, EncodingSet encodings)
         {
             return sdParams.SelectMany(sdParam => SpaceBytes.Concat(sdParam.Bytes(logEvent, invalidNamesPattern, encodings)));
