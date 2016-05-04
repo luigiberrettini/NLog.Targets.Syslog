@@ -1,4 +1,4 @@
-using System.Text;
+using UnidecodeSharpFork;
 
 namespace NLog.Targets.Syslog.Policies
 {
@@ -18,7 +18,7 @@ namespace NLog.Targets.Syslog.Policies
 
         public string Apply(string s)
         {
-            return s.Length == 0 ? s : s.Normalize(NormalizationForm.FormKD);
+            return s.Length == 0 ? s : s.Unidecode();
         }
     }
 }
