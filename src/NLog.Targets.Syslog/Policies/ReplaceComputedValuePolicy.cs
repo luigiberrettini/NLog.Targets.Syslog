@@ -1,3 +1,4 @@
+using NLog.Common;
 using System.Text.RegularExpressions;
 
 namespace NLog.Targets.Syslog.Policies
@@ -20,7 +21,12 @@ namespace NLog.Targets.Syslog.Policies
 
         public string Apply(string s, string searchFor)
         {
-            return string.IsNullOrEmpty(searchFor) || s.Length == 0 ? s : Regex.Replace(s, searchFor, replaceWith);
+            if (string.IsNullOrEmpty(searchFor) || string.IsNullOrEmpty(replaceWith) || s.Length == 0)
+                return s;
+
+            var replaced = Regex.Replace(s, searchFor, replaceWith);
+            InternalLogger.Trace($"Replacing {searchFor} with {replaceWith} given {s}: {replaced}");
+            return replaced;
         }
     }
 }

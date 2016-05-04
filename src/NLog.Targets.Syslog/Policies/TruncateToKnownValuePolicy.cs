@@ -1,3 +1,5 @@
+using NLog.Common;
+
 namespace NLog.Targets.Syslog.Policies
 {
     internal class TruncateToKnownValuePolicy : IBasicPolicy<string, string>
@@ -18,8 +20,12 @@ namespace NLog.Targets.Syslog.Policies
 
         public string Apply(string s)
         {
-            return s.Length <= maxLength ? s : s.Substring(0, maxLength);
+            if (s.Length <= maxLength)
+                return s;
 
+            var truncated = s.Substring(0, maxLength);
+            InternalLogger.Trace($"Truncating {s} to {maxLength}: {truncated}");
+            return truncated;
         }
     }
 }

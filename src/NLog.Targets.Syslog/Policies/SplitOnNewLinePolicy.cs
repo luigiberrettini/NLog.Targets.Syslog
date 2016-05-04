@@ -1,3 +1,4 @@
+using NLog.Common;
 using System;
 using System.Collections.Generic;
 
@@ -20,6 +21,7 @@ namespace NLog.Targets.Syslog.Policies
 
         public IEnumerable<string> Apply(string s)
         {
+            InternalLogger.Trace($"Splitting on new line {s}");
             return s.Split(LineSeps, StringSplitOptions.RemoveEmptyEntries);
         }
     }

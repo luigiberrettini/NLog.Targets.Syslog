@@ -1,3 +1,4 @@
+using NLog.Common;
 using UnidecodeSharpFork;
 
 namespace NLog.Targets.Syslog.Policies
@@ -18,7 +19,12 @@ namespace NLog.Targets.Syslog.Policies
 
         public string Apply(string s)
         {
-            return s.Length == 0 ? s : s.Unidecode();
+            if (s.Length == 0)
+                return s;
+
+            var unidecoded = s.Unidecode();
+            InternalLogger.Trace($"Transliterated {s} to {unidecoded}");
+            return unidecoded;
         }
     }
 }
