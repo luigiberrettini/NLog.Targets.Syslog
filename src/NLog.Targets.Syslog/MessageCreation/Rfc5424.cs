@@ -62,9 +62,9 @@ namespace NLog.Targets.Syslog.MessageCreation
             DisableBom = false;
         }
 
-        internal override void Initialize(Enforcement enforcement)
+        internal override void Initialize(Enforcement enforcement, Facility facility)
         {
-            base.Initialize(enforcement);
+            base.Initialize(enforcement, facility);
             hostnamePolicySet = new FqdnHostnamePolicySet(enforcement, defaultHostname);
             appNamePolicySet = new AppNamePolicySet(enforcement, defaultAppName);
             procIdPolicySet = new ProcIdPolicySet(enforcement);

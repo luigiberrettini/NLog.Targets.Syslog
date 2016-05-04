@@ -9,6 +9,9 @@ namespace NLog.Targets.Syslog.MessageCreation
         private MessageBuilder activeBuilder;
         private readonly Dictionary<RfcNumber, MessageBuilder> builders;
 
+        /// <summary>The Syslog facility to log from (its name e.g. local0 or local7)</summary>
+        public Facility Facility { get; set; }
+
         /// <summary>The Syslog protocol RFC to be followed</summary> 
         public RfcNumber Rfc { get; set; }
 
@@ -21,6 +24,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         /// <summary>Builds a new instance of the MessageBuildersFacade class</summary>
         public MessageBuildersFacade()
         {
+            Facility = Facility.Local1;
             Rfc = RfcNumber.Rfc5424;
             Rfc3164 = new Rfc3164();
             Rfc5424 = new Rfc5424();
@@ -34,7 +38,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         internal void Initialize(Enforcement enforcement)
         {
             activeBuilder = builders[Rfc];
-            activeBuilder.Initialize(enforcement);
+            activeBuilder.Initialize(enforcement, Facility);
         }
 
         internal IEnumerable<IEnumerable<byte>> BuildMessages(LogEventInfo logEvent, Layout layout)

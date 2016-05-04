@@ -34,9 +34,9 @@ namespace NLog.Targets.Syslog.MessageCreation
             Tag = Assembly.GetCallingAssembly().GetName().Name;
         }
 
-        internal override void Initialize(Enforcement enforcement)
+        internal override void Initialize(Enforcement enforcement, Facility facility)
         {
-            base.Initialize(enforcement);
+            base.Initialize(enforcement, facility);
             hostnamePolicySet = new PlainHostnamePolicySet(enforcement);
             tagPolicySet = new TagPolicySet(enforcement);
             plainContentPolicySet = new PlainContentPolicySet(enforcement);

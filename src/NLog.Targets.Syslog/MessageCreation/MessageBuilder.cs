@@ -12,17 +12,12 @@ namespace NLog.Targets.Syslog.MessageCreation
         private SplitOnNewLinePolicy splitOnNewLinePolicy;
 
         /// <summary>The Syslog facility to log from (its name e.g. local0 or local7)</summary>
-        public Facility Facility { get; set; }
+        protected Facility Facility { get; set; }
 
-        /// <summary>Builds the base part of a new instance of a class inheriting from MessageBuilder</summary>
-        protected MessageBuilder()
+        internal virtual void Initialize(Enforcement enforcement, Facility facility)
         {
-            Facility = Facility.Local1;
-        }
-
-        internal virtual void Initialize(Enforcement initedEnforcement)
-        {
-            splitOnNewLinePolicy = new SplitOnNewLinePolicy(initedEnforcement);
+            splitOnNewLinePolicy = new SplitOnNewLinePolicy(enforcement);
+            Facility = facility;
         }
 
         internal IEnumerable<IEnumerable<byte>> BuildMessages(LogEventInfo logEvent, Layout layout)
