@@ -17,16 +17,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 using NLog.Common;
-using System.Collections.Generic;
-using System.Linq;
 using NLog.Targets.Syslog.MessageCreation;
 using NLog.Targets.Syslog.MessageSend;
 using NLog.Targets.Syslog.Policies;
+using System.Collections.Generic;
+using System.Linq;
 
-// ReSharper disable UnusedMember.Global
-// ReSharper disable UnusedAutoPropertyAccessor.Global
-// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
-// ReSharper disable MemberCanBePrivate.Global
 namespace NLog.Targets.Syslog
 {
     /// <summary>Enables logging to a Unix-style Syslog server using NLog</summary>

@@ -1,8 +1,8 @@
-using System.Collections.Generic;
-using System.Linq;
 using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets.Syslog.Policies;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {
@@ -26,8 +26,8 @@ namespace NLog.Targets.Syslog.MessageCreation
         /// <param name="enforcement">The enforcement to apply</param>
         internal void Initialize(Enforcement enforcement)
         {
-            paramNamePolicySet = new ParamNamePolicySet(enforcement); 
-            paramValuePolicySet = new ParamValuePolicySet(enforcement); 
+            paramNamePolicySet = new ParamNamePolicySet(enforcement);
+            paramValuePolicySet = new ParamValuePolicySet(enforcement);
         }
 
         /// <summary>Gives the binary representation of a list of SD-PARAMs field</summary>
@@ -38,7 +38,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         /// <returns>Bytes containing this SD-PARAM field</returns>
         internal static IEnumerable<byte> Bytes(IEnumerable<SdParam> sdParams, LogEventInfo logEvent, string invalidNamesPattern, EncodingSet encodings)
         {
-            return  sdParams.SelectMany(sdParam => SpaceBytes.Concat(sdParam.Bytes(logEvent, invalidNamesPattern, encodings)));
+            return sdParams.SelectMany(sdParam => SpaceBytes.Concat(sdParam.Bytes(logEvent, invalidNamesPattern, encodings)));
         }
 
         private IEnumerable<byte> Bytes(LogEventInfo logEvent, string invalidNamesPattern, EncodingSet encodings)

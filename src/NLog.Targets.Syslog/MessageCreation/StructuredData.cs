@@ -1,6 +1,6 @@
-using System.Collections.Generic;
 using NLog.Config;
 using NLog.Targets.Syslog.Policies;
+using System.Collections.Generic;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {

@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using NLog.Config;
+using NLog.Layouts;
+using NLog.Targets.Syslog.Policies;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
-using NLog.Config;
-using NLog.Layouts;
-using NLog.Targets.Syslog.Policies;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {

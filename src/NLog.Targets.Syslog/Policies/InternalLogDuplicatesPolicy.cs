@@ -1,8 +1,8 @@
 using NLog.Common;
+using NLog.Targets.Syslog.MessageCreation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using NLog.Targets.Syslog.MessageCreation;
 
 namespace NLog.Targets.Syslog.Policies
 {

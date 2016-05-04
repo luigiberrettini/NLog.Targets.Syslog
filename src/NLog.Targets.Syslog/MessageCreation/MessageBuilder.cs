@@ -1,8 +1,8 @@
+using NLog.Layouts;
+using NLog.Targets.Syslog.Policies;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using NLog.Layouts;
-using NLog.Targets.Syslog.Policies;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {
