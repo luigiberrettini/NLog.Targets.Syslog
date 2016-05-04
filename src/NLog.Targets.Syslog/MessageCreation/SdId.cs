@@ -15,9 +15,22 @@ namespace NLog.Targets.Syslog.MessageCreation
             DuplicatesPolicy = new InternalLogDuplicatesPolicy();
         }
 
+        public SdId() : this(string.Empty)
+        {
+        }
+
+        public SdId(string text) : base(text)
+        {
+        }
+
         internal void Initialize(Enforcement enforcement)
         {
             sdIdPolicySet = new SdIdPolicySet(enforcement);
+        }
+
+        public static implicit operator SdId(string text)
+        {
+            return new SdId(text);
         }
 
         internal static IEnumerable<IEnumerable<byte>> Bytes(IEnumerable<SdId> sdIds, LogEventInfo logEvent, EncodingSet encodings)
