@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace NLog.Targets
+namespace NLog.Targets.Syslog.Policies
 {
     internal class SdIdPolicySet : PolicySet
     {

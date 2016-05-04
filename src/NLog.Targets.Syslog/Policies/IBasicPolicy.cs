@@ -1,4 +1,4 @@
-namespace NLog.Targets
+namespace NLog.Targets.Syslog.Policies
 {
     internal interface IBasicPolicy<in T, out TResult>
     {

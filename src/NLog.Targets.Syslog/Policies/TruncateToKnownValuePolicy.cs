@@ -1,4 +1,4 @@
-namespace NLog.Targets
+namespace NLog.Targets.Syslog.Policies
 {
     internal class TruncateToKnownValuePolicy : IBasicPolicy<string, string>
     {

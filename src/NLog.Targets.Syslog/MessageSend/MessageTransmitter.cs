@@ -2,12 +2,7 @@
 using System.Linq;
 using System.Net;
 
-// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
-// ReSharper disable MemberCanBeProtected.Global
-// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable CheckNamespace
-namespace NLog.Targets
-// ReSharper restore CheckNamespace
+namespace NLog.Targets.Syslog.MessageSend
 {
     public abstract class MessageTransmitter
     {

@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace NLog.Targets
+namespace NLog.Targets.Syslog.Policies
 {
     internal class ReplaceKnownValuePolicy : IBasicPolicy<string, string>
     {

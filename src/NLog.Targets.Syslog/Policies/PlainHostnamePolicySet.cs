@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace NLog.Targets
+namespace NLog.Targets.Syslog.Policies
 {
     internal class PlainHostnamePolicySet : PolicySet
     {

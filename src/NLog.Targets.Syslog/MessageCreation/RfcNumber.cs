@@ -1,7 +1,4 @@
-﻿// ReSharper disable UnusedMember.Global
-// ReSharper disable CheckNamespace
-namespace NLog.Targets
-// ReSharper restore CheckNamespace
+﻿namespace NLog.Targets.Syslog.MessageCreation
 {
     /// <summary>The Syslog protocol RFC to be followed</summary>
     public enum RfcNumber

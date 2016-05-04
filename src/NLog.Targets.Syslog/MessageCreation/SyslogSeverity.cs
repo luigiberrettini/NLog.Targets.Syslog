@@ -1,10 +1,6 @@
 ﻿using System;
 
-// ReSharper disable UnusedMember.Global
-// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable CheckNamespace
-namespace NLog.Targets
-// ReSharper enable CheckNamespace
+namespace NLog.Targets.Syslog.MessageCreation
 {
     /// <summary>Syslog severities</summary>
     internal class SyslogSeverity : IComparable<SyslogSeverity>

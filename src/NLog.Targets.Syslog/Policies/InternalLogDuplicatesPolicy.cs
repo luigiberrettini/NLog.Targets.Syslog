@@ -2,10 +2,9 @@ using NLog.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using NLog.Targets.Syslog.MessageCreation;
 
-// ReSharper disable CheckNamespace
-namespace NLog.Targets
-// ReSharper restore CheckNamespace
+namespace NLog.Targets.Syslog.Policies
 {
     internal class InternalLogDuplicatesPolicy
     {

@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace NLog.Targets
+namespace NLog.Targets.Syslog.MessageCreation
 {
     internal class EncodingSet
     {

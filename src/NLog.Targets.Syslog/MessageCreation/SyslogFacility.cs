@@ -1,7 +1,4 @@
-﻿// ReSharper disable UnusedMember.Global
-// ReSharper disable CheckNamespace
-namespace NLog.Targets
-// ReSharper enable CheckNamespace
+﻿namespace NLog.Targets.Syslog.MessageCreation
 {
     /// <summary>Syslog facilities</summary>
     public enum SyslogFacility

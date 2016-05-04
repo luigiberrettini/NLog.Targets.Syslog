@@ -1,7 +1,4 @@
-﻿// ReSharper disable UnusedMember.Global
-// ReSharper disable CheckNamespace
-namespace NLog.Targets
-// ReSharper restore CheckNamespace
+﻿namespace NLog.Targets.Syslog.MessageSend
 {
     /// <summary>The protocol to be used when transmitting a message</summary>
     public enum ProtocolType

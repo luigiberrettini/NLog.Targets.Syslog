@@ -1,11 +1,9 @@
-using NLog.Layouts;
 using System.Collections.Generic;
 using System.Linq;
+using NLog.Layouts;
+using NLog.Targets.Syslog.Policies;
 
-// ReSharper disable ClassNeverInstantiated.Global
-// ReSharper disable CheckNamespace
-namespace NLog.Targets
-// ReSharper restore CheckNamespace
+namespace NLog.Targets.Syslog.MessageCreation
 {
     public class SdId : SimpleLayout
     {

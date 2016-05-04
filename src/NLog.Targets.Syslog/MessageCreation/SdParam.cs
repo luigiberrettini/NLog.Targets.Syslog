@@ -1,14 +1,10 @@
-using NLog.Config;
-using NLog.Layouts;
 using System.Collections.Generic;
 using System.Linq;
+using NLog.Config;
+using NLog.Layouts;
+using NLog.Targets.Syslog.Policies;
 
-// ReSharper disable UnusedAutoPropertyAccessor.Global
-// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
-// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable CheckNamespace
-namespace NLog.Targets
-// ReSharper restore CheckNamespace
+namespace NLog.Targets.Syslog.MessageCreation
 {
     /// <summary>A Syslog SD-PARAM field</summary>
     [NLogConfigurationItem]

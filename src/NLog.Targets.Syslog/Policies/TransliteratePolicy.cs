@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace NLog.Targets
+namespace NLog.Targets.Syslog.Policies
 {
     internal class TransliteratePolicy : IBasicPolicy<string, string>
     {

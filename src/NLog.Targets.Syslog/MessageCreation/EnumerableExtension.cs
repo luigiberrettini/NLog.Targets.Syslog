@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-// ReSharper disable CheckNamespace
-namespace NLog.Targets
-// ReSharper restore CheckNamespace
+namespace NLog.Targets.Syslog.MessageCreation
 {
     internal static class EnumerableExtension
     {

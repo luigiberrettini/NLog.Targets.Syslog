@@ -1,11 +1,8 @@
-using NLog.Config;
 using System.Collections.Generic;
+using NLog.Config;
+using NLog.Targets.Syslog.Policies;
 
-// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
-// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable CheckNamespace
-namespace NLog.Targets
-// ReSharper restore CheckNamespace
+namespace NLog.Targets.Syslog.MessageCreation
 {
     /// <summary>A Syslog STRUCTURED-DATA part</summary>
     [NLogConfigurationItem]

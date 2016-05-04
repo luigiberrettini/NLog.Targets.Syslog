@@ -1,14 +1,10 @@
-using NLog.Layouts;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using NLog.Layouts;
+using NLog.Targets.Syslog.Policies;
 
-// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
-// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable UnusedAutoPropertyAccessor.Global
-// ReSharper disable CheckNamespace
-namespace NLog.Targets
-// ReSharper restore CheckNamespace
+namespace NLog.Targets.Syslog.MessageCreation
 {
     /// <summary>Allows to build Syslog messages</summary>
     public abstract class MessageBuilder

@@ -7,12 +7,7 @@ using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Text;
 
-// ReSharper disable UnusedAutoPropertyAccessor.Global
-// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
-// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable CheckNamespace
-namespace NLog.Targets
-// ReSharper restore CheckNamespace
+namespace NLog.Targets.Syslog.MessageSend
 {
     [DisplayName("Tcp")]
     public class TcpProtocol : MessageTransmitter

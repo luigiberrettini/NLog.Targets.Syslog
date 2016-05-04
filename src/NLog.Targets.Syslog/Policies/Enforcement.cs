@@ -1,10 +1,4 @@
-﻿using NLog.Layouts;
-
-// ReSharper disable UnusedAutoPropertyAccessor.Global
-// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable CheckNamespace
-namespace NLog.Targets
-// ReSharper restore CheckNamespace
+﻿namespace NLog.Targets.Syslog.Policies
 {
     public class Enforcement
     {
