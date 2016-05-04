@@ -15,8 +15,9 @@ namespace NLog.Targets.Syslog.Policies
                 .GroupBy(toBeCompared)
                 .Where(g => g.Count() > 1)
                 .Select(y => y.Key)
-                .Aggregate((current, next) => current + ", " + next);
-            InternalLogger.Debug("Duplicates found: {duplicates}");
+                .Aggregate(string.Empty, (acc, cur) => acc + ", " + cur);
+            if (duplicates.Any())
+                InternalLogger.Debug($"Duplicates found: {duplicates}");
             return list;
         }
     }
