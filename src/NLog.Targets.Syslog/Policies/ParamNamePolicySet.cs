@@ -1,22 +1,35 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace NLog.Targets.Syslog.Policies
 {
     internal class ParamNamePolicySet
     {
+        private const string NonSafePrintUsAscii = @"[^\u0022\u003D\u005D\u0020-\u007E]";
         private const int ParamNameMaxLength = 32;
         private const string QuestionMark = "?";
+        private readonly List<IBasicPolicy<string, string>> basicPolicies;
         private readonly ReplaceComputedValuePolicy replaceComputedValuePolicy;
-        private readonly TruncateToKnownValuePolicy truncateToKnownValuePolicy;
 
-        public ParamNamePolicySet(Enforcement initedEnforcement)
+        public ParamNamePolicySet(Enforcement enforcement)
         {
-            truncateToKnownValuePolicy = new TruncateToKnownValuePolicy(initedEnforcement, ParamNameMaxLength);
-            replaceComputedValuePolicy = new ReplaceComputedValuePolicy(initedEnforcement, QuestionMark);
+            basicPolicies = new List<IBasicPolicy<string, string>>
+            {
+                new TransliteratePolicy(enforcement),
+                new ReplaceKnownValuePolicy(enforcement, NonSafePrintUsAscii, QuestionMark),
+                new TruncateToKnownValuePolicy(enforcement, ParamNameMaxLength)
+            };
+            replaceComputedValuePolicy = new ReplaceComputedValuePolicy(enforcement, QuestionMark);
         }
         public string Apply(string s, string replaceWith)
         {
-            var a = truncateToKnownValuePolicy.IsApplicable() ? truncateToKnownValuePolicy.Apply(s) : s;
-            var b = replaceComputedValuePolicy.IsApplicable() ? replaceComputedValuePolicy.Apply(a, replaceWith) : a;
-            return b;
+            var afterBasicPolicies = basicPolicies
+                .Where(p => p.IsApplicable())
+                .Aggregate(s, (acc, curr) => curr.Apply(acc));
+
+            return replaceComputedValuePolicy.IsApplicable() ?
+                replaceComputedValuePolicy.Apply(afterBasicPolicies, replaceWith) :
+                afterBasicPolicies;
         }
     }
 }

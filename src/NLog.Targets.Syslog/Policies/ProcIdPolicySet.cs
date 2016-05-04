@@ -7,13 +7,14 @@ namespace NLog.Targets.Syslog.Policies
         private const string QuestionMark = "?";
         private const int ProcIdMaxLength = 128;
 
-        public ProcIdPolicySet(Enforcement initedEnforcement)
+        public ProcIdPolicySet(Enforcement enforcement)
         {
             AddPolicies(new IBasicPolicy<string, string>[]
             {
-                new DefaultIfEmptyPolicy(initedEnforcement, NilValue),
-                new ReplaceKnownValuePolicy(initedEnforcement, NonPrintUsAscii, QuestionMark),
-                new TruncateToKnownValuePolicy(initedEnforcement, ProcIdMaxLength),
+                new TransliteratePolicy(enforcement),
+                new DefaultIfEmptyPolicy(enforcement, NilValue),
+                new ReplaceKnownValuePolicy(enforcement, NonPrintUsAscii, QuestionMark),
+                new TruncateToKnownValuePolicy(enforcement, ProcIdMaxLength),
             });
         }
     }

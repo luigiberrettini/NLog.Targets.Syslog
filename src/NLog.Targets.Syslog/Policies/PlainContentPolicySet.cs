@@ -9,12 +9,13 @@ namespace NLog.Targets.Syslog.Policies
         private const string NonAlphaNumericFirstChar = @"^([a-zA-Z0-9])(.*)$";
         private const string PrefixWithSpaceReplacement = " $1$2";
 
-        public PlainContentPolicySet(Enforcement initedEnforcement)
+        public PlainContentPolicySet(Enforcement enforcement)
         {
             AddPolicies(new List<IBasicPolicy<string, string>>
             {
-                new ReplaceKnownValuePolicy(initedEnforcement, NonSpaceOrPrintUsAscii, QuestionMark),
-                new ReplaceKnownValuePolicy(initedEnforcement, NonAlphaNumericFirstChar, PrefixWithSpaceReplacement),
+                new TransliteratePolicy(enforcement),
+                new ReplaceKnownValuePolicy(enforcement, NonSpaceOrPrintUsAscii, QuestionMark),
+                new ReplaceKnownValuePolicy(enforcement, NonAlphaNumericFirstChar, PrefixWithSpaceReplacement),
             });
         }
     }

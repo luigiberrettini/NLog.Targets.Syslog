@@ -13,12 +13,13 @@ namespace NLog.Targets.Syslog.Policies
         private const string QuestionMark = "?";
         private const int SdIdMaxLength = 32;
 
-        public SdIdPolicySet(Enforcement initedEnforcement)
+        public SdIdPolicySet(Enforcement enforcement)
         {
             AddPolicies(new List<IBasicPolicy<string, string>>
             {
-                new ReplaceKnownValuePolicy(initedEnforcement, InvalidSdId, QuestionMark),
-                new TruncateToKnownValuePolicy(initedEnforcement,SdIdMaxLength)
+                new TransliteratePolicy(enforcement),
+                new ReplaceKnownValuePolicy(enforcement, InvalidSdId, QuestionMark),
+                new TruncateToKnownValuePolicy(enforcement,SdIdMaxLength)
             });
         }
     }

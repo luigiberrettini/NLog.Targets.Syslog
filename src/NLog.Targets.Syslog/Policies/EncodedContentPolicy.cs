@@ -7,9 +7,9 @@ namespace NLog.Targets.Syslog.Policies
         private const bool AssumeAsciiEncoding = true;
         private readonly TruncateToComputedValuePolicy truncatePolicy;
 
-        public EncodedContentPolicy(Enforcement initedEnforcement)
+        public EncodedContentPolicy(Enforcement enforcement)
         {
-            truncatePolicy = new TruncateToComputedValuePolicy(initedEnforcement, AssumeAsciiEncoding);
+            truncatePolicy = new TruncateToComputedValuePolicy(enforcement, AssumeAsciiEncoding);
         }
 
         public IEnumerable<byte> Apply(byte[] bytes, int prefixLength)

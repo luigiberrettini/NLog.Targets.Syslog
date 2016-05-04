@@ -6,13 +6,14 @@ namespace NLog.Targets.Syslog.Policies
         private const string QuestionMark = "?";
         private const int HostnameMaxLength = 255;
 
-        public FqdnHostnamePolicySet(Enforcement initedEnforcement, string defaultHostname)
+        public FqdnHostnamePolicySet(Enforcement enforcement, string defaultHostname)
         {
             AddPolicies(new IBasicPolicy<string, string>[]
             {
-                new DefaultIfEmptyPolicy(initedEnforcement, defaultHostname),
-                new ReplaceKnownValuePolicy(initedEnforcement, NonPrintUsAscii, QuestionMark),
-                new TruncateToKnownValuePolicy(initedEnforcement, HostnameMaxLength),
+                new TransliteratePolicy(enforcement),
+                new DefaultIfEmptyPolicy(enforcement, defaultHostname),
+                new ReplaceKnownValuePolicy(enforcement, NonPrintUsAscii, QuestionMark),
+                new TruncateToKnownValuePolicy(enforcement, HostnameMaxLength),
             });
         }
     }

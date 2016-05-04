@@ -7,12 +7,13 @@ namespace NLog.Targets.Syslog.Policies
         private const string NonPrintUsAscii = @"[^\u0021-\u007E]";
         private const string QuestionMark = "?";
 
-        public PlainHostnamePolicySet(Enforcement initedEnforcement)
+        public PlainHostnamePolicySet(Enforcement enforcement)
         {
             AddPolicies(new IBasicPolicy<string, string>[]
             {
-                new DefaultIfEmptyPolicy(initedEnforcement, Dns.GetHostName()),
-                new ReplaceKnownValuePolicy(initedEnforcement, NonPrintUsAscii, QuestionMark)
+                new TransliteratePolicy(enforcement),
+                new DefaultIfEmptyPolicy(enforcement, Dns.GetHostName()),
+                new ReplaceKnownValuePolicy(enforcement, NonPrintUsAscii, QuestionMark)
             });
         }
     }

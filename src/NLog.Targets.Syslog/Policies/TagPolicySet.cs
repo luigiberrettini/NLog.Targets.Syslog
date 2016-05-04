@@ -6,12 +6,13 @@ namespace NLog.Targets.Syslog.Policies
         private const string QuestionMark = "?";
         private const int TagMaxLength = 32;
 
-        public TagPolicySet(Enforcement initedEnforcement)
+        public TagPolicySet(Enforcement enforcement)
         {
             AddPolicies(new IBasicPolicy<string, string>[]
             {
-                new ReplaceKnownValuePolicy(initedEnforcement, NonAlphaNumeric, QuestionMark),
-                new TruncateToKnownValuePolicy(initedEnforcement, TagMaxLength),
+                new TransliteratePolicy(enforcement),
+                new ReplaceKnownValuePolicy(enforcement, NonAlphaNumeric, QuestionMark),
+                new TruncateToKnownValuePolicy(enforcement, TagMaxLength),
             });
         }
     }

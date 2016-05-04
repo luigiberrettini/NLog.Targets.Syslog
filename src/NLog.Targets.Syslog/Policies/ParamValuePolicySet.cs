@@ -7,11 +7,11 @@ namespace NLog.Targets.Syslog.Policies
         private const string InvalidParamValuePattern = @"([^\\""\]]*)([\\""\]])([^\\""\]]*)";
         private const string InvalidParamValueReplacement = "$1\\$2$3";
 
-        public ParamValuePolicySet(Enforcement initedEnforcement)
+        public ParamValuePolicySet(Enforcement enforcement)
         {
             AddPolicies(new List<IBasicPolicy<string, string>>
             {
-                new ReplaceKnownValuePolicy(initedEnforcement, InvalidParamValuePattern, InvalidParamValueReplacement)
+                new ReplaceKnownValuePolicy(enforcement, InvalidParamValuePattern, InvalidParamValueReplacement)
             });
         }
     }

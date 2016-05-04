@@ -6,13 +6,14 @@ namespace NLog.Targets.Syslog.Policies
         private const string QuestionMark = "?";
         private const int AppNameMaxLength = 48;
 
-        public AppNamePolicySet(Enforcement initedEnforcement, string defaultAppName)
+        public AppNamePolicySet(Enforcement enforcement, string defaultAppName)
         {
             AddPolicies(new IBasicPolicy<string, string>[]
             {
-                new DefaultIfEmptyPolicy(initedEnforcement, defaultAppName),
-                new ReplaceKnownValuePolicy(initedEnforcement, NonPrintUsAscii, QuestionMark),
-                new TruncateToKnownValuePolicy(initedEnforcement, AppNameMaxLength),
+                new TransliteratePolicy(enforcement),
+                new DefaultIfEmptyPolicy(enforcement, defaultAppName),
+                new ReplaceKnownValuePolicy(enforcement, NonPrintUsAscii, QuestionMark),
+                new TruncateToKnownValuePolicy(enforcement, AppNameMaxLength),
             });
         }
     }
