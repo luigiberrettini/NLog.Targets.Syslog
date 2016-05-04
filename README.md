@@ -15,20 +15,13 @@ Below is a sample NLog.config file:
 <?xml version="1.0" encoding="utf-8"?>
 <nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <extensions>
-    <add assembly="NLog.Targets.Syslog" />
-  </extensions>
-  <variable name="enterpriseId" value="12345"/>
-  <variable name="sequenceId" value="1"/>
   <targets>
     <target type="Syslog" name="cee-udp">
-      <splitNewlines>false</splitNewlines>
-      <facility>Local4</facility>
       <layout type="SimpleLayout" text="@cee: {&quot;message&quot;: &quot;${message}&quot;}" />
       <messageBuilder>
+        <facility>Local4</facility>
         <rfc>Rfc5424</rfc>
         <rfc5424>
-          <protocolVersion>1</protocolVersion>
           <hostname type="SimpleLayout" text="${machinename}" />
           <appName type="SimpleLayout" text="DAEMON.MyAppName" />
           <procId type="SimpleLayout" text="${processid}" />
@@ -39,7 +32,6 @@ Below is a sample NLog.config file:
     </target>
   </targets>
   <rules>
-    <logger name="*" minlevel="Trace" maxlevel="Trace" writeTo="file-tgt" />
     <logger name="*" minlevel="Debug" writeTo="cee-udp" />
   </rules>
 </nlog>
@@ -48,9 +40,51 @@ The package is also available through NuGet. Simply search for "NLog.Targets.Sys
 
 
 ### Options
-This NLog target provides default values for all configuration options.
-Optionally, your configuration can override them using attributes on `target`, as shown in the example configuration above.
-A more detailed example is included as the [TestApp configuration](./src/TestApp/NLog.config).
+This NLog target supports the standard NLog [layout](https://github.com/NLog/NLog/wiki/Layouts)
+directive to modify the log message body (Syslog packet elements are not affected).
+It provides default values for all configuration options which can be overridden
+by means of configuration settings, as shown in the example configuration above.
+A more detailed example is included in the [test application](./src/TestApp/NLog.config).
+
+#### Enforcement element
+* `splitOnNewLine` - `false` or `true` to split log entries on new line (default: `false`)
+* `transliterate` - `false` or `true` to trasliterate strings from Unicode to ASCII when the RFC allows only ASCII characters for a fields (default: `false`)
+* `replaceInvalidCharacters` - `false` or `true` to replace invalid values usually with a question mark (default: `false`)
+* `truncateFieldsToMaxLength` - `false` or `true` to truncate fields to the length specified in the RFC (default: `false`)
+* `truncateMessageTo` - a number specifying the max lenght allowed for the whole message (default: `0` i.e. do not truncate)
+
+The maximum length of a message is detailed in many RFCs that can be summarized as follow:
+
+|                       |  MUST be supported  |  SHOULD be supported  |  MUST NOT exceed (we are limited by Int32.MaxValue) 
+| :-------------------: | :-----------------: | :-------------------: | :--------------------------------------------------:
+|  RFC 3164 (UDP)       |  1024 B             |  1024 B               |  1024 B                                             
+|  RFC 6587 (TCP)       |  1024 B             |  1024 B               |  1024 B                                             
+|  RFC 5424 (TCP/UDP)   |   480 B             |  2048 B               |  -                                                  
+|  RFC 5426 (UDP/IPv4)  |   480 B             |  2048 B               |  65535      - 60 -  8 B <sup>1</sup>                
+|  RFC 5426 (UDP/IPv6)  |  1180 B             |  2048 B               |  65535      - 40 -  8 B <sup>1</sup>                
+|  RFC 5426 (UDP/IPv6)  |  1180 B             |  2048 B               |  (2^32 - 1) - 40 -  8 B <sup>1</sup> <sup>2</sup>   
+|  RFC 5425 (TLS/IPv4)  |  2048 B             |  8192 B               |  65535      - 60 - 60 B <sup>1</sup>                
+|  RFC 5425 (TLS/IPv6)  |  2048 B             |  8192 B               |  65535      - 40 - 60 B <sup>1</sup>                
+|  RFC 5425 (TLS/IPv6)  |  2048 B             |  8192 B               |  (2^32 - 1) - 40 - 60 B <sup>1</sup> <sup>2</sup>   
+
+<sup>1</sup> IP payload - max IP header - max protocol header
+<sup>2</sup> Using jumbograms
+
+#### Message builder element
+* `facility` - facility name (default: `Local1`)
+* `rfc` - `rfc3164` or `rfc5424` (default: `rfc5424`)
+* `rfc3164` - settings related to RFC 3164:
+  * `hostname` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the HOSTNAME part (default: the hostname of the computer that is creating the message)
+  * `tag` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the TAG part (default: the name of the assembly that is creating the message)
+* `rfc5424` - settings related to RFC 5424:
+  * `hostname` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the HOSTNAME field of the HEADER part (default: the hostname of the computer that is creating the message)
+  * `appName` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the APPNAME field of the HEADER part (default: the name of the assembly that is creating the message)
+  * `procId` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the PROCID field of the HEADER part (default: `-`)
+  * `msgId` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the MSGID field of the HEADER part (default: `-`)
+  * `structuredData` - the STRUCTUREDDATA part containing the SD-ELEMENTs each composed by an SD-ID ([Layout](http://github.com/NLog/NLog/wiki/Layouts))
+                       and optional SD-PARAM fields, i.e. the PARAM-NAME ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) and
+                       PARAM-VALUE ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) fields (default: `-`)
+  * `disableBom` - `true` or `false` to handle RSyslog [issue 284](http://github.com/rsyslog/rsyslog/issues/284) (default: `false`)
 
 #### Message transmitter element
 * `protocol` - `udp` or `tcp` (default: `udp`)
@@ -63,27 +97,6 @@ A more detailed example is included as the [TestApp configuration](./src/TestApp
   * `useTls` - `false` or `true` (default: `true`)
   * `framing` - `nonTransparent` or `octectCounting` (default: `octectCounting`)
 
-#### Message builder element
-* `rfc` - `rfc3164` or `rfc5424` (default: `rfc5424`)
-* `rfc3164` - settings related to RFC 3164:
-  * `hostname` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the HOSTNAME part (default: the hostname of the computer that is creating the message)
-  * `tag` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the TAG part (default: the name of the assembly that is creating the message)
-* `rfc5424` - settings related to RFC 5424:
-  * `protocolVersion` - the VERSION field of the HEADER part (default: `1`)
-  * `hostname` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the HOSTNAME field of the HEADER part (default: the hostname of the computer that is creating the message)
-  * `appName` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the APPNAME field of the HEADER part (default: the name of the assembly that is creating the message)
-  * `procId` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the PROCID field of the HEADER part (default: `-`)
-  * `msgId` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the MSGID field of the HEADER part (default: `-`)
-  * `structuredData` - the STRUCTUREDDATA part containing the SD-ELEMENTs each composed by an SD-ID ([Layout](http://github.com/NLog/NLog/wiki/Layouts))
-                       and optional SD-PARAM fields, i.e. the PARAM-NAME ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) and
-                       PARAM-VALUE ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) fields (default: `-`)
-  * `disableBom` - `true` or `false` to handle RSyslog [issue 284](http://github.com/rsyslog/rsyslog/issues/284) (default: `false`)
-
-#### Other elements
-* `splitNewLines` - `false` or `true` (default: `true`)
-* `facility`: facility name (default: `Local1`)
-* `layout`: the standard NLog [layout](https://github.com/NLog/NLog/wiki/Layouts) directive to modify the log message body (Syslog packet elements are not affected)
-
 
 
 <br />
@@ -95,6 +108,7 @@ A more detailed example is included as the [TestApp configuration](./src/TestApp
  1. `[HOST]` Download VirtualBox and Vagrant and install them
  2. `[HOST]` Download an [Ubuntu Vagrant box](http://cloud-images.ubuntu.com/vagrant/)
  3. `[HOST]` Create a Vagrantfile in the same folder of the downloaded box
+
     ```ruby
     Vagrant.configure("2") do |config|
       config.vm.box = "ubuntu/trusty64"
@@ -106,21 +120,29 @@ A more detailed example is included as the [TestApp configuration](./src/TestApp
       config.vm.network :forwarded_port, guest: 514, host: 1514, protocol: "udp", auto_correct: false
     end
     ```
+
  5. `[HOST]` Add the box to the list
+
     ```shell
     vagrant box add .\ubuntuvagrant.box --name 'ubuntu/trusty64'
     vagrant box list
     ```
+
  6. `[HOST]` Start the VM
+
     ```shell
     vagrant up
     ```
+
  7. `[HOST]` Connect to the VM with SSH on port 2222
  8. `[GUEST]` Switch to the root user
+
     ```shell
     su
     ```
+
  9. `[GUEST]` Uncomment the following `/etc/rsyslog.conf` lines:
+
     ```
     #$ModLoad imudp
     #$UDPServerRun 514
@@ -129,49 +151,70 @@ A more detailed example is included as the [TestApp configuration](./src/TestApp
     #$ModLoad imtcp
     #$InputTCPServerRun 514
     ```
+
 10. `[GUEST]` Add the following `/etc/rsyslog.d/50-default.conf` line under the `user.*` one (prefixing a path with the minus sign omits flushing after every log event)
+
     ```
     local4.*                        /var/log/local4.log
     ```
+
 11. `[GUEST]` Restart Syslog service
+
     ```shell
     service rsyslog restart
     ```
+
 12. `[HOST]` Restart the VM
+
     ```shell
     vagrant reload
     ```
+
 13. `[GUEST]` Make sure rsyslog is running
+
     ```shell
     ps -A | grep rsyslog
     ```
+
 14. `[GUEST]` Check the rsyslog configuration
+
     ```shell
     rsyslogd -N1
     ```
+
 15. `[GUEST]` Check the Linux system log for rsyslog errors
+
     ```shell
     cat /var/log/syslog | grep rsyslog
     ```
+
 16. `[GUEST]` Perform a local test
+
     ```shell
     logger --server 127.0.0.1 --port 514 --priority local4.error "TCP local test"
     logger --server 127.0.0.1 --port 514 --priority local4.warning --udp "UDP local test"
     tail -3 /var/log/syslog
     tail -3 /var/log/local4.log
     ```
+
 17. `[GUEST]` Prepare for a remote test
+
     ```shell
     tail -f /var/log/syslog
     ```
+
     OR
+
     ```shell
     tcpdump port 514 -vv
     ```
+
 18. `[HOST]` Perform a remote test
+
     ```shell
     telnet 127.0.0.1 1514
     ```
+
 19. `[HOST]` Perform a remote test with the NLog target (configuring it to use the Local4 facility)
 
 
