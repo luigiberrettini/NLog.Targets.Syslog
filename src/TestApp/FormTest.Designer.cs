@@ -1,12 +1,9 @@
 ﻿namespace TestApp
 {
-    partial class Form1
+    partial class FormTest
     {
-        /// <summary>Required designer variable</summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>Clean up any resources being used</summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -14,7 +11,6 @@
             base.Dispose(disposing);
         }
 
-        /// <summary>Required method for designer support: do not modify the contents of this method with the code editor</summary>
         private void InitializeComponent()
         {
             buttonTrace = new System.Windows.Forms.Button();
@@ -85,7 +81,7 @@
             FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
-            Name = "Form1";
+            Name = "FormTest";
             StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             Text = "Syslog Target Demo";
             ResumeLayout(false);

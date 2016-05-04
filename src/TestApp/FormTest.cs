@@ -5,14 +5,19 @@ using System.Windows.Forms;
 
 namespace TestApp
 {
-    public partial class Form1 : Form
+    public partial class FormTest : Form
     {
-        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger Logger;
 
-        public Form1()
+        static FormTest()
         {
             InternalLogger.LogLevel = LogLevel.Trace;
             InternalLogger.LogToTrace = true;
+            Logger = LogManager.GetCurrentClassLogger();
+        }
+
+        public FormTest()
+        {
             InitializeComponent();
         }
 
