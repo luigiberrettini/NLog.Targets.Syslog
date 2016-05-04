@@ -86,7 +86,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MessageCreation\RfcNumber.cs" />
     <Compile Include="MessageCreation\Facility.cs" />
-    <Compile Include="MessageCreation\SyslogSeverity.cs" />
+    <Compile Include="MessageCreation\Severity.cs" />
     <Compile Include="Policies\TagPolicySet.cs" />
     <Compile Include="MessageSend\TcpProtocol.cs" />
     <Compile Include="MessageSend\MessageTransmitter.cs" />
