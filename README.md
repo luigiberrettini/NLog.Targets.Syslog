@@ -81,9 +81,11 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
   * `appName` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the APPNAME field of the HEADER part (default: the name of the assembly that is creating the message)
   * `procId` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the PROCID field of the HEADER part (default: `-`)
   * `msgId` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the MSGID field of the HEADER part (default: `-`)
-  * `structuredData` - the STRUCTUREDDATA part containing the SD-ELEMENTs each composed by an SD-ID ([Layout](http://github.com/NLog/NLog/wiki/Layouts))
-                       and optional SD-PARAM fields, i.e. the PARAM-NAME ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) and
-                       PARAM-VALUE ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) fields (default: `-`)
+  * `structuredData` - the STRUCTURED-DATA part containing the SD-ELEMENTs each composed by an SD-ID ([Layout](http://github.com/NLog/NLog/wiki/Layouts))
+    and optional SD-PARAM fields, i.e. the PARAM-NAME ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) and
+    PARAM-VALUE ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) fields (default: `-`).<br />
+    The fromEventProperties attribute allows to use [log event properties data](http://github.com/NLog/NLog/wiki/EventProperties-Layout-Renderer)
+    enabling different STRUCTURED-DATA for each log message
   * `disableBom` - `true` or `false` to handle RSyslog [issue 284](http://github.com/rsyslog/rsyslog/issues/284) (default: `false`)
 
 #### Message transmitter element
