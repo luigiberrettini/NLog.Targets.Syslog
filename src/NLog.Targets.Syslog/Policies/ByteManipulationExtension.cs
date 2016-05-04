@@ -1,18 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-// ReSharper disable CheckNamespace
 namespace NLog.Targets
-// ReSharper restore CheckNamespace
 {
-    internal static class Extension
+    internal static class ByteManipulationExtension
     {
-        public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T> action)
-        {
-            foreach (var item in enumerable)
-                action(item);
-        }
-
         public static bool IsIndexOfCharTerminatingByte(this int i, IReadOnlyList<byte> bytes)
         {
             return bytes[i].IsSingleByte() ||
