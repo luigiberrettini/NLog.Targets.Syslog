@@ -33,17 +33,12 @@ namespace NLog.Targets.Syslog.MessageSend
             Framing = FramingMethod.OctetCounting;
         }
 
-        /// <summary>Applies a framing method to a Syslog message</summary>
-        /// <param name="syslogMessage">The message to be framed</param>
-        /// <returns>Bytes containing the framed Syslog message</returns>
-        public override IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> syslogMessage)
+        internal override IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> syslogMessage)
         {
             return OctectCountingFramedOrUnchanged(NonTransparentFramedOrUnchanged(syslogMessage));
         }
 
-        /// <summary>Sends a set of Syslog messages with TCP and the related settings</summary>
-        /// <param name="syslogMessages">The messages to be sent</param>
-        public override void SendMessages(IEnumerable<byte[]> syslogMessages)
+        internal override void SendMessages(IEnumerable<byte[]> syslogMessages)
         {
             if (string.IsNullOrEmpty(IpAddress))
                 return;

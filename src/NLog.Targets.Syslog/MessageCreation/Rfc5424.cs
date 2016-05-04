@@ -62,8 +62,6 @@ namespace NLog.Targets.Syslog.MessageCreation
             DisableBom = false;
         }
 
-        /// <summary>Initializes the Rfc5424</summary>
-        /// <param name="enforcement">The enforcement to apply</param>
         internal override void Initialize(Enforcement enforcement)
         {
             base.Initialize(enforcement);
@@ -75,12 +73,7 @@ namespace NLog.Targets.Syslog.MessageCreation
             StructuredData.Initialize(enforcement);
         }
 
-        /// <summary>Builds the Syslog message according to the RFC</summary>
-        /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <param name="pri">The Syslog PRI part</param>
-        /// <param name="logEntry">The entry to be logged</param>
-        /// <returns>Bytes containing the Syslog message</returns>
-        protected override IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
+        internal override IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
         {
             var encodings = new EncodingSet(!DisableBom);
 

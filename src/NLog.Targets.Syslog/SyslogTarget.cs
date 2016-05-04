@@ -46,6 +46,7 @@ namespace NLog.Targets.Syslog
             MessageBuilder = new MessageBuildersFacade();
         }
 
+        /// <summary>Initializes the SyslogTarget</summary>
         protected override void InitializeTarget()
         {
             base.InitializeTarget();

@@ -31,15 +31,13 @@ namespace NLog.Targets.Syslog.MessageCreation
             };
         }
 
-        /// <summary>Initializes the MessageBuildersFacade</summary>
-        /// <param name="enforcement">The enforcement to apply</param>
-        public void Initialize(Enforcement enforcement)
+        internal void Initialize(Enforcement enforcement)
         {
             activeBuilder = builders[Rfc];
             activeBuilder.Initialize(enforcement);
         }
 
-        public IEnumerable<IEnumerable<byte>> BuildMessages(LogEventInfo logEvent, Layout layout)
+        internal IEnumerable<IEnumerable<byte>> BuildMessages(LogEventInfo logEvent, Layout layout)
         {
             return activeBuilder.BuildMessages(logEvent, layout);
         }

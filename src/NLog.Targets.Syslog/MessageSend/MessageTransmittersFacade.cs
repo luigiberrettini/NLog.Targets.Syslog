@@ -29,17 +29,17 @@ namespace NLog.Targets.Syslog.MessageSend
             };
         }
 
-        public void Initialize()
+        internal void Initialize()
         {
             activeTransmitter = transmitters[Protocol];
         }
 
-        public IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> syslogMessage)
+        internal IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> syslogMessage)
         {
             return activeTransmitter.FrameMessageOrLeaveItUnchanged(syslogMessage);
         }
 
-        public void SendMessages(IEnumerable<byte[]> syslogMessages)
+        internal void SendMessages(IEnumerable<byte[]> syslogMessages)
         {
             activeTransmitter.SendMessages(syslogMessages);
         }

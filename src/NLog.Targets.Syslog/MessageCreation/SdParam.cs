@@ -22,20 +22,12 @@ namespace NLog.Targets.Syslog.MessageCreation
         /// <summary>The PARAM-VALUE field of this SD-PARAM</summary>
         public Layout Value { get; set; }
 
-        /// <summary>Initializes the SdParam</summary>
-        /// <param name="enforcement">The enforcement to apply</param>
         internal void Initialize(Enforcement enforcement)
         {
             paramNamePolicySet = new ParamNamePolicySet(enforcement);
             paramValuePolicySet = new ParamValuePolicySet(enforcement);
         }
 
-        /// <summary>Gives the binary representation of a list of SD-PARAMs field</summary>
-        /// <param name="sdParams">The SD-PARAMs to be represented as binary</param>
-        /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <param name="encodings"></param>
-        /// <param name="invalidNamesPattern"></param>
-        /// <returns>Bytes containing this SD-PARAM field</returns>
         internal static IEnumerable<byte> Bytes(IEnumerable<SdParam> sdParams, LogEventInfo logEvent, string invalidNamesPattern, EncodingSet encodings)
         {
             return sdParams.SelectMany(sdParam => SpaceBytes.Concat(sdParam.Bytes(logEvent, invalidNamesPattern, encodings)));

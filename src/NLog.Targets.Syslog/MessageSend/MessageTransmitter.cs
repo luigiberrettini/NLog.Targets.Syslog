@@ -24,22 +24,18 @@ namespace NLog.Targets.Syslog.MessageSend
         /// <summary>The port number the Syslog server is listening on</summary>
         public int Port { get; set; }
 
+        /// <summary>Builds the base part of a new instance of a class inheriting from MessageTransmitter</summary>
         protected MessageTransmitter()
         {
             Server = Localhost;
             Port = DefaultSyslogPort;
         }
 
-        /// <summary>Applies a protocol specific framing method, if supported, to a Syslog message</summary>
-        /// <param name="syslogMessage">The message to be framed</param>
-        /// <returns>Bytes containing the framed Syslog message or the original Syslog message</returns>
-        public virtual IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> syslogMessage)
+        internal virtual IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> syslogMessage)
         {
             return syslogMessage;
         }
 
-        /// <summary>Sends a set of Syslog messages with a protocol and the related settings</summary>
-        /// <param name="syslogMessages">The messages to be sent</param>
-        public abstract void SendMessages(IEnumerable<byte[]> syslogMessages);
+        internal abstract void SendMessages(IEnumerable<byte[]> syslogMessages);
     }
 }

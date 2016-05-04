@@ -34,8 +34,6 @@ namespace NLog.Targets.Syslog.MessageCreation
             Tag = Assembly.GetCallingAssembly().GetName().Name;
         }
 
-        /// <summary>Initializes the Rfc3164</summary>
-        /// <param name="enforcement">The enforcement to apply</param>
         internal override void Initialize(Enforcement enforcement)
         {
             base.Initialize(enforcement);
@@ -45,12 +43,7 @@ namespace NLog.Targets.Syslog.MessageCreation
             encodedContentPolicy = new EncodedContentPolicy(enforcement);
         }
 
-        /// <summary>Builds the Syslog message according to RFC 3164</summary>
-        /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <param name="pri">The Syslog PRI part</param>
-        /// <param name="logEntry">The entry to be logged</param>
-        /// <returns>Bytes containing the Syslog message</returns>
-        protected override IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
+        internal override IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
         {
             var encoding = new ASCIIEncoding();
             var msgPrefixBytes = PriBytes(pri, encoding)

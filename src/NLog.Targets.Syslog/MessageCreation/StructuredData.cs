@@ -20,17 +20,11 @@ namespace NLog.Targets.Syslog.MessageCreation
             SdElements = new List<SdElement>();
         }
 
-        /// <summary>Initializes the StructuredData</summary>
-        /// <param name="enforcement">The enforcement to apply</param>
         internal void Initialize(Enforcement enforcement)
         {
             SdElements.ForEach(sdElem => sdElem.Initialize(enforcement));
         }
 
-        /// <summary>Gives the binary representation of the STRUCTURED_DATA part</summary>
-        /// <param name="logEvent">The NLog.LogEventInfo</param>
-        /// <param name="encodings">The encodings to be used</param>
-        /// <returns>Bytes containing the STRUCTURED_DATA part</returns>
         internal IEnumerable<byte> Bytes(LogEventInfo logEvent, EncodingSet encodings)
         {
             return SdElements.Count == 0 ? NilValueBytes : SdElement.Bytes(SdElements, logEvent, encodings);
