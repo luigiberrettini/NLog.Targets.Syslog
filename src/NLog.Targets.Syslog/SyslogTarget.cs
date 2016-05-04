@@ -29,29 +29,29 @@ namespace NLog.Targets.Syslog
     [Target("Syslog")]
     public class SyslogTarget : TargetWithLayout
     {
-        /// <summary>The transmitter used to send messages to the Syslog server</summary>
-        public MessageTransmittersFacade MessageTransmitter { get; set; }
-
         /// <summary>The enforcement to be applied on the Syslog message</summary>
         public Enforcement Enforcement { get; set; }
 
         /// <summary>The builder used to create messages according to RFCs</summary>
         public MessageBuildersFacade MessageBuilder { get; set; }
 
+        /// <summary>The transmitter used to send messages to the Syslog server</summary>
+        public MessageTransmittersFacade MessageTransmitter { get; set; }
+
         /// <summary>Builds a new instance of the SyslogTarget class</summary>
         public SyslogTarget()
         {
-            MessageTransmitter = new MessageTransmittersFacade();
             Enforcement = new Enforcement();
             MessageBuilder = new MessageBuildersFacade();
+            MessageTransmitter = new MessageTransmittersFacade();
         }
 
         /// <summary>Initializes the SyslogTarget</summary>
         protected override void InitializeTarget()
         {
             base.InitializeTarget();
-            MessageTransmitter.Initialize();
             MessageBuilder.Initialize(Enforcement);
+            MessageTransmitter.Initialize();
         }
 
         /// <summary>Writes a single event</summary>
