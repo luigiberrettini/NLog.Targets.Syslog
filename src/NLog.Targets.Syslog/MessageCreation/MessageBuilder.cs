@@ -12,11 +12,11 @@ namespace NLog.Targets.Syslog.MessageCreation
         private SplitOnNewLinePolicy splitOnNewLinePolicy;
 
         /// <summary>The Syslog facility to log from (its name e.g. local0 or local7)</summary>
-        public SyslogFacility Facility { get; set; }
+        public Facility Facility { get; set; }
 
         protected MessageBuilder()
         {
-            Facility = SyslogFacility.Local1;
+            Facility = Facility.Local1;
         }
 
         /// <summary>Initializes the MessageBuilder</summary>
@@ -32,7 +32,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         /// <returns>For each Syslog message the bytes containing it</returns>
         internal IEnumerable<IEnumerable<byte>> BuildMessages(LogEventInfo logEvent, Layout layout)
         {
-            var pri = Pri(Facility, (SyslogSeverity)logEvent.Level);
+            var pri = Pri(Facility, (Severity)logEvent.Level);
             var logEntries = LogEntries(logEvent, layout).ToList();
             var toBeSent = logEntries.Select(logEntry => BuildMessage(logEvent, pri, logEntry));
             return toBeSent;
@@ -45,7 +45,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         /// <returns>Bytes containing the Syslog message</returns>
         protected abstract IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry);
 
-        private static string Pri(SyslogFacility facility, SyslogSeverity severity)
+        private static string Pri(Facility facility, Severity severity)
         {
             var priVal = (int)facility * 8 + (int)severity;
             var priValString = priVal.ToString(CultureInfo.InvariantCulture);

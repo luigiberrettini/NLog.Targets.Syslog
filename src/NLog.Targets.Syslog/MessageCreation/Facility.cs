@@ -1,7 +1,7 @@
 ﻿namespace NLog.Targets.Syslog.MessageCreation
 {
     /// <summary>Syslog facilities</summary>
-    public enum SyslogFacility
+    public enum Facility
     {
         /// <summary>Kernel messages</summary>
         Kernel = 0,

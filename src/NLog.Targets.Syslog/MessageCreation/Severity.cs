@@ -3,36 +3,36 @@
 namespace NLog.Targets.Syslog.MessageCreation
 {
     /// <summary>Syslog severities</summary>
-    internal class SyslogSeverity : IComparable<SyslogSeverity>
+    internal class Severity : IComparable<Severity>
     {
         private readonly int value;
         private readonly string displayName;
 
         /// <summary>System is unusable</summary>
-        public static readonly SyslogSeverity Emergency = new SyslogSeverity(0, "Emergency");
+        public static readonly Severity Emergency = new Severity(0, "Emergency");
 
         /// <summary>Action must be taken immediately</summary>
-        public static readonly SyslogSeverity Alert = new SyslogSeverity(1, "Alert");
+        public static readonly Severity Alert = new Severity(1, "Alert");
 
         /// <summary>Critical conditions</summary>
-        public static readonly SyslogSeverity Critical = new SyslogSeverity(2, "Critical");
+        public static readonly Severity Critical = new Severity(2, "Critical");
 
         /// <summary>Error conditions</summary>
-        public static readonly SyslogSeverity Error = new SyslogSeverity(3, "Error");
+        public static readonly Severity Error = new Severity(3, "Error");
 
         /// <summary>Warning conditions</summary>
-        public static readonly SyslogSeverity Warning = new SyslogSeverity(4, "Warning");
+        public static readonly Severity Warning = new Severity(4, "Warning");
 
         /// <summary>Normal but significant condition</summary>
-        public static readonly SyslogSeverity Notice = new SyslogSeverity(5, "Notice");
+        public static readonly Severity Notice = new Severity(5, "Notice");
 
         /// <summary>Informational messages</summary>
-        public static readonly SyslogSeverity Informational = new SyslogSeverity(6, "Informational");
+        public static readonly Severity Informational = new Severity(6, "Informational");
 
         /// <summary>Debug-level messages</summary>
-        public static readonly SyslogSeverity Debug = new SyslogSeverity(7, "Debug");
+        public static readonly Severity Debug = new Severity(7, "Debug");
 
-        private SyslogSeverity(int value, string displayName)
+        private Severity(int value, string displayName)
         {
             this.value = value;
             this.displayName = displayName;
@@ -40,7 +40,7 @@ namespace NLog.Targets.Syslog.MessageCreation
 
         /// <summary>Compare this instance of SyslogSeverity to another</summary>
         /// <param name="other">The instance of SyslogSeverity this instance is to be compared with</param>
-        public int CompareTo(SyslogSeverity other)
+        public int CompareTo(Severity other)
         {
             return ((int)this).CompareTo((int)other);
         }
@@ -48,7 +48,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         /// <summary>Convert a Syslog severity to an integer</summary>
         /// <param name="severity">Syslog severity to convert</param>
         /// <returns>SyslogSeverity which corresponds to the NLog level</returns>
-        public static explicit operator int(SyslogSeverity severity)
+        public static explicit operator int(Severity severity)
         {
             return severity.value;
         }
@@ -56,7 +56,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         /// <summary>Convert an NLog level to a Syslog severity as they are not exactly one to one</summary>
         /// <param name="logLevel">NLog log level to convert</param>
         /// <returns>SyslogSeverity which corresponds to the NLog level</returns>
-        public static explicit operator SyslogSeverity(LogLevel logLevel)
+        public static explicit operator Severity(LogLevel logLevel)
         {
             if (logLevel == LogLevel.Fatal)
                 return Emergency;
