@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("NLog.Targets.Syslog")]
-[assembly: AssemblyDescription("The NLog Syslog Target is a custom target for NLog version 2.0 allowing you to send logging messages to a UNIX-style Syslog server.")]
+[assembly: AssemblyDescription("The NLog Syslog Target is a custom target for NLog version 4.3.2 allowing you to send logging messages to a Unix-style Syslog server.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Jesper Hess Nielsen, Joe Fitzgerald, Nicolas Graziano and others")]
 [assembly: AssemblyProduct("NLog.Targets.Syslog")]

@@ -20,13 +20,13 @@
                                 <xs:element name="transliterate" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                 <xs:element name="replaceInvalidCharacters" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                 <xs:element name="truncateFieldsToMaxLength" type="xs:boolean" minOccurs="0" maxOccurs="1" />
-                                <xs:element name="truncateSyslogMessageTo" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                                <xs:element name="truncateMessageTo" type="xs:integer" minOccurs="0" maxOccurs="1" />
                             </xs:choice>
                             <xs:attribute name="splitOnNewLine" type="xs:boolean" />
                             <xs:attribute name="transliterate" type="xs:boolean" />
                             <xs:attribute name="replaceInvalidCharacters" type="xs:boolean" />
                             <xs:attribute name="truncateFieldsToMaxLength" type="xs:boolean" />
-                            <xs:attribute name="truncateSyslogMessageTo" type="xs:integer" />                            
+                            <xs:attribute name="truncateMessageTo" type="xs:integer" />
                         </xs:complexType>
                     </xs:element>
                     <xs:element name="messageBuilder" minOccurs="0" maxOccurs="1">

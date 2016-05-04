@@ -7,7 +7,7 @@ namespace NLog.Targets.Syslog.MessageSend
     public abstract class MessageTransmitter
     {
         private const string Localhost = "localhost";
-        private const int DefaultSyslogPort = 514;
+        private const int DefaultPort = 514;
 
         /// <summary>The IP address of the Syslog server or an empty string</summary>
         protected string IpAddress { get; private set; }
@@ -28,14 +28,14 @@ namespace NLog.Targets.Syslog.MessageSend
         protected MessageTransmitter()
         {
             Server = Localhost;
-            Port = DefaultSyslogPort;
+            Port = DefaultPort;
         }
 
-        internal virtual IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> syslogMessage)
+        internal virtual IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> message)
         {
-            return syslogMessage;
+            return message;
         }
 
-        internal abstract void SendMessages(IEnumerable<byte[]> syslogMessages);
+        internal abstract void SendMessages(IEnumerable<byte[]> messages);
     }
 }

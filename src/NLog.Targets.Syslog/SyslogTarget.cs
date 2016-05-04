@@ -80,7 +80,7 @@ namespace NLog.Targets.Syslog
         {
             var messages = MessageBuilder
                 .BuildMessages(asyncLogEvent.LogEvent, Layout)
-                .Select(syslogMessage => MessageTransmitter.FrameMessageOrLeaveItUnchanged(syslogMessage).ToArray());
+                .Select(message => MessageTransmitter.FrameMessageOrLeaveItUnchanged(message).ToArray());
             return messages;
         }
     }

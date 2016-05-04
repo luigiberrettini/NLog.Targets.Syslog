@@ -33,12 +33,12 @@ namespace NLog.Targets.Syslog.MessageSend
             Framing = FramingMethod.OctetCounting;
         }
 
-        internal override IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> syslogMessage)
+        internal override IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> message)
         {
-            return OctectCountingFramedOrUnchanged(NonTransparentFramedOrUnchanged(syslogMessage));
+            return OctectCountingFramedOrUnchanged(NonTransparentFramedOrUnchanged(message));
         }
 
-        internal override void SendMessages(IEnumerable<byte[]> syslogMessages)
+        internal override void SendMessages(IEnumerable<byte[]> messages)
         {
             if (string.IsNullOrEmpty(IpAddress))
                 return;
@@ -46,25 +46,25 @@ namespace NLog.Targets.Syslog.MessageSend
             using (var tcp = new TcpClient(IpAddress, Port))
             using (var stream = SslDecorate(tcp))
             {
-                foreach (var message in syslogMessages)
+                foreach (var message in messages)
                     stream.Write(message, 0, message.Length);
             }
         }
 
-        private IEnumerable<byte> OctectCountingFramedOrUnchanged(IEnumerable<byte> syslogMessage)
+        private IEnumerable<byte> OctectCountingFramedOrUnchanged(IEnumerable<byte> message)
         {
-            if (Framing == FramingMethod.OctetCounting)
-                return syslogMessage;
+            if (Framing != FramingMethod.OctetCounting)
+                return message;
 
-            var slMessage = syslogMessage.ToArray();
-            var octetCount = slMessage.Length;
+            var messageAsArray = message.ToArray();
+            var octetCount = messageAsArray.Length;
             var prefix = new ASCIIEncoding().GetBytes($"{octetCount} ");
-            return prefix.Concat(slMessage);
+            return prefix.Concat(messageAsArray);
         }
 
-        private IEnumerable<byte> NonTransparentFramedOrUnchanged(IEnumerable<byte> syslogMessage)
+        private IEnumerable<byte> NonTransparentFramedOrUnchanged(IEnumerable<byte> message)
         {
-            return Framing == FramingMethod.NonTransparent ? syslogMessage.Concat(LineFeedBytes) : syslogMessage;
+            return Framing != FramingMethod.NonTransparent ? message : message.Concat(LineFeedBytes);
         }
 
         private Stream SslDecorate(TcpClient tcp)

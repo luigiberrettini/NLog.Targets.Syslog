@@ -34,14 +34,14 @@ namespace NLog.Targets.Syslog.MessageSend
             activeTransmitter = transmitters[Protocol];
         }
 
-        internal IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> syslogMessage)
+        internal IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> message)
         {
-            return activeTransmitter.FrameMessageOrLeaveItUnchanged(syslogMessage);
+            return activeTransmitter.FrameMessageOrLeaveItUnchanged(message);
         }
 
-        internal void SendMessages(IEnumerable<byte[]> syslogMessages)
+        internal void SendMessages(IEnumerable<byte[]> messages)
         {
-            activeTransmitter.SendMessages(syslogMessages);
+            activeTransmitter.SendMessages(messages);
         }
     }
 }
