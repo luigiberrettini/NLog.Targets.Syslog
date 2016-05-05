@@ -120,8 +120,6 @@
                     </xs:element>
                 </xs:choice>
                 <xs:attribute name="name" type="xs:string" />
-                <xs:attribute name="splitNewlines" type="xs:boolean" />
-                <xs:attribute name="facility" type="xs:string" />
                 <xs:attribute name="layout" type="nlog:SimpleLayoutAttribute" />
             </xs:extension>
         </xs:complexContent>
