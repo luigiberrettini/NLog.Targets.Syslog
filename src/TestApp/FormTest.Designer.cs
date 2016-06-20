@@ -1,12 +1,9 @@
 ﻿namespace TestApp
 {
-    partial class Form1
+    partial class FormTest
     {
-        /// <summary>Required designer variable</summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>Clean up any resources being used</summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -14,7 +11,6 @@
             base.Dispose(disposing);
         }
 
-        /// <summary>Required method for designer support: do not modify the contents of this method with the code editor</summary>
         private void InitializeComponent()
         {
             buttonTrace = new System.Windows.Forms.Button();
@@ -31,7 +27,7 @@
             buttonTrace.TabIndex = 0;
             buttonTrace.Text = "Trace Event";
             buttonTrace.UseVisualStyleBackColor = true;
-            buttonTrace.Click += new System.EventHandler(ButtonLog_Click);
+            buttonTrace.Click += new System.EventHandler(ButtonLogClick);
 
             buttonDebug.Location = new System.Drawing.Point(34, 70);
             buttonDebug.Name = "buttonDebug";
@@ -39,7 +35,7 @@
             buttonDebug.TabIndex = 1;
             buttonDebug.Text = "Debug Event";
             buttonDebug.UseVisualStyleBackColor = true;
-            buttonDebug.Click += new System.EventHandler(ButtonLog_Click);
+            buttonDebug.Click += new System.EventHandler(ButtonLogClick);
 
             buttonInfo.Location = new System.Drawing.Point(34, 114);
             buttonInfo.Name = "buttonInfo";
@@ -47,7 +43,7 @@
             buttonInfo.TabIndex = 2;
             buttonInfo.Text = "Info Event";
             buttonInfo.UseVisualStyleBackColor = true;
-            buttonInfo.Click += new System.EventHandler(ButtonLog_Click);
+            buttonInfo.Click += new System.EventHandler(ButtonLogClick);
 
             buttonWarn.Location = new System.Drawing.Point(34, 158);
             buttonWarn.Name = "buttonWarn";
@@ -55,7 +51,7 @@
             buttonWarn.TabIndex = 3;
             buttonWarn.Text = "Warn Event";
             buttonWarn.UseVisualStyleBackColor = true;
-            buttonWarn.Click += new System.EventHandler(ButtonLog_Click);
+            buttonWarn.Click += new System.EventHandler(ButtonLogClick);
 
             buttonError.Location = new System.Drawing.Point(34, 202);
             buttonError.Name = "buttonError";
@@ -63,7 +59,7 @@
             buttonError.TabIndex = 4;
             buttonError.Text = "Error Event";
             buttonError.UseVisualStyleBackColor = true;
-            buttonError.Click += new System.EventHandler(ButtonLog_Click);
+            buttonError.Click += new System.EventHandler(ButtonLogClick);
 
             buttonFatal.Location = new System.Drawing.Point(34, 246);
             buttonFatal.Name = "buttonFatal";
@@ -71,7 +67,7 @@
             buttonFatal.TabIndex = 5;
             buttonFatal.Text = "Fatal Event";
             buttonFatal.UseVisualStyleBackColor = true;
-            buttonFatal.Click += new System.EventHandler(ButtonLog_Click);
+            buttonFatal.Click += new System.EventHandler(ButtonLogClick);
 
             AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -85,7 +81,7 @@
             FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
-            Name = "Form1";
+            Name = "FormTest";
             StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             Text = "Syslog Target Demo";
             ResumeLayout(false);
