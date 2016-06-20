@@ -1,7 +1,9 @@
-﻿namespace NLog.Targets.Syslog.MessageCreation
+﻿// ReSharper disable CheckNamespace
+namespace NLog.Targets
+// ReSharper enable CheckNamespace
 {
     /// <summary>Syslog facilities</summary>
-    public enum Facility
+    public enum SyslogFacility
     {
         /// <summary>Kernel messages</summary>
         Kernel = 0,
