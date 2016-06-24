@@ -65,7 +65,6 @@ namespace NLog.Targets.Syslog.MessageCreation
         private static IEnumerable<byte> Bytes(IEnumerable<byte> sdIdBytes, IEnumerable<byte> sdParamsBytes)
         {
             return LeftBracketBytes
-                .Concat(LeftBracketBytes)
                 .Concat(sdIdBytes)
                 .Concat(sdParamsBytes)
                 .Concat(RightBracketBytes);
