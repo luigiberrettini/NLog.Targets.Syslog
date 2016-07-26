@@ -232,7 +232,6 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="Layout"></xs:complexType>
   <xs:complexType name="Filter" abstract="true"></xs:complexType>
   <xs:complexType name="TimeSource" abstract="true"></xs:complexType>
   <xs:simpleType name="SimpleLayoutAttribute">
@@ -2246,6 +2245,9 @@
         </xs:choice>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="Layout">
+    <xs:choice minOccurs="0" maxOccurs="unbounded" />
   </xs:complexType>
   <xs:complexType name="CsvLayout">
     <xs:complexContent>
