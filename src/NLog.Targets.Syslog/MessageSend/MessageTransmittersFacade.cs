@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace NLog.Targets.Syslog.MessageSend
 {
@@ -34,14 +35,15 @@ namespace NLog.Targets.Syslog.MessageSend
             activeTransmitter = transmitters[Protocol];
         }
 
-        internal IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> message)
+        internal void SendMessages(IEnumerable<IEnumerable<byte>> messages)
         {
-            return activeTransmitter.FrameMessageOrLeaveItUnchanged(message);
+            var framedOrUnchangedMessages = messages.Select(FrameMessageOrLeaveItUnchanged);
+            activeTransmitter.SendMessages(framedOrUnchangedMessages);
         }
 
-        internal void SendMessages(IEnumerable<byte[]> messages)
+        private byte[] FrameMessageOrLeaveItUnchanged(IEnumerable<byte> message)
         {
-            activeTransmitter.SendMessages(messages);
+            return activeTransmitter.FrameMessageOrLeaveItUnchanged(message).ToArray();
         }
     }
 }

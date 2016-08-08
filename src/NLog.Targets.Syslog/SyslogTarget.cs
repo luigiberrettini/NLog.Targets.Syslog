@@ -76,12 +76,9 @@ namespace NLog.Targets.Syslog
             MessageTransmitter.SendMessages(messages);
         }
 
-        private IEnumerable<byte[]> ToMessages(AsyncLogEventInfo asyncLogEvent)
+        private IEnumerable<IEnumerable<byte>> ToMessages(AsyncLogEventInfo asyncLogEvent)
         {
-            var messages = MessageBuilder
-                .BuildMessages(asyncLogEvent.LogEvent, Layout)
-                .Select(message => MessageTransmitter.FrameMessageOrLeaveItUnchanged(message).ToArray());
-            return messages;
+            return MessageBuilder.BuildMessages(asyncLogEvent.LogEvent, Layout);
         }
     }
 }
