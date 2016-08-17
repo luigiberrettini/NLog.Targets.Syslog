@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -6,14 +7,29 @@ using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NLog.Targets.Syslog.MessageSend
 {
     [DisplayName("Tcp")]
     public class TcpProtocol : MessageTransmitter
     {
+        private const int DefaultRecoveryTime = 5;
         private FramingMethod framing;
         private static readonly byte[] LineFeedBytes = { 0x0A };
+        private volatile bool isFirstSend;
+        private TimeSpan recoveryTime;
+        private TcpClient tcp;
+        private Stream stream;
+        private volatile bool disposed;
+
+        /// <summary>The number of seconds after which a connection recovery can be attempted</summary>
+        public int RecoveryTime
+        {
+            get { return recoveryTime.Seconds; }
+            set { recoveryTime = TimeSpan.FromSeconds(value); }
+        }
 
         /// <summary>Whether to use TLS or not (TLS 1.2 only)</summary>
         public bool UseTls { get; set; }
@@ -29,8 +45,16 @@ namespace NLog.Targets.Syslog.MessageSend
         /// <summary>Builds a new instance of the TcpProtocol class</summary>
         public TcpProtocol()
         {
+            isFirstSend = true;
+            RecoveryTime = DefaultRecoveryTime;
             UseTls = true;
             Framing = FramingMethod.OctetCounting;
+        }
+
+        internal override void Initialize()
+        {
+            tcp = new TcpClient();
+            tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
         }
 
         internal override IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> message)
@@ -38,17 +62,40 @@ namespace NLog.Targets.Syslog.MessageSend
             return OctectCountingFramedOrUnchanged(NonTransparentFramedOrUnchanged(message));
         }
 
-        internal override void SendMessages(IEnumerable<byte[]> messages)
+        /// <summary>Sends a message over the wire</summary>
+        internal override Task SendMessageAsync(byte[] message, CancellationToken token)
         {
-            if (string.IsNullOrEmpty(IpAddress))
-                return;
+            if (tcp.Connected)
+                return WriteAsync(stream, 0, message, token);
 
-            using (var tcp = new TcpClient(IpAddress, Port))
-            using (var stream = SslDecorate(tcp))
-            {
-                foreach (var message in messages)
-                    stream.Write(message, 0, message.Length);
-            }
+            var delay = isFirstSend ? TimeSpan.FromSeconds(0) : recoveryTime;
+            isFirstSend = false;
+
+            return Task.Delay(delay, token)
+                .Then(_ => ConnectAsync(), token)
+                .Unwrap()
+                .Then(_ => WriteAsync(stream, 0, message, token), token)
+                .Unwrap();
+        }
+
+        private Task ConnectAsync()
+        {
+            return tcp
+                .ConnectAsync(IpAddress, Port)
+                .Then(_ => stream = SslDecorate(tcp), CancellationToken.None);
+        }
+
+        private Stream SslDecorate(TcpClient tcpClient)
+        {
+            var tcpStream = tcpClient.GetStream();
+
+            if (!UseTls)
+                return tcpStream;
+
+            // Do not dispose TcpClient inner stream when disposing SslStream (TcpClient disposes it)
+            var sslStream = new SslStream(tcpStream, true);
+            sslStream.AuthenticateAsClient(Server, null, SslProtocols.Tls12, false);
+            return sslStream;
         }
 
         private IEnumerable<byte> OctectCountingFramedOrUnchanged(IEnumerable<byte> message)
@@ -67,16 +114,32 @@ namespace NLog.Targets.Syslog.MessageSend
             return Framing != FramingMethod.NonTransparent ? message : message.Concat(LineFeedBytes);
         }
 
-        private Stream SslDecorate(TcpClient tcp)
+        private static Task WriteAsync(Stream stream, int offset, byte[] data, CancellationToken token)
         {
-            var tcpStream = tcp.GetStream();
+            var toBeWritten = data.Length - offset;
+            var isLastWrite = toBeWritten <= BufferSize;
+            var size = isLastWrite ? toBeWritten : BufferSize;
+            var buffer = new Byte[size];
+            Buffer.BlockCopy(data, offset, buffer, 0, buffer.Length);
 
-            if (!UseTls)
-                return tcpStream;
+            return Task.Factory
+                .FromAsync(stream.BeginWrite, stream.EndWrite, buffer, 0, buffer.Length, null)
+                .Then(task => isLastWrite ? task : WriteAsync(stream, offset + BufferSize, data, token), token)
+                .Unwrap();
+        }
 
-            var sslStream = new SslStream(tcpStream, true);
-            sslStream.AuthenticateAsClient(Server, null, SslProtocols.Tls12, false);
-            return sslStream;
+        internal override void Dispose()
+        {
+            if (disposed)
+                return;
+            disposed = true;
+
+            // Dispose SslStream without disposing TcpClient inner stream
+            if (UseTls)
+                stream.Dispose();
+
+            // Dispose TcpClient and its inner stream
+            tcp.Close();
         }
     }
 }

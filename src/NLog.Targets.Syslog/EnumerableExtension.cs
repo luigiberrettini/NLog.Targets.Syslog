@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NLog.Targets.Syslog.MessageCreation
+namespace NLog.Targets.Syslog
 {
     internal static class EnumerableExtension
     {
@@ -10,5 +10,6 @@ namespace NLog.Targets.Syslog.MessageCreation
             foreach (var item in enumerable)
                 action(item);
         }
+
     }
 }

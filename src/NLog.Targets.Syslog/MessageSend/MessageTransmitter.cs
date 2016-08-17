@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NLog.Targets.Syslog.MessageSend
 {
@@ -8,6 +10,7 @@ namespace NLog.Targets.Syslog.MessageSend
     {
         private const string Localhost = "localhost";
         private const int DefaultPort = 514;
+        protected const int BufferSize = 4096;
 
         /// <summary>The IP address of the Syslog server or an empty string</summary>
         protected string IpAddress { get; private set; }
@@ -31,11 +34,16 @@ namespace NLog.Targets.Syslog.MessageSend
             Port = DefaultPort;
         }
 
+        internal abstract void Initialize();
+
         internal virtual IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> message)
         {
             return message;
         }
 
-        internal abstract void SendMessages(IEnumerable<byte[]> messages);
+        /// <summary>Sends a message over the wire</summary>
+        internal abstract Task SendMessageAsync(byte[] message, CancellationToken token);
+
+        internal abstract void Dispose();
     }
 }

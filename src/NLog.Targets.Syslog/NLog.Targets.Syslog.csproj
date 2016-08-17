@@ -53,6 +53,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncLogEventsHandler.cs" />
+    <Compile Include="LogEventAndMessages.cs" />
+    <Compile Include="MessageSend\TaskExtensions.cs" />
     <Compile Include="Policies\AppNamePolicySet.cs" />
     <Compile Include="Policies\ByteManipulationExtension.cs" />
     <Compile Include="Policies\DefaultIfEmptyPolicy.cs" />
@@ -63,7 +66,7 @@
     <Compile Include="MessageSend\FramingMethod.cs" />
     <Compile Include="Policies\IBasicPolicy.cs" />
     <Compile Include="MessageCreation\MessageBuilder.cs" />
-    <Compile Include="MessageCreation\EnumerableExtension.cs" />
+    <Compile Include="EnumerableExtension.cs" />
     <Compile Include="MessageCreation\MessageBuildersFacade.cs" />
     <Compile Include="Policies\MsgIdPolicySet.cs" />
     <Compile Include="Policies\MsgWithoutPreamblePolicy.cs" />

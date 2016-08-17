@@ -20,8 +20,6 @@ using NLog.Common;
 using NLog.Targets.Syslog.MessageCreation;
 using NLog.Targets.Syslog.MessageSend;
 using NLog.Targets.Syslog.Policies;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace NLog.Targets.Syslog
 {
@@ -38,12 +36,15 @@ namespace NLog.Targets.Syslog
         /// <summary>The transmitter used to send messages to the Syslog server</summary>
         public MessageTransmittersFacade MessageTransmitter { get; set; }
 
+        private readonly AsyncLogEventsHandler asyncLogEventsHandler;
+
         /// <summary>Builds a new instance of the SyslogTarget class</summary>
         public SyslogTarget()
         {
             Enforcement = new Enforcement();
             MessageBuilder = new MessageBuildersFacade();
             MessageTransmitter = new MessageTransmittersFacade();
+            asyncLogEventsHandler = new AsyncLogEventsHandler(this, MergeEventProperties);
         }
 
         /// <summary>Initializes the SyslogTarget</summary>
@@ -52,11 +53,12 @@ namespace NLog.Targets.Syslog
             base.InitializeTarget();
             MessageBuilder.Initialize(Enforcement);
             MessageTransmitter.Initialize();
+            asyncLogEventsHandler.Initialize(Layout);
         }
 
         /// <summary>Writes a single event</summary>
         /// <param name="logEvent">The NLog.AsyncLogEventInfo</param>
-        /// <remarks>Write(LogEventInfo) is called only by Write(AsyncLogEventInfo/AsyncLogEventInfo[]): no need to ovveride it</remarks>
+        /// <remarks>Write(LogEventInfo) is called only by Write(AsyncLogEventInfo/AsyncLogEventInfo[]): no need to override it</remarks>
         protected override void Write(AsyncLogEventInfo logEvent)
         {
             SendMessages(logEvent);
@@ -64,7 +66,7 @@ namespace NLog.Targets.Syslog
 
         /// <summary>Writes array of events</summary>
         /// <param name="logEvents">The array of NLog.AsyncLogEventInfo</param>
-        /// <remarks>Write(LogEventInfo) is called only by Write(AsyncLogEventInfo/AsyncLogEventInfo[]): no need to ovveride it</remarks>
+        /// <remarks>Write(LogEventInfo) is called only by Write(AsyncLogEventInfo/AsyncLogEventInfo[]): no need to override it</remarks>
         protected override void Write(AsyncLogEventInfo[] logEvents)
         {
             SendMessages(logEvents);
@@ -72,13 +74,14 @@ namespace NLog.Targets.Syslog
 
         private void SendMessages(params AsyncLogEventInfo[] asyncLogEvents)
         {
-            var messages = asyncLogEvents.SelectMany(ToMessages);
-            MessageTransmitter.SendMessages(messages);
+            asyncLogEventsHandler.Handle(asyncLogEvents);
         }
 
-        private IEnumerable<IEnumerable<byte>> ToMessages(AsyncLogEventInfo asyncLogEvent)
+        protected override void Dispose(bool disposing)
         {
-            return MessageBuilder.BuildMessages(asyncLogEvent.LogEvent, Layout);
+            if (disposing)
+                asyncLogEventsHandler.Dispose();
+            base.Dispose(disposing);
         }
     }
 }
