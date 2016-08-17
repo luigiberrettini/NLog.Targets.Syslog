@@ -22,7 +22,7 @@ namespace NLog.Targets.Syslog.Policies
         public IEnumerable<string> Apply(string s)
         {
             var split = s.Split(LineSeps, StringSplitOptions.RemoveEmptyEntries);
-            InternalLogger.Trace($"Split {s} on new line");
+            InternalLogger.Trace($"Split '{s}' on new line");
             return split;
         }
     }

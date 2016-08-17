@@ -14,8 +14,9 @@ namespace NLog.Targets.Syslog.Policies
             var duplicates = list
                 .GroupBy(toBeCompared)
                 .Where(g => g.Count() > 1)
-                .Select(y => y.Key)
-                .Aggregate(string.Empty, (acc, cur) => acc + ", " + cur);
+                .Select(g => g.Key)
+                .Aggregate(string.Empty, (acc, cur) => $"{acc}, '{cur}'")
+                .TrimStart(',', ' ');
             if (duplicates.Any())
                 InternalLogger.Trace($"Found duplicates: {duplicates}");
             return list;

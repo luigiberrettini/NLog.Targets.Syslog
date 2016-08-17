@@ -27,7 +27,7 @@ namespace NLog.Targets.Syslog.Policies
                 return s;
 
             var replaced = Regex.Replace(s, searchFor, replaceWith);
-            InternalLogger.Trace($"Replaced {searchFor} (if found) with {replaceWith} given known value {s}: {replaced}");
+            InternalLogger.Trace($"Replaced '{searchFor}' (if found) with '{replaceWith}' given known value '{s}': '{replaced}'");
             return replaced;
         }
     }

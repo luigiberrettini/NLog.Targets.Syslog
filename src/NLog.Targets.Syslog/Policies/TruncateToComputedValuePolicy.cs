@@ -29,7 +29,7 @@ namespace NLog.Targets.Syslog.Policies
 
             var computedMaxLength = MaxLengthToAvoidCharCorruption(bytes, maxLength);
             Array.Resize(ref bytes, computedMaxLength);
-            InternalLogger.Trace($"Truncated byte array to {computedMaxLength} computed from {messageMaxLength} - {prefixLength}");
+            InternalLogger.Trace($"Truncated byte array to {computedMaxLength} bytes (truncateMessageTo {messageMaxLength} - prefixLength {prefixLength})");
             return bytes;
         }
 
