@@ -97,7 +97,11 @@ namespace NLog.Targets
         {
             SyslogServer = "127.0.0.1";
             Port = 514;
+#if NET45
             Sender = Assembly.GetCallingAssembly().GetName().Name;
+#else
+            Sender = Assembly.GetEntryAssembly().GetName().Name;
+#endif
             Facility = SyslogFacility.Local1;
             Protocol = ProtocolType.Udp;
             TimestampFormat = "MMM dd HH:mm:ss";
@@ -133,7 +137,11 @@ namespace NLog.Targets
         /// <param name="logEvents">The array of NLog.AsyncLogEventInfo</param>
         private void SendEventsBatch(params AsyncLogEventInfo[] logEvents)
         {
+#if NET45
             var logServerIp = Dns.GetHostAddresses(SyslogServer).FirstOrDefault();
+#else
+            var logServerIp = (Dns.GetHostAddressesAsync(SyslogServer)).Result.FirstOrDefault();
+#endif
             if (logServerIp == null)
             {
                 return;
@@ -142,13 +150,25 @@ namespace NLog.Targets
             switch (Protocol)
             {
                 case ProtocolType.Udp:
-                    using (var udp = new UdpClient(ipAddress, Port))
+#if NET45
+             using (var udp = new UdpClient(ipAddress, Port))
+#else
+                    using (var udp = new UdpClient(new IPEndPoint(logServerIp, Port)))
+#endif
                     {
-                        ProcessAndSendEvents(logEvents, messageData => udp.Send(messageData, messageData.Length));
+#if NET45
+             ProcessAndSendEvents(logEvents, messageData => udp.Send(messageData, messageData.Length));
+#else
+                        ProcessAndSendEvents(logEvents, messageData => udp.SendAsync(messageData, messageData.Length, ipAddress, Port));
+#endif
                     }
                     break;
                 case ProtocolType.Tcp:
-                    using (var tcp = new TcpClient(ipAddress, Port))
+#if NET45
+              using (var tcp = new TcpClient(ipAddress, Port))
+#else
+                    using (var tcp = new TcpClient())
+#endif
                     {
                         // disposition of tcp also disposes stream
                         var stream = tcp.GetStream();
@@ -157,7 +177,11 @@ namespace NLog.Targets
                             // leave stream open so that we don't double dispose
                             using (var sslStream = new SslStream(stream, true))
                             {
-                                sslStream.AuthenticateAsClient(SyslogServer);
+#if NET45
+              sslStream.AuthenticateAsClient(SyslogServer);
+#else
+                                sslStream.AuthenticateAsClientAsync(SyslogServer);
+#endif
                                 ProcessAndSendEvents(logEvents, messageData => sslStream.Write(messageData, 0, messageData.Length));
                             }
                         }
