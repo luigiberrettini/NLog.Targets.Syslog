@@ -17,7 +17,7 @@ namespace NLog.Targets.Syslog.Policies
                 .Select(y => y.Key)
                 .Aggregate(string.Empty, (acc, cur) => acc + ", " + cur);
             if (duplicates.Any())
-                InternalLogger.Trace($"Duplicates found: {duplicates}");
+                InternalLogger.Trace($"Found duplicates: {duplicates}");
             return list;
         }
     }

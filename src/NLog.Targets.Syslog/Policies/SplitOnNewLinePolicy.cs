@@ -21,8 +21,9 @@ namespace NLog.Targets.Syslog.Policies
 
         public IEnumerable<string> Apply(string s)
         {
-            InternalLogger.Trace($"Splitting on new line {s}");
-            return s.Split(LineSeps, StringSplitOptions.RemoveEmptyEntries);
+            var split = s.Split(LineSeps, StringSplitOptions.RemoveEmptyEntries);
+            InternalLogger.Trace($"Split {s} on new line");
+            return split;
         }
     }
 }
