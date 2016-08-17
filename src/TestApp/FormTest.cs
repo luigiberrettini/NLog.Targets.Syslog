@@ -1,6 +1,7 @@
 ﻿using NLog;
 using NLog.Common;
 using System;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace TestApp
@@ -54,6 +55,17 @@ namespace TestApp
                 case "buttonFatal":
                 {
                     Logger.Fatal("This is a sample fatal message");
+                    break;
+                }
+                case "buttonMultiple":
+                {
+                    const string paddedNumber = "D6";
+                    Parallel.For(1, 101, i => Logger.Log(LogLevel.Trace, i.ToString(paddedNumber)));
+                    Parallel.For(101, 201, i => Logger.Log(LogLevel.Debug, i.ToString(paddedNumber)));
+                    Parallel.For(201, 301, i => Logger.Log(LogLevel.Info, i.ToString(paddedNumber)));
+                    Parallel.For(301, 401, i => Logger.Log(LogLevel.Warn, i.ToString(paddedNumber)));
+                    Parallel.For(401, 501, i => Logger.Log(LogLevel.Error, i.ToString(paddedNumber)));
+                    Parallel.For(501, 601, i => Logger.Log(LogLevel.Fatal, i.ToString(paddedNumber)));
                     break;
                 }
                 default:
