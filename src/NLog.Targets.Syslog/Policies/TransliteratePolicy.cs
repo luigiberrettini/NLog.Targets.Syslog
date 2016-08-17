@@ -1,5 +1,4 @@
 using NLog.Common;
-using UnidecodeSharpFork;
 
 namespace NLog.Targets.Syslog.Policies
 {

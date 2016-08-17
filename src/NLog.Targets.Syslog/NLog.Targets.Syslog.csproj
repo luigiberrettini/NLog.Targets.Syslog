@@ -47,10 +47,6 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="UnidecodeSharpFork, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\UnidecodeSharpFork.1.0.0\lib\UnidecodeSharpFork.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncLogEventsHandler.cs" />
@@ -89,6 +85,7 @@
     <Compile Include="MessageCreation\SdParam.cs" />
     <Compile Include="Policies\SplitOnNewLinePolicy.cs" />
     <Compile Include="MessageCreation\StructuredData.cs" />
+    <Compile Include="Policies\Unidecoder.cs" />
     <Compile Include="SyslogTarget.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MessageCreation\RfcNumber.cs" />
