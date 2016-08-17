@@ -14,10 +14,19 @@
     <copyright>Copyright 2015 Jesper Hess Nielsen &lt;jesper@graffen.dk&gt;</copyright>
     <tags>>NLog Syslog Log Logging</tags>
     <dependencies>
-      <dependency id="NLog" version="4.2.2"/>
+      <group targetFramework=".NETFramework4.5" />
+      <group targetFramework=".NETStandard1.6">
+        <dependency id="NLog" version="(4.4.0-betaV15, )"/>
+        <dependency id="NETStandard.Library" version="[1.6.0, )" />
+        <dependency id="System.Net.Security" version="[4.0.0, )" />
+      </group>
     </dependencies>
     <releaseNotes>
       See latest changes on github.
     </releaseNotes>
   </metadata>
+   <files>
+    <file src="bin\Release\NLog.Targets.Syslog.dll" target="lib\net45" />
+    <file src="..\NLog.Targets.Syslog.Dotnet\bin\Release\netstandard1.6\NLog.Targets.Syslog.dll" target="lib\netstandard1.6" />
+  </files>
 </package>
