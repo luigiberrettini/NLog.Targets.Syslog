@@ -42,6 +42,7 @@ namespace NLog.Targets.Syslog
                 mergeEventProperties(asyncLogEvent.LogEvent);
                 var logEventAndMessages = new LogEventAndMessages(messageBuilder, asyncLogEvent, layout);
                 queue.Enqueue(logEventAndMessages);
+                InternalLogger.Debug($"Enqueued {logEventAndMessages}");
             });
         }
 
@@ -95,6 +96,8 @@ namespace NLog.Targets.Syslog
 
         private static Task MessagesDequeuedTcsTask(LogEventAndMessages logEventAndMessages, TaskCompletionSource<object> tcs, Exception exception)
         {
+            InternalLogger.Debug($"Dequeued {logEventAndMessages}");
+
             var asyncContinuation = logEventAndMessages.AsyncLogEvent.Continuation;
 
             if (exception != null)

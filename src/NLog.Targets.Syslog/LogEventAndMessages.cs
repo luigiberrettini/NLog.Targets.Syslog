@@ -18,5 +18,10 @@ namespace NLog.Targets.Syslog
             AsyncLogEvent = asyncLogEvent;
             Messages = new Queue<IEnumerable<byte>>(messages);
         }
+
+        public override string ToString()
+        {
+            return AsyncLogEvent.LogEvent.FormattedMessage;
+        }
     }
 }
