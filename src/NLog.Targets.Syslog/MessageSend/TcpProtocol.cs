@@ -15,7 +15,7 @@ namespace NLog.Targets.Syslog.MessageSend
     [DisplayName("Tcp")]
     public class TcpProtocol : MessageTransmitter
     {
-        private const int DefaultRecoveryTime = 5;
+        private const int DefaultReconnectInterval = 5;
         private FramingMethod framing;
         private static readonly byte[] LineFeedBytes = { 0x0A };
         private volatile bool isFirstSend;
@@ -24,8 +24,8 @@ namespace NLog.Targets.Syslog.MessageSend
         private Stream stream;
         private volatile bool disposed;
 
-        /// <summary>The number of seconds after which a connection recovery can be attempted</summary>
-        public int RecoveryTime
+        /// <summary>The time interval, in seconds, after which a connection is retried</summary>
+        public int ReconnectInterval
         {
             get { return recoveryTime.Seconds; }
             set { recoveryTime = TimeSpan.FromSeconds(value); }
@@ -46,7 +46,7 @@ namespace NLog.Targets.Syslog.MessageSend
         public TcpProtocol()
         {
             isFirstSend = true;
-            RecoveryTime = DefaultRecoveryTime;
+            ReconnectInterval = DefaultReconnectInterval;
             UseTls = true;
             Framing = FramingMethod.OctetCounting;
         }
