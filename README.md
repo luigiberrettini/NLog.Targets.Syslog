@@ -7,7 +7,7 @@ It can be used with version 4.3.7 and later of NLog and allows to send logging m
 
 
 ## Configuration
-To use NLog Syslog, you simply wire it up as an extension in the NLog.config file and place the NLog.Targets.Syslog.dll in the same location as the NLog.dll & NLog.config files.
+To use NLog Syslog, you simply wire it up as an extension in the NLog.config file and place the NLog.Targets.Syslog.dll in the same location as the NLog.dll and NLog.config files.
 Then use as you would any NLog target.
 Below is a sample NLog.config file:
 
@@ -89,6 +89,7 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
   * `disableBom` - `true` or `false` to handle RSyslog [issue 284](http://github.com/rsyslog/rsyslog/issues/284) (default: `false`)
 
 #### Message transmitter element
+* `retryInterval` - the time interval, in seconds, after which a send is retried (default: `5`)
 * `protocol` - `udp` or `tcp` (default: `udp`)
 * `udpProtocol` - settings related to UDP:
   * `server` - IP or hostname of the Syslog server (default: `127.0.0.1`)
@@ -96,6 +97,7 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
 * `tcpProtocol` - settings related to TCP:
   * `server` - IP or hostname of the Syslog server (default: `127.0.0.1`)
   * `port` - port the Syslog server is listening on (default: `514`)
+  * `reconnectInterval` - the time interval, in seconds, after which a connection is retried (default: `5`)
   * `useTls` - `false` or `true` (default: `true`)
   * `framing` - `nonTransparent` or `octectCounting` (default: `octectCounting`)
 
@@ -108,8 +110,7 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
 
 # Test bench
  1. `[HOST]` Download VirtualBox and Vagrant and install them
- 2. `[HOST]` Download an [Ubuntu Vagrant box](http://cloud-images.ubuntu.com/vagrant/)
- 3. `[HOST]` Create a Vagrantfile in the same folder of the downloaded box
+ 2. `[HOST]` Create a Vagrantfile
 
     ```ruby
     Vagrant.configure("2") do |config|
@@ -123,27 +124,20 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
     end
     ```
 
- 5. `[HOST]` Add the box to the list
-
-    ```shell
-    vagrant box add .\ubuntuvagrant.box --name 'ubuntu/trusty64'
-    vagrant box list
-    ```
-
- 6. `[HOST]` Start the VM
+ 3. `[HOST]` Start the VM
 
     ```shell
     vagrant up
     ```
 
- 7. `[HOST]` Connect to the VM with SSH on port 2222
- 8. `[GUEST]` Switch to the root user
+ 4. `[HOST]` Connect to the VM with SSH on port 2222
+ 5. `[GUEST]` Switch to the root user
 
     ```shell
     su
     ```
 
- 9. `[GUEST]` Uncomment the following `/etc/rsyslog.conf` lines:
+ 6. `[GUEST]` Uncomment the following `/etc/rsyslog.conf` lines:
 
     ```
     #$ModLoad imudp
@@ -154,43 +148,43 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
     #$InputTCPServerRun 514
     ```
 
-10. `[GUEST]` Add the following `/etc/rsyslog.d/50-default.conf` line under the `user.*` one (prefixing a path with the minus sign omits flushing after every log event)
+ 7. `[GUEST]` Add the following `/etc/rsyslog.d/50-default.conf` line under the `user.*` one (prefixing a path with the minus sign omits flushing after every log event)
 
     ```
     local4.*                        /var/log/local4.log
     ```
 
-11. `[GUEST]` Restart Syslog service
+ 8. `[GUEST]` Restart Syslog service
 
     ```shell
     service rsyslog restart
     ```
 
-12. `[HOST]` Restart the VM
+ 9. `[HOST]` Restart the VM
 
     ```shell
     vagrant reload
     ```
 
-13. `[GUEST]` Make sure rsyslog is running
+11. `[GUEST]` Make sure RSyslog is running
 
     ```shell
     ps -A | grep rsyslog
     ```
 
-14. `[GUEST]` Check the rsyslog configuration
+12. `[GUEST]` Check RSyslog configuration
 
     ```shell
     rsyslogd -N1
     ```
 
-15. `[GUEST]` Check the Linux system log for rsyslog errors
+13. `[GUEST]` Check Linux system log for RSyslog errors
 
     ```shell
     cat /var/log/syslog | grep rsyslog
     ```
 
-16. `[GUEST]` Perform a local test
+14. `[GUEST]` Perform a local test
 
     ```shell
     logger --server 127.0.0.1 --port 514 --priority local4.error "TCP local test"
@@ -199,7 +193,7 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
     tail -3 /var/log/local4.log
     ```
 
-17. `[GUEST]` Prepare for a remote test
+15. `[GUEST]` Prepare for a remote test
 
     ```shell
     tail -f /var/log/syslog
@@ -211,13 +205,13 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
     tcpdump port 514 -vv
     ```
 
-18. `[HOST]` Perform a remote test
+16. `[HOST]` Perform a remote test
 
     ```shell
     telnet 127.0.0.1 1514
     ```
 
-19. `[HOST]` Perform a remote test with the NLog target (configuring it to use the Local4 facility)
+17. `[HOST]` Perform a remote test with the NLog target (configuring it to use the Local4 facility)
 
 
 
