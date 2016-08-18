@@ -54,7 +54,7 @@ namespace NLog.Targets.Syslog
             LogEventAndMessages logEventAndMessages;
             var sendOrDelayTask = queue.TryDequeue(out logEventAndMessages) ?
                 SendMsgSetAsync(logEventAndMessages, token, new TaskCompletionSource<object>()) :
-                Task.Delay(messageTransmitter.RetryTime, token);
+                Task.Delay(messageTransmitter.RetryInterval, token);
 
             sendOrDelayTask
                 .ContinueWith(t =>
