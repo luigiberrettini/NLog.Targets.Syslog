@@ -90,6 +90,7 @@
                     <xs:element name="messageTransmitter" minOccurs="0" maxOccurs="1">
                         <xs:complexType>
                             <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                <xs:element name="retryInterval" type="xs:integer" minOccurs="0" maxOccurs="1" />
                                 <xs:element name="protocol" type="xs:string" minOccurs="0" maxOccurs="1" />
                                 <xs:element name="udpProtocol" minOccurs="0" maxOccurs="1">
                                     <xs:complexType>
@@ -106,11 +107,13 @@
                                         <xs:choice minOccurs="0" maxOccurs="unbounded">
                                             <xs:element name="server" type="xs:string" minOccurs="1" maxOccurs="1" />
                                             <xs:element name="port" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                                            <xs:element name="reconnectInterval" type="xs:integer" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="useTls" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="framing" type="xs:string" minOccurs="0" maxOccurs="1" />
                                         </xs:choice>
                                         <xs:attribute name="server" type="xs:string" />
                                         <xs:attribute name="port" type="xs:integer" />
+                                        <xs:attribute name="reconnectInterval" type="xs:integer" />
                                         <xs:attribute name="useTls" type="xs:boolean" />
                                         <xs:attribute name="framing" type="xs:string" />
                                     </xs:complexType>
