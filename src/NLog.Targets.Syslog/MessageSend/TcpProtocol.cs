@@ -66,7 +66,7 @@ namespace NLog.Targets.Syslog.MessageSend
         internal override Task SendMessageAsync(byte[] message, CancellationToken token)
         {
             if (tcp.Connected)
-                return WriteAsync(stream, 0, message, token);
+                return WriteAsync(0, message, token);
 
             var delay = isFirstSend ? TimeSpan.FromSeconds(0) : recoveryTime;
             isFirstSend = false;
@@ -74,7 +74,7 @@ namespace NLog.Targets.Syslog.MessageSend
             return Task.Delay(delay, token)
                 .Then(_ => ConnectAsync(), token)
                 .Unwrap()
-                .Then(_ => WriteAsync(stream, 0, message, token), token)
+                .Then(_ => WriteAsync(0, message, token), token)
                 .Unwrap();
         }
 
@@ -114,7 +114,7 @@ namespace NLog.Targets.Syslog.MessageSend
             return Framing != FramingMethod.NonTransparent ? message : message.Concat(LineFeedBytes);
         }
 
-        private static Task WriteAsync(Stream stream, int offset, byte[] data, CancellationToken token)
+        private Task WriteAsync(int offset, byte[] data, CancellationToken token)
         {
             var toBeWritten = data.Length - offset;
             var isLastWrite = toBeWritten <= BufferSize;
@@ -124,7 +124,7 @@ namespace NLog.Targets.Syslog.MessageSend
 
             return Task.Factory
                 .FromAsync(stream.BeginWrite, stream.EndWrite, buffer, 0, buffer.Length, null)
-                .Then(task => isLastWrite ? task : WriteAsync(stream, offset + BufferSize, data, token), token)
+                .Then(task => isLastWrite ? task : WriteAsync(offset + BufferSize, data, token), token)
                 .Unwrap();
         }
 
