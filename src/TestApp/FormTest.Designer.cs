@@ -1,8 +1,21 @@
-﻿namespace TestApp
+﻿using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace TestApp
 {
     partial class FormTest
     {
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
+        private Button buttonTrace;
+        private Button buttonDebug;
+        private Button buttonInfo;
+        private Button buttonWarn;
+        private Button buttonError;
+        private Button buttonFatal;
+        private Button buttonFromFile;
+        private Button buttonMultiple;
 
         protected override void Dispose(bool disposing)
         {
@@ -13,113 +26,116 @@
 
         private void InitializeComponent()
         {
-            buttonTrace = new System.Windows.Forms.Button();
-            buttonDebug = new System.Windows.Forms.Button();
-            buttonInfo = new System.Windows.Forms.Button();
-            buttonWarn = new System.Windows.Forms.Button();
-            buttonError = new System.Windows.Forms.Button();
-            buttonFatal = new System.Windows.Forms.Button();
-            buttonMultiple = new System.Windows.Forms.Button();
+            buttonTrace = new Button();
+            buttonDebug = new Button();
+            buttonInfo = new Button();
+            buttonWarn = new Button();
+            buttonError = new Button();
+            buttonFatal = new Button();
+            buttonFromFile = new Button();
+            buttonMultiple = new Button();
             SuspendLayout();
-            // 
+            //
             // buttonTrace
-            // 
-            buttonTrace.Location = new System.Drawing.Point(36, 26);
+            //
+            buttonTrace.Location = new Point(36, 20);
             buttonTrace.Name = "buttonTrace";
-            buttonTrace.Size = new System.Drawing.Size(212, 38);
+            buttonTrace.Size = new Size(212, 38);
             buttonTrace.TabIndex = 0;
             buttonTrace.Text = "Trace event";
             buttonTrace.UseVisualStyleBackColor = true;
-            buttonTrace.Click += new System.EventHandler(ButtonLogClick);
-            // 
+            buttonTrace.Click += new EventHandler(ButtonLogClick);
+            //
             // buttonDebug
-            // 
-            buttonDebug.Location = new System.Drawing.Point(36, 70);
+            //
+            buttonDebug.Location = new Point(36, 70);
             buttonDebug.Name = "buttonDebug";
-            buttonDebug.Size = new System.Drawing.Size(212, 38);
+            buttonDebug.Size = new Size(212, 38);
             buttonDebug.TabIndex = 1;
             buttonDebug.Text = "Debug event";
             buttonDebug.UseVisualStyleBackColor = true;
-            buttonDebug.Click += new System.EventHandler(ButtonLogClick);
-            // 
+            buttonDebug.Click += new EventHandler(ButtonLogClick);
+            //
             // buttonInfo
-            // 
-            buttonInfo.Location = new System.Drawing.Point(36, 114);
+            //
+            buttonInfo.Location = new Point(36, 120);
             buttonInfo.Name = "buttonInfo";
-            buttonInfo.Size = new System.Drawing.Size(212, 38);
+            buttonInfo.Size = new Size(212, 38);
             buttonInfo.TabIndex = 2;
             buttonInfo.Text = "Info event";
             buttonInfo.UseVisualStyleBackColor = true;
-            buttonInfo.Click += new System.EventHandler(ButtonLogClick);
-            // 
+            buttonInfo.Click += new EventHandler(ButtonLogClick);
+            //
             // buttonWarn
-            // 
-            buttonWarn.Location = new System.Drawing.Point(36, 158);
+            //
+            buttonWarn.Location = new Point(36, 170);
             buttonWarn.Name = "buttonWarn";
-            buttonWarn.Size = new System.Drawing.Size(212, 38);
+            buttonWarn.Size = new Size(212, 38);
             buttonWarn.TabIndex = 3;
             buttonWarn.Text = "Warn event";
             buttonWarn.UseVisualStyleBackColor = true;
-            buttonWarn.Click += new System.EventHandler(ButtonLogClick);
-            // 
+            buttonWarn.Click += new EventHandler(ButtonLogClick);
+            //
             // buttonError
-            // 
-            buttonError.Location = new System.Drawing.Point(36, 202);
+            //
+            buttonError.Location = new Point(36, 220);
             buttonError.Name = "buttonError";
-            buttonError.Size = new System.Drawing.Size(212, 38);
+            buttonError.Size = new Size(212, 38);
             buttonError.TabIndex = 4;
             buttonError.Text = "Error event";
             buttonError.UseVisualStyleBackColor = true;
-            buttonError.Click += new System.EventHandler(ButtonLogClick);
-            // 
+            buttonError.Click += new EventHandler(ButtonLogClick);
+            //
             // buttonFatal
-            // 
-            buttonFatal.Location = new System.Drawing.Point(36, 246);
+            //
+            buttonFatal.Location = new Point(36, 220);
             buttonFatal.Name = "buttonFatal";
-            buttonFatal.Size = new System.Drawing.Size(212, 38);
+            buttonFatal.Size = new Size(212, 38);
             buttonFatal.TabIndex = 5;
             buttonFatal.Text = "Fatal event";
             buttonFatal.UseVisualStyleBackColor = true;
-            buttonFatal.Click += new System.EventHandler(ButtonLogClick);
-            // 
+            buttonFatal.Click += new EventHandler(ButtonLogClick);
+            //
+            // buttonFromFile
+            //
+            buttonFromFile.Location = new Point(36, 270);
+            buttonFromFile.Name = "buttonFromFile";
+            buttonFromFile.Size = new Size(212, 38);
+            buttonFromFile.TabIndex = 6;
+            buttonFromFile.Text = "From file events";
+            buttonFromFile.UseVisualStyleBackColor = true;
+            buttonFromFile.Click += new EventHandler(ButtonLogClick);
+            //
             // buttonMultiple
-            // 
-            buttonMultiple.Location = new System.Drawing.Point(36, 290);
+            //
+            buttonMultiple.Location = new Point(36, 320);
             buttonMultiple.Name = "buttonMultiple";
-            buttonMultiple.Size = new System.Drawing.Size(212, 38);
-            buttonMultiple.TabIndex = 6;
+            buttonMultiple.Size = new Size(212, 38);
+            buttonMultiple.TabIndex = 7;
             buttonMultiple.Text = "Multiple events";
             buttonMultiple.UseVisualStyleBackColor = true;
-            buttonMultiple.Click += new System.EventHandler(ButtonLogClick);
-            // 
+            buttonMultiple.Click += new EventHandler(ButtonLogClick);
+            //
             // FormTest
-            // 
-            AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(284, 352);
-            Controls.Add(buttonMultiple);
-            Controls.Add(buttonFatal);
-            Controls.Add(buttonError);
-            Controls.Add(buttonWarn);
-            Controls.Add(buttonInfo);
-            Controls.Add(buttonDebug);
+            //
+            AutoScaleDimensions = new SizeF(6F, 13F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(284, 382);
             Controls.Add(buttonTrace);
-            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            Controls.Add(buttonDebug);
+            Controls.Add(buttonInfo);
+            Controls.Add(buttonWarn);
+            Controls.Add(buttonError);
+            Controls.Add(buttonFatal);
+            Controls.Add(buttonFromFile);
+            Controls.Add(buttonMultiple);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
             Name = "FormTest";
-            StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "Syslog Target Demo";
             ResumeLayout(false);
-
         }
-
-        private System.Windows.Forms.Button buttonTrace;
-        private System.Windows.Forms.Button buttonDebug;
-        private System.Windows.Forms.Button buttonInfo;
-        private System.Windows.Forms.Button buttonWarn;
-        private System.Windows.Forms.Button buttonError;
-        private System.Windows.Forms.Button buttonFatal;
-        private System.Windows.Forms.Button buttonMultiple;
     }
 }

@@ -1,6 +1,9 @@
 ﻿using NLog;
 using NLog.Common;
 using System;
+using System.Configuration;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -55,6 +58,24 @@ namespace TestApp
                 case "buttonFatal":
                 {
                     Logger.Fatal("This is a sample fatal message");
+                    break;
+                }
+                case "buttonFromFile":
+                {
+                    var logLevelName = ConfigurationManager.AppSettings["MessagesFromFileLogLevel"];
+                    var logLevel = logLevelName == null ? LogLevel.Trace : LogLevel.FromString(logLevelName);
+                    InternalLogger.Debug($"From file log level: {logLevel.Name}");
+
+                    var path = ConfigurationManager.AppSettings["MessagesFromFileFilePath"];
+                    var fileNotFound = !File.Exists(path);
+                    if (fileNotFound)
+                    {
+                        InternalLogger.Debug($"From file input file '{path}' does not exist");
+                        return;
+                    }
+
+                    var messages = File.ReadAllLines(path).ToList();
+                    messages.ForEach(m => Logger.Log(logLevel, m));
                     break;
                 }
                 case "buttonMultiple":
