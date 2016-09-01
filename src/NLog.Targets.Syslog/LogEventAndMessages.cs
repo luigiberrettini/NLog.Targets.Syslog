@@ -1,27 +1,38 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using NLog.Common;
 using NLog.Layouts;
 using NLog.Targets.Syslog.MessageCreation;
 
 namespace NLog.Targets.Syslog
 {
+    // LogEventMsgSet
     internal class LogEventAndMessages
     {
-        public AsyncLogEventInfo AsyncLogEvent { get; private set; }
+        private readonly AsyncLogEventInfo asyncLogEventInfo;
+        private int currentMessage;
+        private IEnumerable<byte>[] messages;
 
-        public Queue<IEnumerable<byte>> Messages { get; private set; }
+        public bool HasNoMessages => currentMessage == messages.Length;
 
-        public LogEventAndMessages(MessageBuildersFacade messageBuilder, AsyncLogEventInfo asyncLogEvent, Layout layout)
+        public IEnumerable<byte> NextMessage => messages[currentMessage++];
+
+        public LogEventAndMessages(AsyncLogEventInfo asyncLogEvent)
         {
-            var messages = messageBuilder.BuildMessages(asyncLogEvent.LogEvent, layout);
-
-            AsyncLogEvent = asyncLogEvent;
-            Messages = new Queue<IEnumerable<byte>>(messages);
+            asyncLogEventInfo = asyncLogEvent;
+            currentMessage = 0;
         }
 
-        public override string ToString()
+        public void BuildMessages(MessageBuildersFacade messageBuilder, Layout layout)
         {
-            return AsyncLogEvent.LogEvent.FormattedMessage;
+            messages = messageBuilder.BuildMessages(asyncLogEventInfo.LogEvent, layout).ToArray();
         }
+
+        public void OnNoMessages(Exception exception) => asyncLogEventInfo.Continuation(exception);
+
+        public void OnNoMessages() => asyncLogEventInfo.Continuation(null);
+
+        public override string ToString() => asyncLogEventInfo.LogEvent.FormattedMessage;
     }
 }

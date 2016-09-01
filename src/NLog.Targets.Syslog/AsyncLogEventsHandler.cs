@@ -39,8 +39,7 @@ namespace NLog.Targets.Syslog
         {
             asyncLogEvents.ForEach(asyncLogEvent =>
             {
-                mergeEventProperties(asyncLogEvent.LogEvent);
-                var logEventAndMessages = new LogEventAndMessages(messageBuilder, asyncLogEvent, layout);
+                var logEventAndMessages = new LogEventAndMessages(asyncLogEvent);
                 queue.Enqueue(logEventAndMessages);
                 InternalLogger.Debug($"Enqueued {logEventAndMessages}");
             });
@@ -53,7 +52,7 @@ namespace NLog.Targets.Syslog
 
             LogEventAndMessages logEventAndMessages;
             var sendOrDelayTask = queue.TryDequeue(out logEventAndMessages) ?
-                SendMsgSetAsync(logEventAndMessages, token, new TaskCompletionSource<object>()) :
+                SendMsgSetAsync(logEventAndMessages, token) :
                 Task.Delay(messageTransmitter.RetryInterval, token);
 
             sendOrDelayTask
@@ -68,21 +67,25 @@ namespace NLog.Targets.Syslog
                 }, token);
         }
 
+        private Task SendMsgSetAsync(LogEventAndMessages logEventAndMessages, CancellationToken token)
+        {
+            logEventAndMessages.BuildMessages(messageBuilder, layout);
+            return SendMsgSetAsync(logEventAndMessages, token, new TaskCompletionSource<object>());
+        }
+
         private Task SendMsgSetAsync(LogEventAndMessages logEventAndMessages, CancellationToken token, TaskCompletionSource<object> tcs, Exception exception = null)
         {
             if (disposed || token.IsCancellationRequested)
                 return CancelledTcsTask(tcs);
 
-            var messages = logEventAndMessages.Messages;
-
             // All messages have been dequeued and either all messages have been sent or
             // an exception has occurred and has been propagated till here
             // (no message was sent after it)
-            if (messages.Count == 0)
+            if (logEventAndMessages.HasNoMessages)
                 return MessagesDequeuedTcsTask(logEventAndMessages, tcs, exception);
 
             messageTransmitter
-                .SendMessageAsync(messages.Dequeue(), token)
+                .SendMessageAsync(logEventAndMessages.NextMessage, token)
                 .Then(t => SendMsgSetAsync(logEventAndMessages, token, tcs, t.Exception), token);
 
             return tcs.Task;
@@ -98,16 +101,14 @@ namespace NLog.Targets.Syslog
         {
             InternalLogger.Debug($"Dequeued {logEventAndMessages}");
 
-            var asyncContinuation = logEventAndMessages.AsyncLogEvent.Continuation;
-
             if (exception != null)
             {
-                asyncContinuation(exception.GetBaseException());
+                logEventAndMessages.OnNoMessages(exception.GetBaseException());
                 tcs.SetException(exception);
             }
             else
             {
-                asyncContinuation(null);
+                logEventAndMessages.OnNoMessages();
                 tcs.SetResult(null);
             }
 
