@@ -16,7 +16,7 @@ namespace NLog.Targets.Syslog
         private Layout layout;
         private readonly MessageTransmittersFacade messageTransmitter;
         private readonly Action<LogEventInfo> mergeEventProperties;
-        private readonly ConcurrentQueue<LogEventAndMessages> queue;
+        private readonly ConcurrentQueue<LogEventMsgSet> queue;
         private readonly CancellationTokenSource cts;
         private volatile bool disposed;
 
@@ -25,7 +25,7 @@ namespace NLog.Targets.Syslog
             messageBuilder = target.MessageBuilder;
             messageTransmitter = target.MessageTransmitter;
             mergeEventProperties = mergeEventPropertiesAction;
-            queue = new ConcurrentQueue<LogEventAndMessages>();
+            queue = new ConcurrentQueue<LogEventMsgSet>();
             cts = new CancellationTokenSource();
         }
 
@@ -39,7 +39,7 @@ namespace NLog.Targets.Syslog
         {
             asyncLogEvents.ForEach(asyncLogEvent =>
             {
-                var logEventAndMessages = new LogEventAndMessages(asyncLogEvent);
+                var logEventAndMessages = new LogEventMsgSet(asyncLogEvent);
                 queue.Enqueue(logEventAndMessages);
                 InternalLogger.Debug($"Enqueued {logEventAndMessages}");
             });
@@ -50,9 +50,9 @@ namespace NLog.Targets.Syslog
             if (disposed || token.IsCancellationRequested)
                 return;
 
-            LogEventAndMessages logEventAndMessages;
-            var sendOrDelayTask = queue.TryDequeue(out logEventAndMessages) ?
-                SendMsgSetAsync(logEventAndMessages, token) :
+            LogEventMsgSet logEventMsgSet;
+            var sendOrDelayTask = queue.TryDequeue(out logEventMsgSet) ?
+                SendMsgSetAsync(logEventMsgSet, token) :
                 Task.Delay(messageTransmitter.RetryInterval, token);
 
             sendOrDelayTask
@@ -67,13 +67,13 @@ namespace NLog.Targets.Syslog
                 }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current);
         }
 
-        private Task SendMsgSetAsync(LogEventAndMessages logEventAndMessages, CancellationToken token)
+        private Task SendMsgSetAsync(LogEventMsgSet logEventMsgSet, CancellationToken token)
         {
-            logEventAndMessages.BuildMessages(messageBuilder, layout);
-            return SendMsgSetAsync(logEventAndMessages, token, new TaskCompletionSource<object>());
+            logEventMsgSet.BuildMessages(messageBuilder, layout);
+            return SendMsgSetAsync(logEventMsgSet, token, new TaskCompletionSource<object>());
         }
 
-        private Task SendMsgSetAsync(LogEventAndMessages logEventAndMessages, CancellationToken token, TaskCompletionSource<object> tcs, Exception exception = null)
+        private Task SendMsgSetAsync(LogEventMsgSet logEventMsgSet, CancellationToken token, TaskCompletionSource<object> tcs, Exception exception = null)
         {
             if (disposed || token.IsCancellationRequested)
                 return CancelledTcsTask(tcs);
@@ -81,12 +81,12 @@ namespace NLog.Targets.Syslog
             // All messages have been dequeued and either all messages have been sent or
             // an exception has occurred and has been propagated till here
             // (no message was sent after it)
-            if (logEventAndMessages.HasNoMessages)
-                return MessagesDequeuedTcsTask(logEventAndMessages, tcs, exception);
+            if (logEventMsgSet.HasNoMessages)
+                return MessagesDequeuedTcsTask(logEventMsgSet, tcs, exception);
 
             messageTransmitter
-                .SendMessageAsync(logEventAndMessages.NextMessage, token)
-                .Then(t => SendMsgSetAsync(logEventAndMessages, token, tcs, t.Exception), token);
+                .SendMessageAsync(logEventMsgSet.NextMessage, token)
+                .Then(t => SendMsgSetAsync(logEventMsgSet, token, tcs, t.Exception), token);
 
             return tcs.Task;
         }
@@ -97,18 +97,18 @@ namespace NLog.Targets.Syslog
             return tcs.Task;
         }
 
-        private static Task MessagesDequeuedTcsTask(LogEventAndMessages logEventAndMessages, TaskCompletionSource<object> tcs, Exception exception)
+        private static Task MessagesDequeuedTcsTask(LogEventMsgSet logEventMsgSet, TaskCompletionSource<object> tcs, Exception exception)
         {
-            InternalLogger.Debug($"Dequeued {logEventAndMessages}");
+            InternalLogger.Debug($"Dequeued {logEventMsgSet}");
 
             if (exception != null)
             {
-                logEventAndMessages.OnNoMessages(exception.GetBaseException());
+                logEventMsgSet.OnNoMessages(exception.GetBaseException());
                 tcs.SetException(exception);
             }
             else
             {
-                logEventAndMessages.OnNoMessages();
+                logEventMsgSet.OnNoMessages();
                 tcs.SetResult(null);
             }
 

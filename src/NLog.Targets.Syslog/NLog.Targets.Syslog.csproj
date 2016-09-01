@@ -50,7 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncLogEventsHandler.cs" />
-    <Compile Include="LogEventAndMessages.cs" />
+    <Compile Include="LogEventMsgSet.cs" />
     <Compile Include="MessageSend\TaskExtensions.cs" />
     <Compile Include="Policies\AppNamePolicySet.cs" />
     <Compile Include="Policies\ByteManipulationExtension.cs" />

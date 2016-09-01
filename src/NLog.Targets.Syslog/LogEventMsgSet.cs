@@ -7,8 +7,7 @@ using NLog.Targets.Syslog.MessageCreation;
 
 namespace NLog.Targets.Syslog
 {
-    // LogEventMsgSet
-    internal class LogEventAndMessages
+    internal class LogEventMsgSet
     {
         private readonly AsyncLogEventInfo asyncLogEventInfo;
         private int currentMessage;
@@ -18,7 +17,7 @@ namespace NLog.Targets.Syslog
 
         public IEnumerable<byte> NextMessage => messages[currentMessage++];
 
-        public LogEventAndMessages(AsyncLogEventInfo asyncLogEvent)
+        public LogEventMsgSet(AsyncLogEventInfo asyncLogEvent)
         {
             asyncLogEventInfo = asyncLogEvent;
             currentMessage = 0;
