@@ -8,16 +8,16 @@ namespace NLog.Targets.Syslog.MessageSend
 {
     public class MessageTransmittersFacade
     {
-        private const int DefaultRetryInterval = 5;
+        private const int DefaultRetryInterval = 50;
         private TimeSpan retryTime;
         private MessageTransmitter activeTransmitter;
         private readonly Dictionary<ProtocolType, MessageTransmitter> transmitters;
 
-        /// <summary>The time interval, in seconds, after which a send is retried</summary>
+        /// <summary>The time interval, in milliseconds, after which a send is retried</summary>
         public int RetryInterval
         {
-            get { return retryTime.Seconds; }
-            set { retryTime = TimeSpan.FromSeconds(value); }
+            get { return retryTime.Milliseconds; }
+            set { retryTime = TimeSpan.FromMilliseconds(value); }
         }
 
         /// <summary>The Syslog server protocol</summary>
