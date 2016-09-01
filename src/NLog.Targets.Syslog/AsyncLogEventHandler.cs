@@ -10,7 +10,7 @@ using NLog.Targets.Syslog.MessageSend;
 
 namespace NLog.Targets.Syslog
 {
-    internal class AsyncLogEventsHandler
+    internal class AsyncLogEventHandler
     {
         private readonly MessageBuildersFacade messageBuilder;
         private Layout layout;
@@ -20,7 +20,7 @@ namespace NLog.Targets.Syslog
         private readonly CancellationTokenSource cts;
         private volatile bool disposed;
 
-        public AsyncLogEventsHandler(SyslogTarget target, Action<LogEventInfo> mergeEventPropertiesAction)
+        public AsyncLogEventHandler(SyslogTarget target, Action<LogEventInfo> mergeEventPropertiesAction)
         {
             messageBuilder = target.MessageBuilder;
             messageTransmitter = target.MessageTransmitter;

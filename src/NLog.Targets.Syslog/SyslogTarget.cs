@@ -36,7 +36,7 @@ namespace NLog.Targets.Syslog
         /// <summary>The transmitter used to send messages to the Syslog server</summary>
         public MessageTransmittersFacade MessageTransmitter { get; set; }
 
-        private readonly AsyncLogEventsHandler asyncLogEventsHandler;
+        private readonly AsyncLogEventHandler asyncLogEventHandler;
 
         /// <summary>Builds a new instance of the SyslogTarget class</summary>
         public SyslogTarget()
@@ -44,7 +44,7 @@ namespace NLog.Targets.Syslog
             Enforcement = new Enforcement();
             MessageBuilder = new MessageBuildersFacade();
             MessageTransmitter = new MessageTransmittersFacade();
-            asyncLogEventsHandler = new AsyncLogEventsHandler(this, MergeEventProperties);
+            asyncLogEventHandler = new AsyncLogEventHandler(this, MergeEventProperties);
         }
 
         /// <summary>Initializes the SyslogTarget</summary>
@@ -53,7 +53,7 @@ namespace NLog.Targets.Syslog
             base.InitializeTarget();
             MessageBuilder.Initialize(Enforcement);
             MessageTransmitter.Initialize();
-            asyncLogEventsHandler.Initialize(Layout);
+            asyncLogEventHandler.Initialize(Layout);
         }
 
         /// <summary>Writes a single event</summary>
@@ -74,13 +74,13 @@ namespace NLog.Targets.Syslog
 
         private void SendMessages(params AsyncLogEventInfo[] asyncLogEvents)
         {
-            asyncLogEventsHandler.Handle(asyncLogEvents);
+            asyncLogEventHandler.Handle(asyncLogEvents);
         }
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
-                asyncLogEventsHandler.Dispose();
+                asyncLogEventHandler.Dispose();
             base.Dispose(disposing);
         }
     }

@@ -49,7 +49,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncLogEventsHandler.cs" />
+    <Compile Include="AsyncLogEventHandler.cs" />
     <Compile Include="LogEventMsgSet.cs" />
     <Compile Include="MessageSend\TaskExtensions.cs" />
     <Compile Include="Policies\AppNamePolicySet.cs" />
