@@ -57,24 +57,11 @@ namespace NLog.Targets.Syslog
         }
 
         /// <summary>Writes a single event</summary>
-        /// <param name="logEvent">The NLog.AsyncLogEventInfo</param>
+        /// <param name="asyncLogEvent">The NLog.AsyncLogEventInfo</param>
         /// <remarks>Write(LogEventInfo) is called only by Write(AsyncLogEventInfo/AsyncLogEventInfo[]): no need to override it</remarks>
-        protected override void Write(AsyncLogEventInfo logEvent)
+        protected override void Write(AsyncLogEventInfo asyncLogEvent)
         {
-            SendMessages(logEvent);
-        }
-
-        /// <summary>Writes array of events</summary>
-        /// <param name="logEvents">The array of NLog.AsyncLogEventInfo</param>
-        /// <remarks>Write(LogEventInfo) is called only by Write(AsyncLogEventInfo/AsyncLogEventInfo[]): no need to override it</remarks>
-        protected override void Write(AsyncLogEventInfo[] logEvents)
-        {
-            SendMessages(logEvents);
-        }
-
-        private void SendMessages(params AsyncLogEventInfo[] asyncLogEvents)
-        {
-            asyncLogEventHandler.Handle(asyncLogEvents);
+            asyncLogEventHandler.Handle(asyncLogEvent);
         }
 
         protected override void Dispose(bool disposing)

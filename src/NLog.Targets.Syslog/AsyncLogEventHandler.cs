@@ -35,14 +35,11 @@ namespace NLog.Targets.Syslog
             ProcessQueueAsync(cts.Token);
         }
 
-        public void Handle(IEnumerable<AsyncLogEventInfo> asyncLogEvents)
+        public void Handle(AsyncLogEventInfo asyncLogEvent)
         {
-            asyncLogEvents.ForEach(asyncLogEvent =>
-            {
-                var logEventAndMessages = new LogEventMsgSet(asyncLogEvent);
-                queue.Enqueue(logEventAndMessages);
-                InternalLogger.Debug($"Enqueued {logEventAndMessages}");
-            });
+            var logEventAndMessages = new LogEventMsgSet(asyncLogEvent);
+            queue.Enqueue(logEventAndMessages);
+            InternalLogger.Debug($"Enqueued {logEventAndMessages}");
         }
 
         private void ProcessQueueAsync(CancellationToken token)
