@@ -89,6 +89,28 @@ namespace TestApp
                     Parallel.For(501, 601, i => Logger.Log(LogLevel.Fatal, i.ToString(paddedNumber)));
                     break;
                 }
+                case "buttonContinuous":
+                {
+                    Task.Factory.StartNew(() =>
+                    {
+                        for (var i = 0; i < 123456; i++)
+                        {
+                            Logger.Warn(i);
+                            //Thread.Sleep(100);
+                        }
+                    });
+                    break;
+                }
+                case "buttonParallel":
+                {
+                    Task.Factory.StartNew(() =>
+                    {
+                        var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+                        Parallel.For(1, 345678, parallelOptions, i => Logger.Warn(i));
+                    });
+                    break;
+                }
+
                 default:
                 {
                     throw new InvalidOperationException($"Button name '{btn.Name}' is not supported");

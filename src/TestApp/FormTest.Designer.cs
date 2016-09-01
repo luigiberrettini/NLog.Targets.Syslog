@@ -16,6 +16,8 @@ namespace TestApp
         private Button buttonFatal;
         private Button buttonFromFile;
         private Button buttonMultiple;
+        private Button buttonContinuous;
+        private Button buttonParallel;
 
         protected override void Dispose(bool disposing)
         {
@@ -34,6 +36,8 @@ namespace TestApp
             buttonFatal = new Button();
             buttonFromFile = new Button();
             buttonMultiple = new Button();
+            buttonContinuous = new Button();
+            buttonParallel = new Button();
             SuspendLayout();
             //
             // buttonTrace
@@ -116,11 +120,31 @@ namespace TestApp
             buttonMultiple.UseVisualStyleBackColor = true;
             buttonMultiple.Click += new EventHandler(ButtonLogClick);
             //
+            // buttonContinuous
+            //
+            buttonContinuous.Location = new Point(36, 370);
+            buttonContinuous.Name = "buttonMultiple";
+            buttonContinuous.Size = new Size(212, 38);
+            buttonContinuous.TabIndex = 7;
+            buttonContinuous.Text = "Continuous events";
+            buttonContinuous.UseVisualStyleBackColor = true;
+            buttonContinuous.Click += new EventHandler(ButtonLogClick);
+            //
+            // buttonParallel
+            //
+            buttonParallel.Location = new Point(36, 420);
+            buttonParallel.Name = "buttonMultiple";
+            buttonParallel.Size = new Size(212, 38);
+            buttonParallel.TabIndex = 7;
+            buttonParallel.Text = "Parallel events";
+            buttonParallel.UseVisualStyleBackColor = true;
+            buttonParallel.Click += new EventHandler(ButtonLogClick);
+            //
             // FormTest
             //
             AutoScaleDimensions = new SizeF(6F, 13F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(284, 382);
+            ClientSize = new Size(284, 482);
             Controls.Add(buttonTrace);
             Controls.Add(buttonDebug);
             Controls.Add(buttonInfo);
@@ -129,6 +153,8 @@ namespace TestApp
             Controls.Add(buttonFatal);
             Controls.Add(buttonFromFile);
             Controls.Add(buttonMultiple);
+            Controls.Add(buttonContinuous);
+            Controls.Add(buttonParallel);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
