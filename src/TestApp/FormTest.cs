@@ -93,7 +93,7 @@ namespace TestApp
                 {
                     Task.Factory.StartNew(() =>
                     {
-                        for (var i = 0; i < 123456; i++)
+                        for (var i = 0; i < 101202; i++)
                         {
                             Logger.Warn(i);
                             //Thread.Sleep(100);
@@ -106,7 +106,7 @@ namespace TestApp
                     Task.Factory.StartNew(() =>
                     {
                         var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-                        Parallel.For(1, 345678, parallelOptions, i => Logger.Warn(i));
+                        Parallel.For(1, 404505, parallelOptions, i => Logger.Warn(i));
                     });
                     break;
                 }
