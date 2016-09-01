@@ -64,7 +64,7 @@ namespace NLog.Targets.Syslog
                         InternalLogger.Debug(t.Exception.GetBaseException(), "Task faulted with exception");
                     else
                         ProcessQueueAsync(token);
-                }, token);
+                }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current);
         }
 
         private Task SendMsgSetAsync(LogEventAndMessages logEventAndMessages, CancellationToken token)

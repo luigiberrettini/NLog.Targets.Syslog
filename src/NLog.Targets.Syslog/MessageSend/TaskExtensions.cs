@@ -21,7 +21,7 @@ namespace NLog.Targets.Syslog.MessageSend
                         tcs.SetResult(continuationFunction(t));
 
                     return tcs.Task;
-                }, token)
+                }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
                 .Unwrap();
         }
     }
