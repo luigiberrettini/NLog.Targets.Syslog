@@ -23,7 +23,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         internal IEnumerable<IEnumerable<byte>> BuildMessages(LogEventInfo logEvent, Layout layout)
         {
             var pri = Pri(Facility, (Severity)logEvent.Level);
-            var logEntries = LogEntries(logEvent, layout).ToList();
+            var logEntries = LogEntries(logEvent, layout);
             var toBeSent = logEntries.Select(logEntry => BuildMessage(logEvent, pri, logEntry));
             return toBeSent;
         }
