@@ -37,7 +37,7 @@ namespace NLog.Targets.Syslog
 
         public void Handle(AsyncLogEventInfo asyncLogEvent)
         {
-            var logEventAndMessages = new LogEventMsgSet(asyncLogEvent);
+            var logEventAndMessages = new LogEventMsgSet(asyncLogEvent, messageBuilder, layout);
             queue.Enqueue(logEventAndMessages);
             InternalLogger.Debug($"Enqueued {logEventAndMessages}");
         }
@@ -66,7 +66,7 @@ namespace NLog.Targets.Syslog
 
         private Task SendMsgSetAsync(LogEventMsgSet logEventMsgSet, CancellationToken token)
         {
-            logEventMsgSet.BuildMessages(messageBuilder, layout);
+            logEventMsgSet.BuildLogEntries();
             return SendMsgSetAsync(logEventMsgSet, token, new TaskCompletionSource<object>());
         }
 
@@ -119,6 +119,7 @@ namespace NLog.Targets.Syslog
                 if (disposed)
                     return;
                 disposed = true;
+                messageBuilder.Dispose();
                 messageTransmitter.Dispose();
                 cts.Cancel();
             }

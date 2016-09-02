@@ -12,13 +12,13 @@ namespace NLog.Targets.Syslog.MessageCreation
         /// <summary>The Syslog facility to log from (its name e.g. local0 or local7)</summary>
         public Facility Facility { get; set; }
 
-        /// <summary>The Syslog protocol RFC to be followed</summary> 
+        /// <summary>The Syslog protocol RFC to be followed</summary>
         public RfcNumber Rfc { get; set; }
 
-        /// <summary>RFC 3164 related fields</summary> 
+        /// <summary>RFC 3164 related fields</summary>
         public Rfc3164 Rfc3164 { get; set; }
 
-        /// <summary>RFC 5424 related fields</summary> 
+        /// <summary>RFC 5424 related fields</summary>
         public Rfc5424 Rfc5424 { get; set; }
 
         /// <summary>Builds a new instance of the MessageBuildersFacade class</summary>
@@ -41,9 +41,19 @@ namespace NLog.Targets.Syslog.MessageCreation
             activeBuilder.Initialize(enforcement, Facility);
         }
 
-        internal IEnumerable<IEnumerable<byte>> BuildMessages(LogEventInfo logEvent, Layout layout)
+        internal IEnumerable<string> BuildLogEntries(LogEventInfo logEvent, Layout layout)
         {
-            return activeBuilder.BuildMessages(logEvent, layout);
+            return activeBuilder.BuildLogEntries(logEvent, layout);
+        }
+
+        internal IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string logEntry)
+        {
+            return activeBuilder.BuildMessage(logEvent, logEntry);
+        }
+
+        internal void Dispose()
+        {
+            activeBuilder.Dispose();
         }
     }
 }

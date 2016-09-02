@@ -9,29 +9,33 @@ namespace NLog.Targets.Syslog
 {
     internal class LogEventMsgSet
     {
-        private readonly AsyncLogEventInfo asyncLogEventInfo;
+        private readonly AsyncLogEventInfo asyncLogEvent;
+        private MessageBuildersFacade messageBuilder;
+        private Layout layout;
         private int currentMessage;
-        private IEnumerable<byte>[] messages;
+        private string[] logEntries;
 
-        public bool HasNoMessages => currentMessage == messages.Length;
+        public bool HasNoMessages => currentMessage == logEntries.Length;
 
-        public IEnumerable<byte> NextMessage => messages[currentMessage++];
+        public IEnumerable<byte> NextMessage => messageBuilder.BuildMessage(asyncLogEvent.LogEvent, logEntries[currentMessage++]);
 
-        public LogEventMsgSet(AsyncLogEventInfo asyncLogEvent)
+        public LogEventMsgSet(AsyncLogEventInfo asyncLogEvent, MessageBuildersFacade messageBuilder, Layout layout)
         {
-            asyncLogEventInfo = asyncLogEvent;
+            this.asyncLogEvent = asyncLogEvent;
+            this.messageBuilder = messageBuilder;
+            this.layout = layout;
             currentMessage = 0;
         }
 
-        public void BuildMessages(MessageBuildersFacade messageBuilder, Layout layout)
+        public void BuildLogEntries()
         {
-            messages = messageBuilder.BuildMessages(asyncLogEventInfo.LogEvent, layout).ToArray();
+            logEntries = messageBuilder.BuildLogEntries(asyncLogEvent.LogEvent, layout).ToArray();
         }
 
-        public void OnNoMessages(Exception exception) => asyncLogEventInfo.Continuation(exception);
+        public void OnNoMessages(Exception exception) => asyncLogEvent.Continuation(exception);
 
-        public void OnNoMessages() => asyncLogEventInfo.Continuation(null);
+        public void OnNoMessages() => asyncLogEvent.Continuation(null);
 
-        public override string ToString() => asyncLogEventInfo.LogEvent.FormattedMessage;
+        public override string ToString() => asyncLogEvent.LogEvent.FormattedMessage;
     }
 }
