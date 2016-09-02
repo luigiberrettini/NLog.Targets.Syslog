@@ -6,7 +6,7 @@ using System.Text;
 namespace NLog.Targets.Syslog.Policies
 {
     /// <summary>ASCII transliterations of Unicode text <see href="http://bitbucket.org/DimaStefantsov/unidecodesharpfork">(UnidecodeSharpFork)</see></summary>
-    internal static class Unidecoder
+    public static class Unidecoder
     {
         private static readonly Dictionary<int, string[]> Characters;
 

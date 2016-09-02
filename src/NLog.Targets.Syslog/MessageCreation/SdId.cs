@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {
+    /// <summary>A Syslog SD-ID field of an SD-ELEMENT field</summary>
     public class SdId : SimpleLayout
     {
         private static readonly InternalLogDuplicatesPolicy DuplicatesPolicy;
@@ -15,10 +16,13 @@ namespace NLog.Targets.Syslog.MessageCreation
             DuplicatesPolicy = new InternalLogDuplicatesPolicy();
         }
 
+        /// <summary>Builds a new instance of the SdId class</summary>
         public SdId() : this(string.Empty)
         {
         }
 
+        /// <summary>Builds a new instance of the SdId class</summary>
+        /// <param name="text">The layout string to parse</param>
         public SdId(string text) : base(text)
         {
         }
@@ -26,11 +30,6 @@ namespace NLog.Targets.Syslog.MessageCreation
         internal void Initialize(Enforcement enforcement)
         {
             sdIdPolicySet = new SdIdPolicySet(enforcement);
-        }
-
-        public static implicit operator SdId(string text)
-        {
-            return new SdId(text);
         }
 
         internal static IEnumerable<IEnumerable<byte>> Bytes(IEnumerable<SdId> sdIds, LogEventInfo logEvent, EncodingSet encodings)
@@ -45,6 +44,7 @@ namespace NLog.Targets.Syslog.MessageCreation
             return encodings.Ascii.GetBytes(sdId);
         }
 
+        /// <summary>Gives a string representation of an SdId instance</summary>
         public override string ToString()
         {
             var nullEvent = LogEventInfo.CreateNullEvent();

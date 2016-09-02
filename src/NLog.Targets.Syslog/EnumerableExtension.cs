@@ -10,6 +10,5 @@ namespace NLog.Targets.Syslog
             foreach (var item in enumerable)
                 action(item);
         }
-
     }
 }

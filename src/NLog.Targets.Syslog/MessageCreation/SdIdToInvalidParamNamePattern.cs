@@ -20,9 +20,6 @@ namespace NLog.Targets.Syslog.MessageCreation
         private const string NonSafePrintUsAscii = @"[^\u0022\u003D\u005D\u0020-\u007E]";
         private const string InvalidCustomParamName = NonSafePrintUsAscii;
 
-        /// <summary>Maps an SD-ID to the corresponding invalid values for PARAM-NAME fields</summary>
-        /// <param name="sdId">The string representation of the SD-ID</param>
-        /// <returns>The invalid PARAM-NAME pattern</returns>
         public static string Map(string sdId)
         {
             return InvalidIanaParamNames.ContainsKey(sdId) ? InvalidIanaParamNames[sdId] : InvalidCustomParamName;

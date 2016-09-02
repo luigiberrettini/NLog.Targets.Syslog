@@ -62,7 +62,6 @@ namespace NLog.Targets.Syslog.MessageSend
             return OctectCountingFramedOrUnchanged(NonTransparentFramedOrUnchanged(message));
         }
 
-        /// <summary>Sends a message over the wire</summary>
         internal override Task SendMessageAsync(byte[] message, CancellationToken token)
         {
             if (tcp.Connected)

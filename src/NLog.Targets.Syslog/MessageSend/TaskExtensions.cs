@@ -6,7 +6,7 @@ namespace NLog.Targets.Syslog.MessageSend
 {
     public static class TaskExtensions
     {
-        public static Task<TResult> Then<TResult>(this Task task, Func<Task, TResult> continuationFunction, CancellationToken token)
+        internal static Task<TResult> Then<TResult>(this Task task, Func<Task, TResult> continuationFunction, CancellationToken token)
         {
             return task
                 .ContinueWith(t =>

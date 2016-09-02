@@ -38,6 +38,7 @@ namespace NLog.Targets.Syslog.MessageCreation
             return sdElements.Aggregate(string.Empty, (acc, curr) => acc.ToString() + curr.ToString());
         }
 
+        /// <summary>Gives a string representation of an SdElement instance</summary>
         public override string ToString()
         {
             return $"[{SdId}{SdParam.ToString(SdParams)}]";

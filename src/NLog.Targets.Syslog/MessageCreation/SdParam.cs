@@ -33,6 +33,7 @@ namespace NLog.Targets.Syslog.MessageCreation
             return sdParams.Aggregate(string.Empty, (acc, cur) => $"{acc} {cur.ToString()}");
         }
 
+        /// <summary>Gives a string representation of an SdParam instance</summary>
         public override string ToString()
         {
             var nullEvent = LogEventInfo.CreateNullEvent();

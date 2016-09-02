@@ -41,7 +41,6 @@ namespace NLog.Targets.Syslog.MessageSend
             return message;
         }
 
-        /// <summary>Sends a message over the wire</summary>
         internal abstract Task SendMessageAsync(byte[] message, CancellationToken token);
 
         internal abstract void Dispose();

@@ -16,13 +16,11 @@ namespace NLog.Targets.Syslog.MessageSend
             udp = new UdpClient(IpAddress, Port);
         }
 
-        /// <summary>Sends a message over the wire</summary>
         internal override Task SendMessageAsync(byte[] message, CancellationToken token)
         {
             return udp.SendAsync(message, message.Length);
         }
 
-        /// <summary>Disposes resources</summary>
         internal override void Dispose()
         {
             if (disposed)

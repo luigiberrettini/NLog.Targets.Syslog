@@ -21,6 +21,7 @@ namespace NLog.Targets.Syslog.Policies
             };
             replaceComputedValuePolicy = new ReplaceComputedValuePolicy(enforcement, QuestionMark);
         }
+
         public string Apply(string s, string replaceWith)
         {
             var afterBasicPolicies = basicPolicies
