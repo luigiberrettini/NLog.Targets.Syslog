@@ -36,6 +36,7 @@ namespace NLog.Targets.Syslog
 
         public void Handle(AsyncLogEventInfo asyncLogEvent)
         {
+            mergeEventProperties(asyncLogEvent.LogEvent);
             var logEventAndMessages = new LogEventMsgSet(asyncLogEvent, messageBuilder, layout);
             queue.Enqueue(logEventAndMessages);
             InternalLogger.Debug($"Enqueued {logEventAndMessages}");
