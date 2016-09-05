@@ -8,13 +8,14 @@ namespace NLog.Targets.Syslog
     {
         private const int Zero = 0;
         private const int DefaultBufferCapacity = 65535;
+        private const int MaxBufferCapacity = int.MaxValue;
         private readonly MemoryStream memoryStream;
 
         public int Length => (int)memoryStream.Length;
 
-        public ByteArray(int initialCapacity)
+        public ByteArray(long initialCapacity)
         {
-            var capacity = initialCapacity == 0 ? DefaultBufferCapacity : initialCapacity;
+            var capacity = EnforceAllowedValues(initialCapacity);
             memoryStream = new MemoryStream(capacity);
         }
 
@@ -51,6 +52,7 @@ namespace NLog.Targets.Syslog
         {
             if (buffer.Length == 0)
                 return;
+
             memoryStream.Write(buffer, 0, buffer.Length);
         }
 
@@ -59,9 +61,18 @@ namespace NLog.Targets.Syslog
             memoryStream.SetLength(Zero);
         }
 
-        public void Resize(int newLength)
+        public void Resize(long newLength)
         {
             memoryStream.SetLength(newLength);
+        }
+
+        private static int EnforceAllowedValues(long initialCapacity)
+        {
+            if (initialCapacity <= 0)
+                return DefaultBufferCapacity;
+            if (initialCapacity > MaxBufferCapacity)
+                return MaxBufferCapacity;
+            return (int)initialCapacity;
         }
 
         public void Dispose()

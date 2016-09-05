@@ -93,7 +93,7 @@ namespace NLog.Targets.Syslog
                     else
                         ProcessQueueAsync(token);
                 }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current);
-        }
+    }
 
         protected override void Dispose(bool disposing)
         {

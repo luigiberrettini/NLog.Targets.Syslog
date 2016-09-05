@@ -55,7 +55,7 @@ A more detailed example is included in the [test application](./src/TestApp/NLog
 
 The maximum length of a message is detailed in many RFCs that can be summarized as follow:
 
-|                       |  MUST be supported  |  SHOULD be supported  |  MUST NOT exceed (we are limited by Int32.MaxValue) 
+|                       |  MUST be supported  |  SHOULD be supported  |  MUST NOT exceed
 | :-------------------: | :-----------------: | :-------------------: | :--------------------------------------------------:
 |  RFC 3164 (UDP)       |  1024 B             |  1024 B               |  1024 B                                             
 |  RFC 6587 (TCP)       |  1024 B             |  1024 B               |  1024 B                                             
@@ -67,8 +67,9 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
 |  RFC 5425 (TLS/IPv6)  |  2048 B             |  8192 B               |  65535      - 40 - 60 B <sup>1</sup>                
 |  RFC 5425 (TLS/IPv6)  |  2048 B             |  8192 B               |  (2^32 - 1) - 40 - 60 B <sup>1</sup> <sup>2</sup>   
 
-<sup>1</sup> IP payload - max IP header - max protocol header
-<sup>2</sup> Using jumbograms
+<sup>1</sup> IP payload - max IP header - max protocol header \
+<sup>2</sup> Using jumbograms (limited by Int32.MaxValue = 2147483647, i.e. the maximum size for an array)
+
 
 #### Message builder element
 * `facility` - facility name (default: `Local1`)

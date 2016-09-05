@@ -15,6 +15,6 @@
         public bool TruncateFieldsToMaxLength { get; set; }
 
         /// <summary>The length to truncate the Syslog message to or zero</summary>
-        public int TruncateMessageTo { get; set; }
+        public long TruncateMessageTo { get; set; }
     }
 }

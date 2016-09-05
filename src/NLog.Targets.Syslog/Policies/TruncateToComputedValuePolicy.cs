@@ -5,12 +5,14 @@ namespace NLog.Targets.Syslog.Policies
 {
     internal class TruncateToComputedValuePolicy
     {
-        private readonly int messageMaxLength;
+        // RFC 5426 (UDP/IPv6) with jumbograms: (2^32 - 1) - 40 - 8 = 4294967247
+        private const long MaxLengthNotToBeExceeded = 4294967247;
+        private readonly long messageMaxLength;
         private readonly bool assumeAscii;
 
         public TruncateToComputedValuePolicy(Enforcement enforcement, bool assumeAsciiEncoding)
         {
-            messageMaxLength = enforcement.TruncateMessageTo;
+            messageMaxLength = messageMaxLength > MaxLengthNotToBeExceeded ? MaxLengthNotToBeExceeded : enforcement.TruncateMessageTo;
             assumeAscii = assumeAsciiEncoding;
         }
 
@@ -31,7 +33,7 @@ namespace NLog.Targets.Syslog.Policies
             InternalLogger.Trace($"Truncated byte array to {computedMaxLength} bytes (truncateMessageTo {messageMaxLength})");
         }
 
-        private int MaxLengthToAvoidCharCorruption(ByteArray bytes, int updatedMaxLength)
+        private long MaxLengthToAvoidCharCorruption(ByteArray bytes, long updatedMaxLength)
         {
             if (assumeAscii)
                 return updatedMaxLength;
