@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using NLog.Targets.Syslog.Extensions;
-using NLog.Targets.Syslog.Policies;
 
 namespace NLog.Targets.Syslog
 {
