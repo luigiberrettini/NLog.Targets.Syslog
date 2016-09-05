@@ -4,12 +4,10 @@ namespace NLog.Targets.Syslog.Policies
 {
     internal class DefaultIfEmptyPolicy : IBasicPolicy<string, string>
     {
-        private readonly Enforcement enforcement;
         private readonly string defaultValue;
 
-        public DefaultIfEmptyPolicy(Enforcement enforcement, string defaultValue)
+        public DefaultIfEmptyPolicy(string defaultValue)
         {
-            this.enforcement = enforcement;
             this.defaultValue = defaultValue;
         }
 

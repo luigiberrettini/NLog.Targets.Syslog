@@ -11,7 +11,7 @@ namespace NLog.Targets.Syslog.Policies
             AddPolicies(new IBasicPolicy<string, string>[]
             {
                 new TransliteratePolicy(enforcement),
-                new DefaultIfEmptyPolicy(enforcement, defaultAppName),
+                new DefaultIfEmptyPolicy(defaultAppName),
                 new ReplaceKnownValuePolicy(enforcement, NonPrintUsAscii, QuestionMark),
                 new TruncateToKnownValuePolicy(enforcement, AppNameMaxLength),
             });

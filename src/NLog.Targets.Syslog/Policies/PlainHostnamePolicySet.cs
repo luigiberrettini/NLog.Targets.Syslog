@@ -12,7 +12,7 @@ namespace NLog.Targets.Syslog.Policies
             AddPolicies(new IBasicPolicy<string, string>[]
             {
                 new TransliteratePolicy(enforcement),
-                new DefaultIfEmptyPolicy(enforcement, Dns.GetHostName()),
+                new DefaultIfEmptyPolicy(Dns.GetHostName()),
                 new ReplaceKnownValuePolicy(enforcement, NonPrintUsAscii, QuestionMark)
             });
         }
