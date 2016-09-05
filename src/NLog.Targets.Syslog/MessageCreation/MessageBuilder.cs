@@ -10,8 +10,7 @@ namespace NLog.Targets.Syslog.MessageCreation
     {
         private SplitOnNewLinePolicy splitOnNewLinePolicy;
 
-        /// <summary>The buffer used to build a Syslog message</summary>
-        protected ByteArray Message { get; set; }
+        internal ByteArray Message { get; set; }
 
         internal virtual void Initialize(Enforcement enforcement)
         {
