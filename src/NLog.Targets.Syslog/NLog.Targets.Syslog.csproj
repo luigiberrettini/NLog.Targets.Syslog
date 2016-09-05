@@ -49,7 +49,6 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncLogEventHandler.cs" />
     <Compile Include="ByteArray.cs" />
     <Compile Include="LogEventMsgSet.cs" />
     <Compile Include="MessageSend\TaskExtensions.cs" />

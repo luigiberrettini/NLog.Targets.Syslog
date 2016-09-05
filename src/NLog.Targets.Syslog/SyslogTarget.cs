@@ -16,6 +16,10 @@
 //   limitations under the License.
 ////////////////////////////////////////////////////////////////////////////////
 
+using System;
+using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
 using NLog.Common;
 using NLog.Targets.Syslog.MessageCreation;
 using NLog.Targets.Syslog.MessageSend;
@@ -27,6 +31,9 @@ namespace NLog.Targets.Syslog
     [Target("Syslog")]
     public class SyslogTarget : TargetWithLayout
     {
+        private readonly CancellationTokenSource cts;
+        private readonly ConcurrentQueue<LogEventMsgSet> queue;
+
         /// <summary>The enforcement to be applied on the Syslog message</summary>
         public Enforcement Enforcement { get; set; }
 
@@ -36,15 +43,14 @@ namespace NLog.Targets.Syslog
         /// <summary>The transmitter used to send messages to the Syslog server</summary>
         public MessageTransmittersFacade MessageTransmitter { get; set; }
 
-        private readonly AsyncLogEventHandler asyncLogEventHandler;
-
         /// <summary>Builds a new instance of the SyslogTarget class</summary>
         public SyslogTarget()
         {
+            cts = new CancellationTokenSource();
+            queue = new ConcurrentQueue<LogEventMsgSet>();
             Enforcement = new Enforcement();
             MessageBuilder = new MessageBuildersFacade();
             MessageTransmitter = new MessageTransmittersFacade();
-            asyncLogEventHandler = new AsyncLogEventHandler(this, MergeEventProperties);
         }
 
         /// <summary>Initializes the SyslogTarget</summary>
@@ -53,7 +59,7 @@ namespace NLog.Targets.Syslog
             base.InitializeTarget();
             MessageBuilder.Initialize(Enforcement);
             MessageTransmitter.Initialize();
-            asyncLogEventHandler.Initialize(Layout);
+            ProcessQueueAsync(cts.Token);
         }
 
         /// <summary>Writes a single event</summary>
@@ -61,13 +67,49 @@ namespace NLog.Targets.Syslog
         /// <remarks>Write(LogEventInfo) is called only by Write(AsyncLogEventInfo/AsyncLogEventInfo[]): no need to override it</remarks>
         protected override void Write(AsyncLogEventInfo asyncLogEvent)
         {
-            asyncLogEventHandler.Handle(asyncLogEvent);
+            MergeEventProperties(asyncLogEvent.LogEvent);
+            var logEventAndMessages = new LogEventMsgSet(asyncLogEvent, MessageBuilder, MessageTransmitter);
+            queue.Enqueue(logEventAndMessages);
+            InternalLogger.Debug($"Enqueued {logEventAndMessages}");
+        }
+
+        private void ProcessQueueAsync(CancellationToken token)
+        {
+            if (token.IsCancellationRequested)
+                return;
+
+            LogEventMsgSet logEventMsgSet;
+            var sendOrDelayTask = queue.TryDequeue(out logEventMsgSet) ?
+                logEventMsgSet.Build(Layout).SendAsync(token) :
+                Task.Delay(MessageTransmitter.RetryInterval, token);
+
+            sendOrDelayTask
+                .ContinueWith(t =>
+                {
+                    if (t.IsCanceled)
+                        InternalLogger.Debug("Task canceled");
+                    else if (t.Exception != null) // t.IsFaulted is true
+                        InternalLogger.Debug(t.Exception.GetBaseException(), "Task faulted with exception");
+                    else
+                        ProcessQueueAsync(token);
+                }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current);
         }
 
         protected override void Dispose(bool disposing)
         {
             if (disposing)
-                asyncLogEventHandler.Dispose();
+            {
+                try
+                {
+                    cts.Cancel();
+                    MessageBuilder.Dispose();
+                    MessageTransmitter.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    InternalLogger.Debug(ex, $"{GetType().Name} dispose error");
+                }
+            }
             base.Dispose(disposing);
         }
     }
