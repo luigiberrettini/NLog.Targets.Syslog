@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace NLog.Targets.Syslog.Policies
+namespace NLog.Targets.Syslog.Extensions
 {
     internal static class ByteManipulationExtension
     {

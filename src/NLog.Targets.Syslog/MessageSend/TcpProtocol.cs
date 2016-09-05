@@ -7,6 +7,7 @@ using System.Security.Authentication;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using NLog.Targets.Syslog.Extensions;
 
 namespace NLog.Targets.Syslog.MessageSend
 {

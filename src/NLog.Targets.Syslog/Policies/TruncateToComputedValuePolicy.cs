@@ -1,4 +1,5 @@
 using NLog.Common;
+using NLog.Targets.Syslog.Extensions;
 
 namespace NLog.Targets.Syslog.Policies
 {

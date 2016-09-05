@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace NLog.Targets.Syslog.MessageSend
+namespace NLog.Targets.Syslog.Extensions
 {
     public static class TaskExtensions
     {

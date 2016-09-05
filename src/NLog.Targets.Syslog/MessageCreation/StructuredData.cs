@@ -2,6 +2,7 @@ using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets.Syslog.Policies;
 using System.Collections.Generic;
+using NLog.Targets.Syslog.Extensions;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {

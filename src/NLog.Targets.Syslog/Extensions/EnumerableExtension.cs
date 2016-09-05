@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NLog.Targets.Syslog
+namespace NLog.Targets.Syslog.Extensions
 {
     internal static class EnumerableExtension
     {

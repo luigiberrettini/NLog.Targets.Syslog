@@ -51,9 +51,9 @@
   <ItemGroup>
     <Compile Include="ByteArray.cs" />
     <Compile Include="LogEventMsgSet.cs" />
-    <Compile Include="MessageSend\TaskExtensions.cs" />
+    <Compile Include="Extensions\TaskExtensions.cs" />
     <Compile Include="Policies\AppNamePolicySet.cs" />
-    <Compile Include="Policies\ByteManipulationExtension.cs" />
+    <Compile Include="Extensions\ByteManipulationExtension.cs" />
     <Compile Include="Policies\DefaultIfEmptyPolicy.cs" />
     <Compile Include="Policies\AsciiMessagePolicy.cs" />
     <Compile Include="MessageCreation\EncodingSet.cs" />
@@ -62,7 +62,7 @@
     <Compile Include="MessageSend\FramingMethod.cs" />
     <Compile Include="Policies\IBasicPolicy.cs" />
     <Compile Include="MessageCreation\MessageBuilder.cs" />
-    <Compile Include="EnumerableExtension.cs" />
+    <Compile Include="Extensions\EnumerableExtension.cs" />
     <Compile Include="MessageCreation\MessageBuildersFacade.cs" />
     <Compile Include="Policies\MsgIdPolicySet.cs" />
     <Compile Include="Policies\Utf8MessagePolicy.cs" />
