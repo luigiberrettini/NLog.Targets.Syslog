@@ -2,7 +2,7 @@
 
 namespace NLog.Targets.Syslog.Extensions
 {
-    internal static class ByteManipulationExtension
+    internal static class ByteManipulationExtensions
     {
         public static void ShiftBytesRight(this IList<byte> buffer, int oldLength, int newLength)
         {
