@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {
-    internal class SdIdToInvalidParamNamePattern
+    internal static class SdIdToInvalidParamNamePattern
     {
         private const string Timequality = "timeQuality";
         private const string Origin = "origin";

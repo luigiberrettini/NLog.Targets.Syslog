@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,12 +35,7 @@ namespace NLog.Targets.Syslog.MessageSend
 
         internal abstract void Initialize();
 
-        internal virtual IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> message)
-        {
-            return message;
-        }
-
-        internal abstract Task SendMessageAsync(byte[] message, CancellationToken token);
+        internal abstract Task SendMessageAsync(ByteArray message, CancellationToken token);
 
         internal abstract void Dispose();
     }

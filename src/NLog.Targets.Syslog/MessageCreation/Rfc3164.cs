@@ -1,9 +1,7 @@
 ﻿using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets.Syslog.Policies;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
@@ -17,7 +15,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         private PlainHostnamePolicySet hostnamePolicySet;
         private TagPolicySet tagPolicySet;
         private PlainContentPolicySet plainContentPolicySet;
-        private EncodedContentPolicy encodedContentPolicy;
+        private AsciiMessagePolicy asciiMessagePolicy;
         private const string TimestampFormat = "{0:MMM} {0,11:d HH:mm:ss}";
         private static readonly byte[] SpaceBytes = { 0x20 };
 
@@ -34,53 +32,62 @@ namespace NLog.Targets.Syslog.MessageCreation
             Tag = Assembly.GetCallingAssembly().GetName().Name;
         }
 
-        internal override void Initialize(Enforcement enforcement, Facility facility)
+        internal override void Initialize(Enforcement enforcement)
         {
-            base.Initialize(enforcement, facility);
+            base.Initialize(enforcement);
             hostnamePolicySet = new PlainHostnamePolicySet(enforcement);
             tagPolicySet = new TagPolicySet(enforcement);
             plainContentPolicySet = new PlainContentPolicySet(enforcement);
-            encodedContentPolicy = new EncodedContentPolicy(enforcement);
+            asciiMessagePolicy = new AsciiMessagePolicy(enforcement);
         }
 
-        internal override IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
+        protected override ByteArray BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
         {
             var encoding = new ASCIIEncoding();
-            var msgPrefixBytes = PriBytes(pri, encoding)
-                .Concat(HeaderBytes(logEvent, encoding))
-                .Concat(SpaceBytes)
-                .ToArray();
-            var msgBytes = MsgBytes(logEvent, logEntry, msgPrefixBytes.Length, encoding);
-            return msgPrefixBytes.Concat(msgBytes);
+
+            AppendPriBytes(pri, encoding);
+            AppendHeaderBytes(logEvent, encoding);
+            Message.Append(SpaceBytes);
+            AppendMsgBytes(logEvent, logEntry, encoding);
+
+            asciiMessagePolicy.Apply(Message);
+
+            return Message;
         }
 
-        private static IEnumerable<byte> PriBytes(string pri, Encoding encoding)
+        private void AppendPriBytes(string pri, Encoding encoding)
         {
-            return encoding.GetBytes(pri);
+            var priBytes = encoding.GetBytes(pri);
+            Message.Append(priBytes);
         }
 
-        private IEnumerable<byte> HeaderBytes(LogEventInfo logEvent, Encoding encoding)
+        private void AppendHeaderBytes(LogEventInfo logEvent, Encoding encoding)
         {
             var timestamp = string.Format(CultureInfo.InvariantCulture, TimestampFormat, logEvent.TimeStamp);
             var hostname = hostnamePolicySet.Apply(Hostname.Render(logEvent));
             var header = $"{timestamp} {hostname}";
-            return encoding.GetBytes(header);
+            var headerBytes = encoding.GetBytes(header);
+            Message.Append(headerBytes);
         }
 
-        private IEnumerable<byte> MsgBytes(LogEventInfo logEvent, string logEntry, int msgPrefixSize, Encoding encoding)
+        private void AppendMsgBytes(LogEventInfo logEvent, string logEntry, Encoding encoding)
+        {
+            AppendTagBytes(logEvent, encoding);
+            AppendContentBytes(logEntry, encoding);
+        }
+
+        private void AppendTagBytes(LogEventInfo logEvent, Encoding encoding)
         {
             var tag = tagPolicySet.Apply(Tag.Render(logEvent));
             var tagBytes = encoding.GetBytes(tag);
-            var contentPrefixLength = msgPrefixSize + tag.Length;
-            var contentBytes = ContentBytes(logEntry, contentPrefixLength, encoding);
-            return tagBytes.Concat(contentBytes);
+            Message.Append(tagBytes);
         }
 
-        private IEnumerable<byte> ContentBytes(string logEntry, int contentPrefixLength, Encoding encoding)
+        private void AppendContentBytes(string logEntry, Encoding encoding)
         {
             var plainContent = plainContentPolicySet.Apply(logEntry);
             var encodedContent = encoding.GetBytes(plainContent);
-            return encodedContentPolicy.Apply(encodedContent, contentPrefixLength);
+            Message.Append(encodedContent);
         }
     }
 }

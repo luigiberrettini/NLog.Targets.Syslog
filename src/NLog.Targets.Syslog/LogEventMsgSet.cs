@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using NLog.Common;
 using NLog.Layouts;
@@ -10,14 +9,14 @@ namespace NLog.Targets.Syslog
     internal class LogEventMsgSet
     {
         private readonly AsyncLogEventInfo asyncLogEvent;
-        private MessageBuildersFacade messageBuilder;
-        private Layout layout;
+        private readonly MessageBuildersFacade messageBuilder;
+        private readonly Layout layout;
         private int currentMessage;
         private string[] logEntries;
 
         public bool HasNoMessages => currentMessage == logEntries.Length;
 
-        public IEnumerable<byte> NextMessage => messageBuilder.BuildMessage(asyncLogEvent.LogEvent, logEntries[currentMessage++]);
+        public ByteArray NextMessage => messageBuilder.BuildMessage(asyncLogEvent.LogEvent, logEntries[currentMessage++]);
 
         public LogEventMsgSet(AsyncLogEventInfo asyncLogEvent, MessageBuildersFacade messageBuilder, Layout layout)
         {

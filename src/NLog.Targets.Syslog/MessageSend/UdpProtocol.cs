@@ -16,7 +16,7 @@ namespace NLog.Targets.Syslog.MessageSend
             udp = new UdpClient(IpAddress, Port);
         }
 
-        internal override Task SendMessageAsync(byte[] message, CancellationToken token)
+        internal override Task SendMessageAsync(ByteArray message, CancellationToken token)
         {
             return udp.SendAsync(message, message.Length);
         }

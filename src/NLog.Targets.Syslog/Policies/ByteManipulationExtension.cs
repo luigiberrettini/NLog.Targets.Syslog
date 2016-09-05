@@ -4,20 +4,30 @@ namespace NLog.Targets.Syslog.Policies
 {
     internal static class ByteManipulationExtension
     {
-        public static bool IsIndexOfCharTerminatingByte(this int i, IReadOnlyList<byte> bytes)
+        public static void ShiftBytesRight(this IList<byte> buffer, int oldLength, int newLength)
         {
-            return bytes[i].IsSingleByte() ||
-                   bytes[i].IsContinuationByte() && (i.IsLastIndex(bytes) || bytes[i + 1].IsNonContinuationByte());
+            var idxOld = oldLength - 1;
+            var idxNew = newLength - 1;
+            while (idxOld >= 0)
+                buffer[idxNew--] = buffer[idxOld--];
         }
 
-        private static bool IsLastIndex(this int i, IReadOnlyCollection<byte> bytes)
+        public static bool IsIndexOfCharTerminatingByte(this int i, ByteArray bytes)
         {
-            return i == bytes.Count;
+            return i.IsLastIndex(bytes) ||
+                   bytes[i].IsSingleByte() ||
+                   (bytes[i].IsContinuationByte() && bytes[i + 1].IsNonContinuationByte());
+        }
+
+        private static bool IsLastIndex(this int i, ByteArray bytes)
+        {
+            return i == bytes.Length - 1;
         }
 
         private static bool IsSingleByte(this byte b)
         {
-            return OnlyTopTwoBitsPreserved(b) == 0x00;
+            var topTwoBits = OnlyTopTwoBitsPreserved(b);
+            return topTwoBits == 0x00 || topTwoBits == 0x40;
         }
 
         private static bool IsContinuationByte(this byte b)

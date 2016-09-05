@@ -1,20 +1,19 @@
-using System.Collections.Generic;
-
 namespace NLog.Targets.Syslog.Policies
 {
-    internal class MsgWithoutPreamblePolicy
+    internal class Utf8MessagePolicy
     {
         private const bool AssumeAsciiEncoding = false;
         private readonly TruncateToComputedValuePolicy truncatePolicy;
 
-        public MsgWithoutPreamblePolicy(Enforcement enforcement)
+        public Utf8MessagePolicy(Enforcement enforcement)
         {
             truncatePolicy = new TruncateToComputedValuePolicy(enforcement, AssumeAsciiEncoding);
         }
 
-        public IEnumerable<byte> Apply(byte[] bytes, int prefixLength)
+        public void Apply(ByteArray bytes)
         {
-            return truncatePolicy.IsApplicable() ? truncatePolicy.Apply(bytes, prefixLength) : bytes;
+            if (truncatePolicy.IsApplicable())
+                truncatePolicy.Apply(bytes);
         }
     }
 }

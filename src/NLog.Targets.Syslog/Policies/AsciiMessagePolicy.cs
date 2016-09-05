@@ -1,20 +1,19 @@
-using System.Collections.Generic;
-
 namespace NLog.Targets.Syslog.Policies
 {
-    internal class EncodedContentPolicy
+    internal class AsciiMessagePolicy
     {
         private const bool AssumeAsciiEncoding = true;
         private readonly TruncateToComputedValuePolicy truncatePolicy;
 
-        public EncodedContentPolicy(Enforcement enforcement)
+        public AsciiMessagePolicy(Enforcement enforcement)
         {
             truncatePolicy = new TruncateToComputedValuePolicy(enforcement, AssumeAsciiEncoding);
         }
 
-        public IEnumerable<byte> Apply(byte[] bytes, int prefixLength)
+        public void Apply(ByteArray bytes)
         {
-            return truncatePolicy.IsApplicable() ? truncatePolicy.Apply(bytes, prefixLength) : bytes;
+            if (truncatePolicy.IsApplicable())
+                truncatePolicy.Apply(bytes);
         }
     }
 }

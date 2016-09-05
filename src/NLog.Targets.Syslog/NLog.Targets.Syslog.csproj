@@ -50,12 +50,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsyncLogEventHandler.cs" />
+    <Compile Include="ByteArray.cs" />
     <Compile Include="LogEventMsgSet.cs" />
     <Compile Include="MessageSend\TaskExtensions.cs" />
     <Compile Include="Policies\AppNamePolicySet.cs" />
     <Compile Include="Policies\ByteManipulationExtension.cs" />
     <Compile Include="Policies\DefaultIfEmptyPolicy.cs" />
-    <Compile Include="Policies\EncodedContentPolicy.cs" />
+    <Compile Include="Policies\AsciiMessagePolicy.cs" />
     <Compile Include="MessageCreation\EncodingSet.cs" />
     <Compile Include="Policies\Enforcement.cs" />
     <Compile Include="Policies\FqdnHostnamePolicySet.cs" />
@@ -65,7 +66,7 @@
     <Compile Include="EnumerableExtension.cs" />
     <Compile Include="MessageCreation\MessageBuildersFacade.cs" />
     <Compile Include="Policies\MsgIdPolicySet.cs" />
-    <Compile Include="Policies\MsgWithoutPreamblePolicy.cs" />
+    <Compile Include="Policies\Utf8MessagePolicy.cs" />
     <Compile Include="Policies\ParamNamePolicySet.cs" />
     <Compile Include="Policies\ParamValuePolicySet.cs" />
     <Compile Include="Policies\PlainContentPolicySet.cs" />

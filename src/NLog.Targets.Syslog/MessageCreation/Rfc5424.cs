@@ -1,9 +1,7 @@
 ﻿using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets.Syslog.Policies;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
@@ -22,7 +20,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         private AppNamePolicySet appNamePolicySet;
         private ProcIdPolicySet procIdPolicySet;
         private MsgIdPolicySet msgIdPolicySet;
-        private MsgWithoutPreamblePolicy msgWithoutPreamblePolicy;
+        private Utf8MessagePolicy utf8MessagePolicy;
         private const string TimestampFormat = "{0:yyyy-MM-ddTHH:mm:ss.ffffffK}";
         private static readonly byte[] SpaceBytes = { 0x20 };
 
@@ -62,28 +60,30 @@ namespace NLog.Targets.Syslog.MessageCreation
             DisableBom = false;
         }
 
-        internal override void Initialize(Enforcement enforcement, Facility facility)
+        internal override void Initialize(Enforcement enforcement)
         {
-            base.Initialize(enforcement, facility);
+            base.Initialize(enforcement);
             hostnamePolicySet = new FqdnHostnamePolicySet(enforcement, defaultHostname);
             appNamePolicySet = new AppNamePolicySet(enforcement, defaultAppName);
             procIdPolicySet = new ProcIdPolicySet(enforcement);
             msgIdPolicySet = new MsgIdPolicySet(enforcement);
-            msgWithoutPreamblePolicy = new MsgWithoutPreamblePolicy(enforcement);
+            utf8MessagePolicy = new Utf8MessagePolicy(enforcement);
             StructuredData.Initialize(enforcement);
         }
 
-        internal override IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
+        protected override ByteArray BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
         {
             var encodings = new EncodingSet(!DisableBom);
 
-            var msgPrefixBytes = HeaderBytes(pri, logEvent, encodings)
-                .Concat(SpaceBytes)
-                .Concat(StructuredData.Bytes(logEvent, encodings))
-                .Concat(SpaceBytes)
-                .ToArray();
-            var msgBytes = MsgBytes(logEntry, msgPrefixBytes.Length, encodings);
-            return msgPrefixBytes.Concat(msgBytes);
+            AppendHeaderBytes(pri, logEvent, encodings);
+            Message.Append(SpaceBytes);
+            AppendStructuredDataBytes(logEvent, encodings);
+            Message.Append(SpaceBytes);
+            AppendMsgBytes(logEntry, encodings);
+
+            utf8MessagePolicy.Apply(Message);
+
+            return Message;
         }
 
         private static string HostFqdn()
@@ -94,7 +94,7 @@ namespace NLog.Targets.Syslog.MessageCreation
             return hostname.EndsWith(domainAsSuffix) ? hostname : $"{hostname}{domainAsSuffix}";
         }
 
-        private IEnumerable<byte> HeaderBytes(string pri, LogEventInfo logEvent, EncodingSet encodings)
+        private void AppendHeaderBytes(string pri, LogEventInfo logEvent, EncodingSet encodings)
         {
             var timestamp = string.Format(CultureInfo.InvariantCulture, TimestampFormat, logEvent.TimeStamp);
             var hostname = hostnamePolicySet.Apply(Hostname.Render(logEvent));
@@ -102,16 +102,31 @@ namespace NLog.Targets.Syslog.MessageCreation
             var procId = procIdPolicySet.Apply(ProcId.Render(logEvent));
             var msgId = msgIdPolicySet.Apply(MsgId.Render(logEvent));
             var header = $"{pri}{Version} {timestamp} {hostname} {appName} {procId} {msgId}";
-            return encodings.Ascii.GetBytes(header);
+            var headerBytes = encodings.Ascii.GetBytes(header);
+            Message.Append(headerBytes);
         }
 
-        private IEnumerable<byte> MsgBytes(string logEntry, int msgPrefixLength, EncodingSet encodings)
+        private void AppendStructuredDataBytes(LogEventInfo logEvent, EncodingSet encodings)
+        {
+            StructuredData.AppendBytes(Message, logEvent, encodings);
+        }
+
+        private void AppendMsgBytes(string logEntry, EncodingSet encodings)
+        {
+            AppendPreambleBytes(encodings);
+            AppendLogEntryBytes(logEntry, encodings);
+        }
+
+        private void AppendPreambleBytes(EncodingSet encodings)
         {
             var preambleBytes = encodings.Utf8.GetPreamble();
+            Message.Append(preambleBytes);
+        }
+
+        private void AppendLogEntryBytes(string logEntry, EncodingSet encodings)
+        {
             var logEntryBytes = encodings.Utf8.GetBytes(logEntry);
-            var msgWithoutPreamblePrefixLength = msgPrefixLength + preambleBytes.Length;
-            var msgWithoutPreambleBytes = msgWithoutPreamblePolicy.Apply(logEntryBytes, msgWithoutPreamblePrefixLength);
-            return preambleBytes.Concat(msgWithoutPreambleBytes);
+            Message.Append(logEntryBytes);
         }
     }
 }

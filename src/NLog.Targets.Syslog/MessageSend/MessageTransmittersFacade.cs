@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -49,14 +48,9 @@ namespace NLog.Targets.Syslog.MessageSend
             activeTransmitter.Initialize();
         }
 
-        internal Task SendMessageAsync(IEnumerable<byte> message, CancellationToken token)
+        internal Task SendMessageAsync(ByteArray message, CancellationToken token)
         {
-            return activeTransmitter.SendMessageAsync(FrameMessageOrLeaveItUnchanged(message), token);
-        }
-
-        private byte[] FrameMessageOrLeaveItUnchanged(IEnumerable<byte> message)
-        {
-            return activeTransmitter.FrameMessageOrLeaveItUnchanged(message).ToArray();
+            return activeTransmitter.SendMessageAsync(message, token);
         }
 
         internal void Dispose()

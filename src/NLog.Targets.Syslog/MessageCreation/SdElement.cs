@@ -9,7 +9,6 @@ namespace NLog.Targets.Syslog.MessageCreation
     [NLogConfigurationItem]
     public class SdElement
     {
-        private SdIdToInvalidParamNamePattern sdIdToInvalidParamNamePattern;
         private static readonly byte[] LeftBracketBytes = { 0x5B };
         private static readonly byte[] RightBracketBytes = { 0x5D };
 
@@ -23,7 +22,6 @@ namespace NLog.Targets.Syslog.MessageCreation
         /// <summary>Builds a new instance of the SdElement class</summary>
         public SdElement()
         {
-            sdIdToInvalidParamNamePattern = new SdIdToInvalidParamNamePattern();
             SdParams = new List<SdParam>();
         }
 
@@ -44,31 +42,22 @@ namespace NLog.Targets.Syslog.MessageCreation
             return $"[{SdId}{SdParam.ToString(SdParams)}]";
         }
 
-        internal static IEnumerable<byte> Bytes(IEnumerable<SdElement> sdElements, LogEventInfo logEvent, EncodingSet encodings)
+        internal static void AppendBytes(ByteArray message, IEnumerable<SdElement> sdElements, LogEventInfo logEvent, EncodingSet encodings)
         {
-            var elements = sdElements.ToList();
-
-            var ids = elements.Select(x => x.SdId);
-            var encodedIds = SdId.Bytes(ids, logEvent, encodings).ToList();
-
-            var encodedparamLists = elements
-                .Select(x =>
-                {
-                    var renderedId = x.SdId.Render(logEvent);
-                    var invalidParamNames = SdIdToInvalidParamNamePattern.Map(renderedId);
-                    return SdParam.Bytes(x.SdParams, logEvent, invalidParamNames, encodings);
-                })
+            var elements = sdElements
+                .Select(x => new { x.SdId, RenderedSdId = x.SdId.Render(logEvent), x.SdParams })
                 .ToList();
 
-            return elements.SelectMany((e, i) => Bytes(encodedIds[i], encodedparamLists[i]));
-        }
+            InternalLogDuplicatesPolicy.Apply(elements, x => x.RenderedSdId);
 
-        private static IEnumerable<byte> Bytes(IEnumerable<byte> sdIdBytes, IEnumerable<byte> sdParamsBytes)
-        {
-            return LeftBracketBytes
-                .Concat(sdIdBytes)
-                .Concat(sdParamsBytes)
-                .Concat(RightBracketBytes);
+            elements
+                .ForEach(elem =>
+                {
+                    message.Append(LeftBracketBytes);
+                    elem.SdId.AppendBytes(message, elem.RenderedSdId, encodings);
+                    SdParam.AppendBytes(message, elem.SdParams, logEvent, SdIdToInvalidParamNamePattern.Map(elem.RenderedSdId), encodings);
+                    message.Append(RightBracketBytes);
+                });
         }
     }
 }

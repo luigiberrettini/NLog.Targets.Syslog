@@ -37,13 +37,21 @@ namespace NLog.Targets.Syslog.MessageCreation
             return SdElements.Count == 0 ? NilValue : SdElement.ToString(SdElements);
         }
 
-        internal IEnumerable<byte> Bytes(LogEventInfo logEvent, EncodingSet encodings)
+        internal void AppendBytes(ByteArray message, LogEventInfo logEvent, EncodingSet encodings)
         {
             var sdFromEvtProps = FromEventProperties.Render(logEvent);
-            if (!string.IsNullOrEmpty(sdFromEvtProps))
-                return encodings.Utf8.GetBytes(sdFromEvtProps);
 
-            return SdElements.Count == 0 ? NilValueBytes : SdElement.Bytes(SdElements, logEvent, encodings);
+            if (!string.IsNullOrEmpty(sdFromEvtProps))
+            {
+                var sdBytes = encodings.Utf8.GetBytes(sdFromEvtProps);
+                message.Append(sdBytes);
+                return;
+            }
+
+            if (SdElements.Count == 0)
+                message.Append(NilValueBytes);
+            else
+                SdElement.AppendBytes(message, SdElements, logEvent, encodings);
         }
     }
 }

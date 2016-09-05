@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
@@ -57,13 +55,10 @@ namespace NLog.Targets.Syslog.MessageSend
             tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
         }
 
-        internal override IEnumerable<byte> FrameMessageOrLeaveItUnchanged(IEnumerable<byte> message)
+        internal override Task SendMessageAsync(ByteArray message, CancellationToken token)
         {
-            return OctectCountingFramedOrUnchanged(NonTransparentFramedOrUnchanged(message));
-        }
+            FrameMessageOrLeaveItUnchanged(message);
 
-        internal override Task SendMessageAsync(byte[] message, CancellationToken token)
-        {
             if (tcp.Connected)
                 return WriteAsync(0, message, token);
 
@@ -75,6 +70,28 @@ namespace NLog.Targets.Syslog.MessageSend
                 .Unwrap()
                 .Then(_ => WriteAsync(0, message, token), token)
                 .Unwrap();
+        }
+
+        private void FrameMessageOrLeaveItUnchanged(ByteArray message)
+        {
+            OctectCountingFramedOrUnchanged(message);
+            NonTransparentFramedOrUnchanged(message);
+        }
+
+        private void OctectCountingFramedOrUnchanged(ByteArray message)
+        {
+            if (Framing != FramingMethod.OctetCounting)
+                return;
+
+            var octetCount = message.Length;
+            var prefix = new ASCIIEncoding().GetBytes($"{octetCount} ");
+            message.Prepend(prefix);
+        }
+
+        private void NonTransparentFramedOrUnchanged(ByteArray message)
+        {
+            if (Framing == FramingMethod.NonTransparent)
+                message.Append(LineFeedBytes);
         }
 
         private Task ConnectAsync()
@@ -97,32 +114,14 @@ namespace NLog.Targets.Syslog.MessageSend
             return sslStream;
         }
 
-        private IEnumerable<byte> OctectCountingFramedOrUnchanged(IEnumerable<byte> message)
-        {
-            if (Framing != FramingMethod.OctetCounting)
-                return message;
-
-            var messageAsArray = message.ToArray();
-            var octetCount = messageAsArray.Length;
-            var prefix = new ASCIIEncoding().GetBytes($"{octetCount} ");
-            return prefix.Concat(messageAsArray);
-        }
-
-        private IEnumerable<byte> NonTransparentFramedOrUnchanged(IEnumerable<byte> message)
-        {
-            return Framing != FramingMethod.NonTransparent ? message : message.Concat(LineFeedBytes);
-        }
-
         private Task WriteAsync(int offset, byte[] data, CancellationToken token)
         {
-            var toBeWritten = data.Length - offset;
-            var isLastWrite = toBeWritten <= BufferSize;
-            var size = isLastWrite ? toBeWritten : BufferSize;
-            var buffer = new Byte[size];
-            Buffer.BlockCopy(data, offset, buffer, 0, buffer.Length);
+            var toBeWrittenTotal = data.Length - offset;
+            var isLastWrite = toBeWrittenTotal <= BufferSize;
+            var count = isLastWrite ? toBeWrittenTotal : BufferSize;
 
             return Task.Factory
-                .FromAsync(stream.BeginWrite, stream.EndWrite, buffer, 0, buffer.Length, null)
+                .FromAsync(stream.BeginWrite, stream.EndWrite, data, offset, count, null)
                 .Then(task => isLastWrite ? task : WriteAsync(offset + BufferSize, data, token), token)
                 .Unwrap();
         }

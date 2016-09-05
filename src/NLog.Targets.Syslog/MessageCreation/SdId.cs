@@ -1,20 +1,12 @@
 using NLog.Layouts;
 using NLog.Targets.Syslog.Policies;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {
     /// <summary>A Syslog SD-ID field of an SD-ELEMENT field</summary>
     public class SdId : SimpleLayout
     {
-        private static readonly InternalLogDuplicatesPolicy DuplicatesPolicy;
         private SdIdPolicySet sdIdPolicySet;
-
-        static SdId()
-        {
-            DuplicatesPolicy = new InternalLogDuplicatesPolicy();
-        }
 
         /// <summary>Builds a new instance of the SdId class</summary>
         public SdId() : this(string.Empty)
@@ -32,16 +24,11 @@ namespace NLog.Targets.Syslog.MessageCreation
             sdIdPolicySet = new SdIdPolicySet(enforcement);
         }
 
-        internal static IEnumerable<IEnumerable<byte>> Bytes(IEnumerable<SdId> sdIds, LogEventInfo logEvent, EncodingSet encodings)
+        internal void AppendBytes(ByteArray message, string renderedSdId, EncodingSet encodings)
         {
-            return InternalLogDuplicatesPolicy.Apply(sdIds, x => x.Render(logEvent))
-                .Select(x => x.Bytes(logEvent, encodings));
-        }
-
-        private IEnumerable<byte> Bytes(LogEventInfo logEvent, EncodingSet encodings)
-        {
-            var sdId = sdIdPolicySet.Apply(Render(logEvent));
-            return encodings.Ascii.GetBytes(sdId);
+            var sdId = sdIdPolicySet.Apply(renderedSdId);
+            var sdIdBytes = encodings.Ascii.GetBytes(sdId);
+            message.Append(sdIdBytes);
         }
 
         /// <summary>Gives a string representation of an SdId instance</summary>

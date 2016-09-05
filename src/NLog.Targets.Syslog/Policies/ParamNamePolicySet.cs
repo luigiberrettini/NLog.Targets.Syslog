@@ -22,14 +22,14 @@ namespace NLog.Targets.Syslog.Policies
             replaceComputedValuePolicy = new ReplaceComputedValuePolicy(enforcement, QuestionMark);
         }
 
-        public string Apply(string s, string replaceWith)
+        public string Apply(string s, string searchFor)
         {
             var afterBasicPolicies = basicPolicies
                 .Where(p => p.IsApplicable())
                 .Aggregate(s, (acc, curr) => curr.Apply(acc));
 
             return replaceComputedValuePolicy.IsApplicable() ?
-                replaceComputedValuePolicy.Apply(afterBasicPolicies, replaceWith) :
+                replaceComputedValuePolicy.Apply(afterBasicPolicies, searchFor) :
                 afterBasicPolicies;
         }
     }

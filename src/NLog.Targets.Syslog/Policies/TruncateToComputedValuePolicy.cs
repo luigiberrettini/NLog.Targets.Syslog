@@ -1,6 +1,4 @@
 using NLog.Common;
-using System;
-using System.Collections.Generic;
 
 namespace NLog.Targets.Syslog.Policies
 {
@@ -20,26 +18,25 @@ namespace NLog.Targets.Syslog.Policies
             return messageMaxLength > 0;
         }
 
-        public byte[] Apply(byte[] bytes, int prefixLength)
+        public void Apply(ByteArray bytes)
         {
-            var maxLength = messageMaxLength - prefixLength;
+            var maxLength = messageMaxLength;
 
-            if (maxLength <= 0 || bytes.Length <= maxLength)
-                return bytes;
+            if (maxLength <= 0 || maxLength >= bytes.Length)
+                return;
 
             var computedMaxLength = MaxLengthToAvoidCharCorruption(bytes, maxLength);
-            Array.Resize(ref bytes, computedMaxLength);
-            InternalLogger.Trace($"Truncated byte array to {computedMaxLength} bytes (truncateMessageTo {messageMaxLength} - prefixLength {prefixLength})");
-            return bytes;
+            bytes.Resize(computedMaxLength);
+            InternalLogger.Trace($"Truncated byte array to {computedMaxLength} bytes (truncateMessageTo {messageMaxLength})");
         }
 
-        private int MaxLengthToAvoidCharCorruption(IReadOnlyList<byte> bytes, int updatedMaxLength)
+        private int MaxLengthToAvoidCharCorruption(ByteArray bytes, int updatedMaxLength)
         {
             if (assumeAscii)
                 return updatedMaxLength;
 
-            var computedMaxLength = bytes.Count;
-            for (var i = bytes.Count - 1; i >= 0; i--)
+            var computedMaxLength = bytes.Length;
+            for (var i = bytes.Length - 1; i >= 0; i--)
             {
                 if (computedMaxLength <= updatedMaxLength && i.IsIndexOfCharTerminatingByte(bytes))
                     break;

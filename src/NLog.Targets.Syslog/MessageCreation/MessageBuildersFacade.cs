@@ -38,7 +38,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         internal void Initialize(Enforcement enforcement)
         {
             activeBuilder = builders[Rfc];
-            activeBuilder.Initialize(enforcement, Facility);
+            activeBuilder.Initialize(enforcement);
         }
 
         internal IEnumerable<string> BuildLogEntries(LogEventInfo logEvent, Layout layout)
@@ -46,9 +46,9 @@ namespace NLog.Targets.Syslog.MessageCreation
             return activeBuilder.BuildLogEntries(logEvent, layout);
         }
 
-        internal IEnumerable<byte> BuildMessage(LogEventInfo logEvent, string logEntry)
+        internal ByteArray BuildMessage(LogEventInfo logEvent, string logEntry)
         {
-            return activeBuilder.BuildMessage(logEvent, logEntry);
+            return activeBuilder.BuildMessage(Facility ,logEvent, logEntry);
         }
 
         internal void Dispose()
