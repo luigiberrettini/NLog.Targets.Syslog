@@ -101,6 +101,7 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
   * `reconnectInterval` - the time interval, in milliseconds, after which a connection is retried (default: `500`)
   * `useTls` - `false` or `true` (default: `true`)
   * `framing` - `nonTransparent` or `octectCounting` (default: `octectCounting`)
+  * `dataChunkSize` - the size of chunks, in bytes, in which data is split to be sent over the wire (default: `4096`)
 
 
 

@@ -15,6 +15,7 @@ namespace NLog.Targets.Syslog.MessageSend
     public class TcpProtocol : MessageTransmitter
     {
         private const int DefaultReconnectInterval = 500;
+        private const int DefaultBufferSize = 4096;
         private FramingMethod framing;
         private static readonly byte[] LineFeedBytes = { 0x0A };
         private volatile bool isFirstSend;
@@ -41,6 +42,9 @@ namespace NLog.Targets.Syslog.MessageSend
             set { framing = value; }
         }
 
+        /// <summary>The size of chunks in which data is split to be sent over the wire</summary>
+        public int DataChunkSize { get; set; }
+
         /// <summary>Builds a new instance of the TcpProtocol class</summary>
         public TcpProtocol()
         {
@@ -48,6 +52,7 @@ namespace NLog.Targets.Syslog.MessageSend
             ReconnectInterval = DefaultReconnectInterval;
             UseTls = true;
             Framing = FramingMethod.OctetCounting;
+            DataChunkSize = DefaultBufferSize;
         }
 
         internal override void Initialize()
@@ -118,12 +123,12 @@ namespace NLog.Targets.Syslog.MessageSend
         private Task WriteAsync(int offset, byte[] data, CancellationToken token)
         {
             var toBeWrittenTotal = data.Length - offset;
-            var isLastWrite = toBeWrittenTotal <= BufferSize;
-            var count = isLastWrite ? toBeWrittenTotal : BufferSize;
+            var isLastWrite = toBeWrittenTotal <= DataChunkSize;
+            var count = isLastWrite ? toBeWrittenTotal : DataChunkSize;
 
             return Task.Factory
                 .FromAsync(stream.BeginWrite, stream.EndWrite, data, offset, count, null)
-                .Then(task => isLastWrite ? task : WriteAsync(offset + BufferSize, data, token), token)
+                .Then(task => isLastWrite ? task : WriteAsync(offset + DataChunkSize, data, token), token)
                 .Unwrap();
         }
 

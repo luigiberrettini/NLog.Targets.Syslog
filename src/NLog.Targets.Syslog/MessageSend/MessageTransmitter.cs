@@ -9,7 +9,6 @@ namespace NLog.Targets.Syslog.MessageSend
     {
         private const string Localhost = "localhost";
         private const int DefaultPort = 514;
-        protected const int BufferSize = 4096;
 
         /// <summary>The IP address of the Syslog server or an empty string</summary>
         protected string IpAddress { get; private set; }
