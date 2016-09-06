@@ -42,10 +42,7 @@ namespace NLog.Targets.Syslog
             if (token.IsCancellationRequested)
                 return CancelledTcsTask(tcs);
 
-            // All messages have been dequeued and either all messages have been sent or
-            // an exception has occurred and has been propagated till here
-            // (no message was sent after it)
-            if (HasNoMessages)
+            if (AllSent)
                 return MessagesDequeuedTcsTask(tcs, exception);
 
             messageTransmitter
@@ -55,7 +52,7 @@ namespace NLog.Targets.Syslog
             return tcs.Task;
         }
 
-        private bool HasNoMessages => currentMessage == logEntries.Length;
+        private bool AllSent => currentMessage == logEntries.Length;
 
         private ByteArray NextMessage => messageBuilder.BuildMessage(asyncLogEvent.LogEvent, logEntries[currentMessage++]);
 
