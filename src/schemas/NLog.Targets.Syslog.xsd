@@ -21,11 +21,11 @@
                                         <xs:choice minOccurs="0" maxOccurs="unbounded">
                                             <xs:element name="limit" type="xs:integer" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="strategy" type="xs:string" minOccurs="0" maxOccurs="1" />
-                                            <xs:element name="delay" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                                            <xs:element name="delay" type="xs:decimal" minOccurs="0" maxOccurs="1" />
                                         </xs:choice>
                                         <xs:attribute name="limit" type="xs:integer" />
                                         <xs:attribute name="strategy" type="xs:string" />
-                                        <xs:attribute name="delay" type="xs:integer" />
+                                        <xs:attribute name="delay" type="xs:decimal" />
                                     </xs:complexType>
                                 </xs:element>
                                 <xs:element name="splitOnNewLine" type="xs:boolean" minOccurs="0" maxOccurs="1" />

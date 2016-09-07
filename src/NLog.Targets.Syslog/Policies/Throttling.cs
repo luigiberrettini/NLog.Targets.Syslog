@@ -13,7 +13,7 @@ namespace NLog.Targets.Syslog.Policies
         public ThrottlingStrategy Strategy { get; set; }
 
         /// <summary>The milliseconds/percentage delay for a DiscardOnFixedTimeout/DiscardOnPercentageTimeout/Defer throttling strategy</summary>
-        public int Delay { get; set; }
+        public decimal Delay { get; set; }
 
         /// <summary>Builds a new instance of the Throttling class</summary>
         public Throttling()
@@ -78,15 +78,16 @@ namespace NLog.Targets.Syslog.Policies
             return FixedTime(Delay, waitingLogEntries);
         }
 
-        private int FixedTime(int delay, int waitingLogEntries)
+        private int FixedTime(decimal delay, int waitingLogEntries)
         {
             var isPercentageDelay = Strategy == ThrottlingStrategy.DiscardOnPercentageTimeout ||
                 Strategy == ThrottlingStrategy.DeferForPercentageTime;
 
             if (!isPercentageDelay)
-                return delay;
+                return (int)delay;
 
-            return waitingLogEntries * delay / 100;
+            var fixedTime = waitingLogEntries * delay / 100;
+            return (int)fixedTime;
         }
     }
 }
