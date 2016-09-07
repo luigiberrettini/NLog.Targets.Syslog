@@ -15,7 +15,7 @@ namespace TestApp
 
         static FormTest()
         {
-            InternalLogger.LogLevel = LogLevel.Trace;
+            InternalLogger.LogLevel = LogLevel.Warn;
             InternalLogger.LogToTrace = true;
             Logger = LogManager.GetCurrentClassLogger();
         }

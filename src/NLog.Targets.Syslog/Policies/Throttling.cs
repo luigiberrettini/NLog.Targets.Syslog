@@ -43,7 +43,7 @@ namespace NLog.Targets.Syslog.Policies
 
             if (Strategy == ThrottlingStrategy.Discard)
             {
-                InternalLogger.Debug("Applied discard throttling strategy");
+                InternalLogger.Warn("Applied discard throttling strategy");
                 return;
             }
 
@@ -59,7 +59,7 @@ namespace NLog.Targets.Syslog.Policies
             if (!deferStrategy)
                 return;
 
-            InternalLogger.Debug("Applying defer throttling strategy");
+            InternalLogger.Warn("Applying defer throttling strategy");
 
             var delay = FixedTime(Delay, waitingLogEntries);
             Thread.SpinWait(delay);
@@ -73,7 +73,7 @@ namespace NLog.Targets.Syslog.Policies
             if (!timeoutStrategy)
                 return Timeout.Infinite;
 
-            InternalLogger.Debug("Applying timeout throttling strategy");
+            InternalLogger.Warn("Applying timeout throttling strategy");
 
             return FixedTime(Delay, waitingLogEntries);
         }
