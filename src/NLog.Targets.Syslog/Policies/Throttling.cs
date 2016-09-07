@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using NLog.Common;
 
 namespace NLog.Targets.Syslog.Policies
 {
@@ -41,12 +42,13 @@ namespace NLog.Targets.Syslog.Policies
             }
 
             if (Strategy == ThrottlingStrategy.Discard)
+            {
+                InternalLogger.Debug("Applied discard throttling strategy");
                 return;
+            }
 
             ApplyDeferment(waitingLogEntries);
-
-            var timeout = CalculateTimeout(waitingLogEntries, actionWithTimeout);
-            actionWithTimeout(timeout);
+            actionWithTimeout(CalculateTimeout(waitingLogEntries));
         }
 
         private void ApplyDeferment(int waitingLogEntries)
@@ -57,25 +59,34 @@ namespace NLog.Targets.Syslog.Policies
             if (!deferStrategy)
                 return;
 
+            InternalLogger.Debug("Applying defer throttling strategy");
+
             var delay = FixedTime(Delay, waitingLogEntries);
             Thread.SpinWait(delay);
         }
 
-        private int CalculateTimeout(int waitingLogEntries, Action<int> actionWithTimeout)
+        private int CalculateTimeout(int waitingLogEntries)
         {
             var timeoutStrategy = Strategy == ThrottlingStrategy.DiscardOnFixedTimeout ||
                 Strategy == ThrottlingStrategy.DiscardOnPercentageTimeout;
 
-            return FixedTime(timeoutStrategy ? Delay : Timeout.Infinite, waitingLogEntries);
+            if (!timeoutStrategy)
+                return Timeout.Infinite;
+
+            InternalLogger.Debug("Applying timeout throttling strategy");
+
+            return FixedTime(Delay, waitingLogEntries);
         }
 
         private int FixedTime(int delay, int waitingLogEntries)
         {
             var isPercentageDelay = Strategy == ThrottlingStrategy.DiscardOnPercentageTimeout ||
                 Strategy == ThrottlingStrategy.DeferForPercentageTime;
-            if (isPercentageDelay)
-                return waitingLogEntries * delay / 100;
-            return delay;
+
+            if (!isPercentageDelay)
+                return delay;
+
+            return waitingLogEntries * delay / 100;
         }
     }
 }
