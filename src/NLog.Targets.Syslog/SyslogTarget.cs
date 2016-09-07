@@ -69,8 +69,8 @@ namespace NLog.Targets.Syslog
         protected override void Write(AsyncLogEventInfo asyncLogEvent)
         {
             MergeEventProperties(asyncLogEvent.LogEvent);
-            var logEventAndMessages = new LogEventMsgSet(asyncLogEvent, MessageBuilder, MessageTransmitter);
-            Enforcement.Throttling.Apply(queue.Count, delay => Enqueue(logEventAndMessages, delay));
+            var logEventMsgSet = new LogEventMsgSet(asyncLogEvent, MessageBuilder, MessageTransmitter);
+            Enforcement.Throttling.Apply(queue.Count, delay => Enqueue(logEventMsgSet, delay));
         }
 
         private BlockingCollection<LogEventMsgSet> NewBlockingCollection()
@@ -115,10 +115,10 @@ namespace NLog.Targets.Syslog
                 }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current);
         }
 
-        private void Enqueue(LogEventMsgSet logEventAndMessages, int delay)
+        private void Enqueue(LogEventMsgSet logEventMsgSet, int delay)
         {
-            queue.TryAdd(logEventAndMessages, delay, cts.Token);
-            InternalLogger.Debug($"Enqueued {logEventAndMessages}");
+            queue.TryAdd(logEventMsgSet, delay, cts.Token);
+            InternalLogger.Debug($"Enqueued {logEventMsgSet}");
         }
 
         protected override void Dispose(bool disposing)
