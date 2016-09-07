@@ -32,13 +32,11 @@ namespace NLog.Targets.Syslog.Policies
                 Strategy = ThrottlingStrategy.None;
         }
 
-        internal void Apply(int waitingLogEntries, Action<int> action)
+        internal void Apply(int waitingLogEntries, Action<int> actionWithTimeout)
         {
-            const int zeroMsDelay = 0;
-
             if (waitingLogEntries <= Limit)
             {
-                action(zeroMsDelay);
+                actionWithTimeout(0);
                 return;
             }
 
@@ -46,8 +44,9 @@ namespace NLog.Targets.Syslog.Policies
                 return;
 
             ApplyDeferment(waitingLogEntries);
-            action(ActionDelay(waitingLogEntries));
 
+            var timeout = CalculateTimeout(waitingLogEntries, actionWithTimeout);
+            actionWithTimeout(timeout);
         }
 
         private void ApplyDeferment(int waitingLogEntries)
@@ -58,40 +57,19 @@ namespace NLog.Targets.Syslog.Policies
             if (!deferStrategy)
                 return;
 
-            var fixedDelay = FixedDelay(Delay, waitingLogEntries);
-            Thread.SpinWait(fixedDelay);
+            var delay = FixedTime(Delay, waitingLogEntries);
+            Thread.SpinWait(delay);
         }
 
-        private int ActionDelay(int waitingLogEntries)
+        private int CalculateTimeout(int waitingLogEntries, Action<int> actionWithTimeout)
         {
-            const int zeroMsDelay = 0;
-            const int infiniteDelay = -1;
+            var timeoutStrategy = Strategy == ThrottlingStrategy.DiscardOnFixedTimeout ||
+                Strategy == ThrottlingStrategy.DiscardOnPercentageTimeout;
 
-            switch (Strategy)
-            {
-                case ThrottlingStrategy.None:
-                case ThrottlingStrategy.DeferForFixedTime:
-                case ThrottlingStrategy.DeferForPercentageTime:
-                {
-                    return FixedDelay(zeroMsDelay, waitingLogEntries);
-                }
-                case ThrottlingStrategy.DiscardOnFixedTimeout:
-                case ThrottlingStrategy.DiscardOnPercentageTimeout:
-                {
-                    return FixedDelay(Delay, waitingLogEntries);
-                }
-                case ThrottlingStrategy.Block:
-                {
-                    return FixedDelay(infiniteDelay, waitingLogEntries);
-                }
-                default:
-                {
-                    throw new InvalidOperationException("LimitExceededAction value already evaluated");
-                }
-            }
+            return FixedTime(timeoutStrategy ? Delay : Timeout.Infinite, waitingLogEntries);
         }
 
-        private int FixedDelay(int delay, int waitingLogEntries)
+        private int FixedTime(int delay, int waitingLogEntries)
         {
             var isPercentageDelay = Strategy == ThrottlingStrategy.DiscardOnPercentageTimeout ||
                 Strategy == ThrottlingStrategy.DeferForPercentageTime;
