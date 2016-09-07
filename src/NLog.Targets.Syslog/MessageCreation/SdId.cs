@@ -19,6 +19,14 @@ namespace NLog.Targets.Syslog.MessageCreation
         {
         }
 
+        /// <summary>Converts a string to a new instance of the SdId class</summary>
+        /// <param name="text">The layout string to parse</param>
+        /// <remarks>Needed during the NLog configuration parsing</remarks>
+        public static implicit operator SdId(string text)
+        {
+            return new SdId(text);
+        }
+
         internal void Initialize(Enforcement enforcement)
         {
             sdIdPolicySet = new SdIdPolicySet(enforcement);
