@@ -35,7 +35,7 @@ namespace NLog.Targets.Syslog.Policies
 
         internal void Apply(int waitingLogEntries, Action<int> actionWithTimeout)
         {
-            if (waitingLogEntries <= Limit)
+            if (waitingLogEntries < Limit)
             {
                 actionWithTimeout(0);
                 return;
