@@ -64,7 +64,7 @@ namespace NLog.Targets.Syslog
 
         private Task MessagesDequeuedTcsTask(TaskCompletionSource<object> tcs, Exception exception)
         {
-            InternalLogger.Debug($"Dequeued {asyncLogEvent.LogEvent.FormattedMessage}");
+            InternalLogger.Debug($"Dequeued {this}");
 
             if (exception != null)
             {
@@ -78,6 +78,11 @@ namespace NLog.Targets.Syslog
             }
 
             return tcs.Task;
+        }
+
+        public override string ToString()
+        {
+            return asyncLogEvent.LogEvent.FormattedMessage;
         }
     }
 }
