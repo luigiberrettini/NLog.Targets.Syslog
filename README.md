@@ -90,7 +90,6 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
   * `disableBom` - `true` or `false` to handle RSyslog [issue 284](http://github.com/rsyslog/rsyslog/issues/284) (default: `false`)
 
 #### Message transmitter element
-* `retryInterval` - the time interval, in milliseconds, after which a send is retried (default: `50`)
 * `protocol` - `udp` or `tcp` (default: `udp`)
 * `udpProtocol` - settings related to UDP:
   * `server` - IP or hostname of the Syslog server (default: `127.0.0.1`)

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,17 +6,8 @@ namespace NLog.Targets.Syslog.MessageSend
 {
     public class MessageTransmittersFacade
     {
-        private const int DefaultRetryInterval = 50;
-        private TimeSpan retryTime;
         private MessageTransmitter activeTransmitter;
         private readonly Dictionary<ProtocolType, MessageTransmitter> transmitters;
-
-        /// <summary>The time interval, in milliseconds, after which a send is retried</summary>
-        public int RetryInterval
-        {
-            get { return retryTime.Milliseconds; }
-            set { retryTime = TimeSpan.FromMilliseconds(value); }
-        }
 
         /// <summary>The Syslog server protocol</summary>
         public ProtocolType Protocol { get; set; }
@@ -31,7 +21,6 @@ namespace NLog.Targets.Syslog.MessageSend
         /// <summary>Builds a new instance of the MessageTransmittersFacade class</summary>
         public MessageTransmittersFacade()
         {
-            RetryInterval = DefaultRetryInterval;
             Protocol = ProtocolType.Tcp;
             UdpProtocol = new UdpProtocol();
             TcpProtocol = new TcpProtocol();

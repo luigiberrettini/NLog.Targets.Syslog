@@ -52,6 +52,8 @@
     <Compile Include="ByteArray.cs" />
     <Compile Include="LogEventMsgSet.cs" />
     <Compile Include="Extensions\TaskExtensions.cs" />
+    <Compile Include="Throttling.cs" />
+    <Compile Include="ThrottlingStrategy.cs" />
     <Compile Include="Policies\AppNamePolicySet.cs" />
     <Compile Include="Extensions\ByteManipulationExtensions.cs" />
     <Compile Include="Policies\DefaultIfEmptyPolicy.cs" />

@@ -32,7 +32,7 @@ namespace NLog.Targets.Syslog
     public class SyslogTarget : TargetWithLayout
     {
         private readonly CancellationTokenSource cts;
-        private readonly ConcurrentQueue<LogEventMsgSet> queue;
+        private BlockingCollection<LogEventMsgSet> queue;
 
         /// <summary>The enforcement to be applied on the Syslog message</summary>
         public Enforcement Enforcement { get; set; }
@@ -47,7 +47,6 @@ namespace NLog.Targets.Syslog
         public SyslogTarget()
         {
             cts = new CancellationTokenSource();
-            queue = new ConcurrentQueue<LogEventMsgSet>();
             Enforcement = new Enforcement();
             MessageBuilder = new MessageBuildersFacade();
             MessageTransmitter = new MessageTransmittersFacade();
@@ -57,6 +56,8 @@ namespace NLog.Targets.Syslog
         protected override void InitializeTarget()
         {
             base.InitializeTarget();
+            Enforcement.Throttling.EnsureAllowedSettings();
+            queue = NewBlockingCollection();
             MessageBuilder.Initialize(Enforcement);
             MessageTransmitter.Initialize();
             ProcessQueueAsync(cts.Token);
@@ -69,8 +70,28 @@ namespace NLog.Targets.Syslog
         {
             MergeEventProperties(asyncLogEvent.LogEvent);
             var logEventAndMessages = new LogEventMsgSet(asyncLogEvent, MessageBuilder, MessageTransmitter);
-            queue.Enqueue(logEventAndMessages);
-            InternalLogger.Debug($"Enqueued {logEventAndMessages}");
+            Enforcement.Throttling.Apply(queue.Count, delay => Enqueue(logEventAndMessages, delay));
+        }
+
+        private BlockingCollection<LogEventMsgSet> NewBlockingCollection()
+        {
+            var throttlingLimit = Enforcement.Throttling.Limit;
+
+            return BoundedBlockingCollection ?
+                new BlockingCollection<LogEventMsgSet>(throttlingLimit) :
+                new BlockingCollection<LogEventMsgSet>();
+        }
+
+        private bool BoundedBlockingCollection
+        {
+            get
+            {
+                var throttlingStrategy = Enforcement.Throttling.Strategy;
+
+                return throttlingStrategy == ThrottlingStrategy.DiscardOnFixedTimeout ||
+                       throttlingStrategy == ThrottlingStrategy.DiscardOnPercentageTimeout ||
+                       throttlingStrategy == ThrottlingStrategy.Block;
+            }
         }
 
         private void ProcessQueueAsync(CancellationToken token)
@@ -78,12 +99,11 @@ namespace NLog.Targets.Syslog
             if (token.IsCancellationRequested)
                 return;
 
-            LogEventMsgSet logEventMsgSet;
-            var sendOrDelayTask = queue.TryDequeue(out logEventMsgSet) ?
-                logEventMsgSet.Build(Layout).SendAsync(token) :
-                Task.Delay(MessageTransmitter.RetryInterval, token);
+            var logEventMsgSet = queue.Take(token);
 
-            sendOrDelayTask
+            logEventMsgSet
+                .Build(Layout)
+                .SendAsync(token)
                 .ContinueWith(t =>
                 {
                     if (t.IsCanceled)
@@ -93,7 +113,13 @@ namespace NLog.Targets.Syslog
                     else
                         ProcessQueueAsync(token);
                 }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current);
-    }
+        }
+
+        private void Enqueue(LogEventMsgSet logEventAndMessages, int delay)
+        {
+            queue.TryAdd(logEventAndMessages, delay, cts.Token);
+            InternalLogger.Debug($"Enqueued {logEventAndMessages}");
+        }
 
         protected override void Dispose(bool disposing)
         {
@@ -102,6 +128,7 @@ namespace NLog.Targets.Syslog
                 try
                 {
                     cts.Cancel();
+                    queue.Dispose();
                     MessageBuilder.Dispose();
                     MessageTransmitter.Dispose();
                 }
