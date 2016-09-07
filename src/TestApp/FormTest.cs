@@ -62,60 +62,79 @@ namespace TestApp
                 }
                 case "buttonFromFile":
                 {
-                    var logLevelName = ConfigurationManager.AppSettings["MessagesFromFileLogLevel"];
-                    var logLevel = logLevelName == null ? LogLevel.Trace : LogLevel.FromString(logLevelName);
-                    InternalLogger.Debug($"From file log level: {logLevel.Name}");
-
-                    var path = ConfigurationManager.AppSettings["MessagesFromFileFilePath"];
-                    var fileNotFound = !File.Exists(path);
-                    if (fileNotFound)
-                    {
-                        InternalLogger.Debug($"From file input file '{path}' does not exist");
-                        return;
-                    }
-
-                    var messages = File.ReadAllLines(path).ToList();
-                    messages.ForEach(m => Logger.Log(logLevel, m));
+                    ButtonFromFile();
                     break;
                 }
                 case "buttonMultiple":
                 {
-                    const string paddedNumber = "D6";
-                    Parallel.For(1, 101, i => Logger.Log(LogLevel.Trace, i.ToString(paddedNumber)));
-                    Parallel.For(101, 201, i => Logger.Log(LogLevel.Debug, i.ToString(paddedNumber)));
-                    Parallel.For(201, 301, i => Logger.Log(LogLevel.Info, i.ToString(paddedNumber)));
-                    Parallel.For(301, 401, i => Logger.Log(LogLevel.Warn, i.ToString(paddedNumber)));
-                    Parallel.For(401, 501, i => Logger.Log(LogLevel.Error, i.ToString(paddedNumber)));
-                    Parallel.For(501, 601, i => Logger.Log(LogLevel.Fatal, i.ToString(paddedNumber)));
+                    ButtonMultiple();
                     break;
                 }
                 case "buttonContinuous":
                 {
-                    Task.Factory.StartNew(() =>
-                    {
-                        for (var i = 0; i < 101202; i++)
-                        {
-                            Logger.Warn(i);
-                            //Thread.Sleep(100);
-                        }
-                    });
+                    ButtonContinuous();
                     break;
                 }
                 case "buttonParallel":
                 {
-                    Task.Factory.StartNew(() =>
-                    {
-                        var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-                        Parallel.For(1, 404505, parallelOptions, i => Logger.Warn(i));
-                    });
+                    ButtonParallel();
                     break;
                 }
-
                 default:
                 {
                     throw new InvalidOperationException($"Button name '{btn.Name}' is not supported");
                 }
             }
+        }
+
+        private static void ButtonFromFile()
+        {
+            var logLevelName = ConfigurationManager.AppSettings["MessagesFromFileLogLevel"];
+            var logLevel = logLevelName == null ? LogLevel.Trace : LogLevel.FromString(logLevelName);
+            InternalLogger.Debug($"From file log level: {logLevel.Name}");
+
+            var path = ConfigurationManager.AppSettings["MessagesFromFileFilePath"];
+            var fileNotFound = !File.Exists(path);
+            if (fileNotFound)
+            {
+                InternalLogger.Debug($"From file input file '{path}' does not exist");
+                return;
+            }
+
+            var messages = File.ReadAllLines(path).ToList();
+            messages.ForEach(m => Logger.Log(logLevel, m));
+        }
+
+        private static void ButtonMultiple()
+        {
+            const string paddedNumber = "D6";
+            Parallel.For(1, 101, i => Logger.Log(LogLevel.Trace, i.ToString(paddedNumber)));
+            Parallel.For(101, 201, i => Logger.Log(LogLevel.Debug, i.ToString(paddedNumber)));
+            Parallel.For(201, 301, i => Logger.Log(LogLevel.Info, i.ToString(paddedNumber)));
+            Parallel.For(301, 401, i => Logger.Log(LogLevel.Warn, i.ToString(paddedNumber)));
+            Parallel.For(401, 501, i => Logger.Log(LogLevel.Error, i.ToString(paddedNumber)));
+            Parallel.For(501, 601, i => Logger.Log(LogLevel.Fatal, i.ToString(paddedNumber)));
+        }
+
+        private static void ButtonContinuous()
+        {
+            Task.Factory.StartNew(() =>
+            {
+                for (var i = 0; i < 101202; i++)
+                {
+                    Logger.Warn(i);
+                    //Thread.Sleep(100);
+                }
+            });
+        }
+
+        private static void ButtonParallel()
+        {
+            Task.Factory.StartNew(() =>
+            {
+                var parallelOptions = new ParallelOptions {MaxDegreeOfParallelism = Environment.ProcessorCount};
+                Parallel.For(1, 404505, parallelOptions, i => Logger.Warn(i));
+            });
         }
     }
 }
