@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 
-namespace NLog.Targets.Syslog
+namespace NLog.Targets.Syslog.Policies
 {
     public class Throttling
     {

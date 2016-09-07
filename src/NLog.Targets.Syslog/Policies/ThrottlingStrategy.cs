@@ -1,4 +1,4 @@
-﻿namespace NLog.Targets.Syslog
+﻿namespace NLog.Targets.Syslog.Policies
 {
     /// <summary>The throttling strategy to be used</summary>
     public enum ThrottlingStrategy
