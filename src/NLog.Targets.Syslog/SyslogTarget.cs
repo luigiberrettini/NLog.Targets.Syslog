@@ -60,7 +60,7 @@ namespace NLog.Targets.Syslog
             queue = NewBlockingCollection();
             MessageBuilder.Initialize(Enforcement);
             MessageTransmitter.Initialize();
-            ProcessQueueAsync(cts.Token);
+            Task.Factory.StartNew(() => ProcessQueueAsync(cts.Token));
         }
 
         /// <summary>Writes a single event</summary>
