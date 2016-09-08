@@ -131,7 +131,7 @@ namespace TestApp
             // buttonContinuous
             //
             buttonContinuous.Location = new Point(36, 370);
-            buttonContinuous.Name = "buttonMultiple";
+            buttonContinuous.Name = "buttonContinuous";
             buttonContinuous.Size = new Size(212, 38);
             buttonContinuous.TabIndex = 7;
             buttonContinuous.Text = "Continuous events";
@@ -141,7 +141,7 @@ namespace TestApp
             // buttonParallel
             //
             buttonParallel.Location = new Point(36, 420);
-            buttonParallel.Name = "buttonMultiple";
+            buttonParallel.Name = "buttonParallel";
             buttonParallel.Size = new Size(212, 38);
             buttonParallel.TabIndex = 7;
             buttonParallel.Text = "Parallel events";
@@ -168,7 +168,7 @@ namespace TestApp
             // tcpLabel
             //
             tcpLabel.Location = new Point(885, 242);
-            tcpLabel.Name = "udpLabel";
+            tcpLabel.Name = "tcpLabel";
             tcpLabel.Text = "T" + Environment.NewLine + "C" + Environment.NewLine + "P";
             tcpLabel.AutoSize = true;
             //
