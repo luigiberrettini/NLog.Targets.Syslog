@@ -23,7 +23,7 @@ namespace NLog.Targets.Syslog.Policies
             Delay = 0;
         }
 
-        internal void EnsureAllowedSettings()
+        internal void EnsureAllowedValues()
         {
             if (Limit < 1)
                 Limit = 0;

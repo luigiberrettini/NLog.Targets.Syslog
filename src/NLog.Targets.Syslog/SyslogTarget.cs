@@ -56,7 +56,7 @@ namespace NLog.Targets.Syslog
         protected override void InitializeTarget()
         {
             base.InitializeTarget();
-            Enforcement.Throttling.EnsureAllowedSettings();
+            Enforcement.Throttling.EnsureAllowedValues();
             queue = NewBlockingCollection();
             MessageBuilder.Initialize(Enforcement);
             MessageTransmitter.Initialize();
