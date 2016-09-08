@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace TestApp
 {
@@ -15,14 +16,27 @@ namespace TestApp
         {
             this.udpEndPoint = udpEndPoint;
             this.tcpEndPoint = tcpEndPoint;
-            tcpServer = new TcpServer();
             udpServer = new UdpServer();
+            tcpServer = new TcpServer();
         }
 
-        public void Start(Action<ProtocolType, string> receivedStringAction)
+        public void Start(Action<ProtocolType, string> receivedStringAction, Action<Task> exceptionAction)
         {
-            udpServer.StartListening(udpEndPoint, str => receivedStringAction(ProtocolType.Udp, str));
-            tcpServer.StartListening(tcpEndPoint, str => receivedStringAction(ProtocolType.Tcp, str));
+            Task.Factory
+                .StartNew(() => udpServer.StartListening(udpEndPoint, str => receivedStringAction(ProtocolType.Udp, str)))
+                .ContinueWith(t =>
+                 {
+                     if (t.Exception != null)
+                         exceptionAction(t);
+                 });
+
+            Task.Factory
+                .StartNew(() => tcpServer.StartListening(tcpEndPoint, str => receivedStringAction(ProtocolType.Tcp, str)))
+                .ContinueWith(t =>
+                {
+                    if (t.Exception != null)
+                        exceptionAction(t);
+                });
         }
 
         public void Dispose()

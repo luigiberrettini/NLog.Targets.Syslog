@@ -41,16 +41,12 @@ namespace TestApp
                 textBox.AppendText(Environment.NewLine);
             };
             Action<ProtocolType, string> receivedStringAction = (protocolType, recString) => Invoke(appendStringAction, protocolType, recString);
-            Action<Task> exceptionAction = task => MessageBox.Show(this, task.Exception?.GetBaseException().ToString());
 
-            syslogServer = new SyslogServer(tcpEndPoint, udpEndPoint);
-            Task.Factory
-                .StartNew(() => syslogServer.Start(receivedStringAction))
-                .ContinueWith(t =>
-                {
-                    if (t.Exception != null)
-                        Invoke(exceptionAction);
-                });
+            Action<Task> msgBoxAction = task => MessageBox.Show(this, task.Exception?.GetBaseException().ToString());
+            Action<Task> exceptionAction = task => Invoke(msgBoxAction, task);
+
+            var server = new SyslogServer(udpEndPoint, tcpEndPoint);
+            server.Start(receivedStringAction, exceptionAction);
         }
 
         private static IPEndPoint EndPoint(string ipKey, string portKey)
