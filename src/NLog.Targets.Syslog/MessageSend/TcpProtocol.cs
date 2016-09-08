@@ -120,14 +120,14 @@ namespace NLog.Targets.Syslog.MessageSend
             return sslStream;
         }
 
-        private Task WriteAsync(int offset, byte[] data, CancellationToken token)
+        private Task WriteAsync(int offset, ByteArray data, CancellationToken token)
         {
             var toBeWrittenTotal = data.Length - offset;
             var isLastWrite = toBeWrittenTotal <= DataChunkSize;
             var count = isLastWrite ? toBeWrittenTotal : DataChunkSize;
 
             return Task.Factory
-                .FromAsync(stream.BeginWrite, stream.EndWrite, data, offset, count, null)
+                .FromAsync(stream.BeginWrite, stream.EndWrite, (byte[])data, offset, count, null)
                 .Then(task => isLastWrite ? task : WriteAsync(offset + DataChunkSize, data, token), token)
                 .Unwrap();
         }
