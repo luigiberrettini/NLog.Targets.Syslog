@@ -4,6 +4,8 @@ using System;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -12,6 +14,7 @@ namespace TestApp
     public partial class FormTest : Form
     {
         private static readonly Logger Logger;
+        private SyslogServer syslogServer;
 
         static FormTest()
         {
@@ -23,6 +26,38 @@ namespace TestApp
         public FormTest()
         {
             InitializeComponent();
+            StartSyslogServer();
+        }
+
+        private void StartSyslogServer()
+        {
+            var tcpEndPoint = EndPoint("tcpIp", "tcpPort");
+            var udpEndPoint = EndPoint("udpIp", "udpPort");
+
+            Action<ProtocolType, string> appendStringAction = (protocolType, recString) =>
+            {
+                var textBox = protocolType == ProtocolType.Udp ? udpTextBox : tcpTextBox;
+                textBox.AppendText(recString);
+                textBox.AppendText(Environment.NewLine);
+            };
+            Action<ProtocolType, string> receivedStringAction = (protocolType, recString) => Invoke(appendStringAction, protocolType, recString);
+            Action<Task> exceptionAction = task => MessageBox.Show(this, task.Exception?.GetBaseException().ToString());
+
+            syslogServer = new SyslogServer(tcpEndPoint, udpEndPoint);
+            Task.Factory
+                .StartNew(() => syslogServer.Start(receivedStringAction))
+                .ContinueWith(t =>
+                {
+                    if (t.Exception != null)
+                        Invoke(exceptionAction);
+                });
+        }
+
+        private static IPEndPoint EndPoint(string ipKey, string portKey)
+        {
+            var ip = IPAddress.Parse(ConfigurationManager.AppSettings[ipKey]);
+            var port = int.Parse(ConfigurationManager.AppSettings[portKey]);
+            return new IPEndPoint(ip, port);
         }
 
         private void ButtonLogClick(object sender, EventArgs e)
@@ -132,7 +167,7 @@ namespace TestApp
         {
             Task.Factory.StartNew(() =>
             {
-                var parallelOptions = new ParallelOptions {MaxDegreeOfParallelism = Environment.ProcessorCount};
+                var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
                 Parallel.For(1, 404505, parallelOptions, i => Logger.Warn(i));
             });
         }

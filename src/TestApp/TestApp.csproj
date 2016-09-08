@@ -55,6 +55,13 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServerSocket.cs" />
+    <Compile Include="StateObject.cs" />
+    <Compile Include="SyslogServer.cs" />
+    <Compile Include="TcpServer.cs" />
+    <Compile Include="TcpState.cs" />
+    <Compile Include="UdpServer.cs" />
+    <Compile Include="UdpState.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

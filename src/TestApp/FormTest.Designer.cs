@@ -18,6 +18,10 @@ namespace TestApp
         private Button buttonMultiple;
         private Button buttonContinuous;
         private Button buttonParallel;
+        private Label udpLabel;
+        private TextBox udpTextBox;
+        private Label tcpLabel;
+        private TextBox tcpTextBox;
 
         protected override void Dispose(bool disposing)
         {
@@ -38,6 +42,10 @@ namespace TestApp
             buttonMultiple = new Button();
             buttonContinuous = new Button();
             buttonParallel = new Button();
+            udpLabel = new Label();
+            udpTextBox = new TextBox();
+            tcpLabel = new Label();
+            tcpTextBox = new TextBox();
             SuspendLayout();
             //
             // buttonTrace
@@ -140,11 +148,45 @@ namespace TestApp
             buttonParallel.UseVisualStyleBackColor = true;
             buttonParallel.Click += new EventHandler(ButtonLogClick);
             //
+            // udpLabel
+            //
+            udpLabel.Location = new Point(885, 21);
+            udpLabel.Name = "udpLabel";
+            udpLabel.Text = "U" + Environment.NewLine + "D" + Environment.NewLine + "P";
+            udpLabel.AutoSize = true;
+            //
+            // udpTextBox
+            //
+            udpTextBox.Location = new Point(260, 21);
+            udpTextBox.Name = "udpTextBox";
+            udpTextBox.Size = new Size(620, 215);
+            udpTextBox.TabIndex = 8;
+            udpTextBox.Multiline = true;
+            udpTextBox.ReadOnly = true;
+            udpTextBox.ScrollBars = ScrollBars.Vertical;
+            //
+            // tcpLabel
+            //
+            tcpLabel.Location = new Point(885, 242);
+            tcpLabel.Name = "udpLabel";
+            tcpLabel.Text = "T" + Environment.NewLine + "C" + Environment.NewLine + "P";
+            tcpLabel.AutoSize = true;
+            //
+            // tcpTextBox
+            //
+            tcpTextBox.Location = new Point(260, 242);
+            tcpTextBox.Name = "tcpTextBox";
+            tcpTextBox.Size = new Size(620, 215);
+            tcpTextBox.TabIndex = 9;
+            tcpTextBox.Multiline = true;
+            tcpTextBox.ReadOnly = true;
+            tcpTextBox.ScrollBars = ScrollBars.Vertical;
+            //
             // FormTest
             //
             AutoScaleDimensions = new SizeF(6F, 13F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(284, 482);
+            ClientSize = new Size(925, 482);
             Controls.Add(buttonTrace);
             Controls.Add(buttonDebug);
             Controls.Add(buttonInfo);
@@ -155,6 +197,10 @@ namespace TestApp
             Controls.Add(buttonMultiple);
             Controls.Add(buttonContinuous);
             Controls.Add(buttonParallel);
+            Controls.Add(udpLabel);
+            Controls.Add(udpTextBox);
+            Controls.Add(tcpLabel);
+            Controls.Add(tcpTextBox);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             MinimizeBox = false;
