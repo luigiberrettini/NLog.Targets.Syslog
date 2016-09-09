@@ -47,7 +47,11 @@ namespace NLog.Targets.Syslog
 
             messageTransmitter
                 .SendMessageAsync(NextMessage, token)
-                .Then(t => SendAsync(token, tcs, t.Exception), token);
+                .Then(t => SendAsync(token, tcs, t.Exception), token)
+                .ContinueWith(t => MessagesDequeuedTcsTask(tcs, t.Exception),
+                    token,
+                    TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                    TaskScheduler.Current);
 
             return tcs.Task;
         }
