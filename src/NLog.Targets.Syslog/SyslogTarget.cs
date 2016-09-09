@@ -107,11 +107,13 @@ namespace NLog.Targets.Syslog
                 .ContinueWith(t =>
                 {
                     if (t.IsCanceled)
+                    {
                         InternalLogger.Debug("Task canceled");
-                    else if (t.Exception != null) // t.IsFaulted is true
+                        return;
+                    }
+                    if (t.Exception != null) // t.IsFaulted is true
                         InternalLogger.Debug(t.Exception.GetBaseException(), "Task faulted with exception");
-                    else
-                        ProcessQueueAsync(token);
+                    ProcessQueueAsync(token);
                 }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current);
         }
 
