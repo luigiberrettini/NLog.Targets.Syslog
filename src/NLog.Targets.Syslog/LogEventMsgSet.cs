@@ -40,18 +40,22 @@ namespace NLog.Targets.Syslog
         private Task SendAsync(CancellationToken token, TaskCompletionSource<object> tcs, Exception exception = null)
         {
             if (token.IsCancellationRequested)
-                return CancelledTcsTask(tcs);
+                return SendCanceledTcsTask(tcs);
 
             if (AllSent)
-                return MessagesDequeuedTcsTask(tcs, exception);
+                return SendSucceededTcsTask(tcs);
 
             messageTransmitter
                 .SendMessageAsync(NextMessage, token)
-                .Then(t => SendAsync(token, tcs, t.Exception), token)
-                .ContinueWith(t => MessagesDequeuedTcsTask(tcs, t.Exception),
-                    token,
-                    TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
-                    TaskScheduler.Current);
+                .ContinueWith(t =>
+                {
+                    if (t.IsCanceled)
+                        return SendCanceledTcsTask(tcs);
+                    if (t.Exception != null)
+                        return SendFailedTcsTask(tcs, t.Exception);
+                    return SendAsync(token, tcs, t.Exception);
+                }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
+                .Unwrap();
 
             return tcs.Task;
         }
@@ -60,27 +64,23 @@ namespace NLog.Targets.Syslog
 
         private ByteArray NextMessage => messageBuilder.BuildMessage(asyncLogEvent.LogEvent, logEntries[currentMessage++]);
 
-        private static Task CancelledTcsTask(TaskCompletionSource<object> tcs)
+        private static Task SendCanceledTcsTask(TaskCompletionSource<object> tcs)
         {
             tcs.SetCanceled();
             return tcs.Task;
         }
 
-        private Task MessagesDequeuedTcsTask(TaskCompletionSource<object> tcs, Exception exception)
+        private Task SendSucceededTcsTask(TaskCompletionSource<object> tcs)
         {
-            InternalLogger.Debug($"Dequeued {this}");
+            asyncLogEvent.Continuation(null);
+            tcs.SetResult(null);
+            return tcs.Task;
+        }
 
-            if (exception != null)
-            {
-                asyncLogEvent.Continuation(exception.GetBaseException());
-                tcs.SetException(exception);
-            }
-            else
-            {
-                asyncLogEvent.Continuation(null);
-                tcs.SetResult(null);
-            }
-
+        private Task SendFailedTcsTask(TaskCompletionSource<object> tcs, Exception exception)
+        {
+            asyncLogEvent.Continuation(exception.GetBaseException());
+            tcs.SetException(exception);
             return tcs.Task;
         }
 

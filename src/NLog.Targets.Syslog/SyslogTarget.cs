@@ -113,6 +113,8 @@ namespace NLog.Targets.Syslog
                     }
                     if (t.Exception != null) // t.IsFaulted is true
                         InternalLogger.Debug(t.Exception.GetBaseException(), "Task faulted with exception");
+                    else
+                        InternalLogger.Debug($"Successfully sent the dequeued message set '{logEventMsgSet.ToString()}'");
                     ProcessQueueAsync(token);
                 }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current);
         }
