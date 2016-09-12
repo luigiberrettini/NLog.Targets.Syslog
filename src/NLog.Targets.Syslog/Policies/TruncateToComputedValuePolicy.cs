@@ -12,7 +12,7 @@ namespace NLog.Targets.Syslog.Policies
 
         public TruncateToComputedValuePolicy(Enforcement enforcement, bool assumeAsciiEncoding)
         {
-            messageMaxLength = messageMaxLength > MaxLengthNotToBeExceeded ? MaxLengthNotToBeExceeded : enforcement.TruncateMessageTo;
+            messageMaxLength = enforcement.TruncateMessageTo > MaxLengthNotToBeExceeded ? MaxLengthNotToBeExceeded : enforcement.TruncateMessageTo;
             assumeAscii = assumeAsciiEncoding;
         }
 
