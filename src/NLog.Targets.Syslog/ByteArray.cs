@@ -63,7 +63,8 @@ namespace NLog.Targets.Syslog
 
         public void Resize(long newLength)
         {
-            memoryStream.SetLength(newLength);
+            if (memoryStream.Length != newLength)
+                memoryStream.SetLength(newLength);
         }
 
         private static int EnforceAllowedValues(long initialCapacity)
