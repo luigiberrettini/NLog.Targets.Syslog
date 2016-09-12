@@ -27,7 +27,7 @@ namespace NLog.Targets.Syslog.Policies
         {
             if (Limit < 1)
                 Limit = 0;
-            if (Delay < 1)
+            if (Delay < 0)
                 Delay = 0;
             if (Limit == 0)
                 Strategy = ThrottlingStrategy.None;
@@ -35,7 +35,7 @@ namespace NLog.Targets.Syslog.Policies
 
         internal void Apply(int waitingLogEntries, Action<int> actionWithTimeout)
         {
-            if (waitingLogEntries < Limit)
+            if (Strategy == ThrottlingStrategy.None || waitingLogEntries < Limit)
             {
                 actionWithTimeout(0);
                 return;
