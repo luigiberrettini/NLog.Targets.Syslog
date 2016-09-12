@@ -27,7 +27,7 @@ namespace TestApp
 
         protected override void HandleChunks(string receivedString, Action<string> receivedStringAction)
         {
-            var msgSet = MsgSet.FromStringAndFraming(receivedString, framing);
+            var msgSet = ServerMsgSet.FromStringAndFraming(receivedString, framing);
 
             if (msgSet == null)
             {

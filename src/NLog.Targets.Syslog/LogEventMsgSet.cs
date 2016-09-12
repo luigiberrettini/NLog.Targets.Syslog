@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using NLog.Common;
 using NLog.Layouts;
-using NLog.Targets.Syslog.Extensions;
 using NLog.Targets.Syslog.MessageCreation;
 using NLog.Targets.Syslog.MessageSend;
 
@@ -37,7 +36,7 @@ namespace NLog.Targets.Syslog
             return SendAsync(token, new TaskCompletionSource<object>());
         }
 
-        private Task SendAsync(CancellationToken token, TaskCompletionSource<object> tcs, Exception exception = null)
+        private Task SendAsync(CancellationToken token, TaskCompletionSource<object> tcs)
         {
             if (token.IsCancellationRequested)
                 return SendCanceledTcsTask(tcs);
@@ -53,7 +52,7 @@ namespace NLog.Targets.Syslog
                         return SendCanceledTcsTask(tcs);
                     if (t.Exception != null)
                         return SendFailedTcsTask(tcs, t.Exception);
-                    return SendAsync(token, tcs, t.Exception);
+                    return SendAsync(token, tcs);
                 }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
                 .Unwrap();
 

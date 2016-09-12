@@ -5,7 +5,7 @@ using NLog.Targets.Syslog.MessageSend;
 
 namespace TestApp
 {
-    internal class MsgSet
+    internal class ServerMsgSet
     {
         private readonly UTF8Encoding encoding;
         private string[] messages;
@@ -20,9 +20,9 @@ namespace TestApp
 
         public byte[] LastMessageBytes => encoding.GetBytes(LastMessage);
 
-        public static MsgSet FromStringAndFraming(string s, FramingMethod? framing)
+        public static ServerMsgSet FromStringAndFraming(string s, FramingMethod? framing)
         {
-            var msgSet = new MsgSet();
+            var msgSet = new ServerMsgSet();
             switch (framing)
             {
                 case FramingMethod.NonTransparent:
@@ -54,35 +54,35 @@ namespace TestApp
             return octetCount == octets.Length.ToString();
         }
 
-        private static MsgSet FromStringNonTransparent(string s, MsgSet msgSet)
+        private static ServerMsgSet FromStringNonTransparent(string s, ServerMsgSet serverMsgSet)
         {
             const char lineFeed = '\n';
-            msgSet.messages = s.Split(lineFeed);
+            serverMsgSet.messages = s.Split(lineFeed);
 
             var lastChar = s[s.Length - 1];
-            msgSet.LastIsPartial = lastChar == lineFeed;
+            serverMsgSet.LastIsPartial = lastChar == lineFeed;
 
-            return msgSet;
+            return serverMsgSet;
         }
 
-        private static MsgSet FromStringOctetCounting(string s, MsgSet msgSet)
+        private static ServerMsgSet FromStringOctetCounting(string s, ServerMsgSet serverMsgSet)
         {
             var matches = Regex
                 .Split(s, "(\\d{1,11} <\\d{1,3}>)")
                 .Where(x => !string.IsNullOrEmpty(x))
                 .Select((value, index) => new { value, index})
                 .ToArray();
-            msgSet.messages = matches
+            serverMsgSet.messages = matches
                 .Where(x => x.index % 2 == 0)
                 .Select(x => x.value + matches[x.index + 1].value)
                 .ToArray();
 
-            msgSet.LastIsPartial = !msgSet.IsValid(msgSet.LastMessage, FramingMethod.OctetCounting);
+            serverMsgSet.LastIsPartial = !serverMsgSet.IsValid(serverMsgSet.LastMessage, FramingMethod.OctetCounting);
 
-            return msgSet;
+            return serverMsgSet;
         }
 
-        private MsgSet()
+        private ServerMsgSet()
         {
             encoding = new UTF8Encoding();
         }
