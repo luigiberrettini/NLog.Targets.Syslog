@@ -114,24 +114,12 @@ namespace TestApp
                 }
                 case "buttonStartSyslogServer":
                 {
-                    btn.Enabled = false;
-                    btn.Name = "buttonStopSyslogServer";
-                    btn.Text = @"Stop Syslog Server";
-                    syslogServer.Start(receivedStringAction, exceptionAction);
-                    Action enableButton = () => btn.Enabled = true;
-                    Task.Delay(500).ContinueWith(_ => Invoke(enableButton));
-                    btn.Enabled = false;
+                    StartSyslogServer();
                     break;
                 }
                 case "buttonStopSyslogServer":
                 {
-                    btn.Enabled = false;
-                    btn.Name = "buttonStartSyslogServer";
-                    btn.Text = @"Start Syslog Server";
-                    syslogServer.Stop();
-                    Action enableButton = () => btn.Enabled = true;
-                    Task.Delay(500).ContinueWith(_ => Invoke(enableButton));
-                    btn.Enabled = false;
+                    StopSyslogServer();
                     break;
                 }
                 default:
@@ -141,9 +129,8 @@ namespace TestApp
             }
         }
 
-        private void ButtonFromFile()
+        private static void ButtonFromFile()
         {
-            syslogServer.Stop();
             var logLevelName = ConfigurationManager.AppSettings["MessagesFromFileLogLevel"];
             var logLevel = logLevelName == null ? LogLevel.Trace : LogLevel.FromString(logLevelName);
             InternalLogger.Debug($"From file log level: {logLevel.Name}");
@@ -160,9 +147,8 @@ namespace TestApp
             messages.ForEach(m => Logger.Log(logLevel, m));
         }
 
-        private void ButtonMultiple()
+        private static void ButtonMultiple()
         {
-            syslogServer.Stop();
             const string paddedNumber = "D6";
             Parallel.For(1, 101, i => Logger.Log(LogLevel.Trace, i.ToString(paddedNumber)));
             Parallel.For(101, 201, i => Logger.Log(LogLevel.Debug, i.ToString(paddedNumber)));
@@ -172,9 +158,8 @@ namespace TestApp
             Parallel.For(501, 601, i => Logger.Log(LogLevel.Fatal, i.ToString(paddedNumber)));
         }
 
-        private void ButtonContinuous()
+        private static void ButtonContinuous()
         {
-            syslogServer.Stop();
             Task.Factory.StartNew(() =>
             {
                 for (var i = 0; i < 101202; i++)
@@ -192,6 +177,33 @@ namespace TestApp
                 var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
                 Parallel.For(1, 404505, parallelOptions, i => Logger.Warn(i));
             });
+        }
+
+        private void StartSyslogServer()
+        {
+            ToggleSyslogServer(true);
+        }
+
+        private void StopSyslogServer()
+        {
+            ToggleSyslogServer(false);
+        }
+
+        private void ToggleSyslogServer(bool start)
+        {
+            buttonStartStopSyslogServer.Enabled = false;
+
+            var operation = start ? "Stop" : "Start";
+            buttonStartStopSyslogServer.Name = $"button{operation}SyslogServer";
+            buttonStartStopSyslogServer.Text = $@"{operation} Syslog Server";
+
+            if (start)
+                syslogServer.Start(receivedStringAction, exceptionAction);
+            else
+                syslogServer.Stop();
+
+            Action enableButton = () => buttonStartStopSyslogServer.Enabled = true;
+            Task.Delay(500).ContinueWith(_ => Invoke(enableButton));
         }
     }
 }

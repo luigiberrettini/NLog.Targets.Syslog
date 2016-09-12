@@ -11,19 +11,14 @@ namespace TestApp
         {
         }
 
-        protected override void HandleFirstReceive(MemoryStream ms, string str)
+        protected override void HandleFirstReceive(MemoryStream ms)
         {
-            var charsBeforePri = str.IndexOf("<", StringComparison.Ordinal);
-            if (charsBeforePri != 0)
-                ms.SetLength(0);
         }
 
-        protected override void HandleLastReceive(StringBuilder receivedData, string str, Action<string> receivedStringAction)
+        protected override void HandleChunks(string receivedString, Action<string> receivedStringAction)
         {
-            var receivedString = receivedData.ToString();
             receivedStringAction(receivedString);
             Buffer.SetLength(0);
-            receivedData.Clear();
         }
     }
 }
