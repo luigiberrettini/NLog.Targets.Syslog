@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net.Sockets;
 using System.Text;
 
@@ -6,24 +7,25 @@ namespace TestApp
 {
     internal abstract class StateObject
     {
-        protected const int BufferSize = 65536;
+        private const int BufferSize = 65536;
         private readonly UTF8Encoding encoding;
+        private readonly Socket receiveSocket;
+        private readonly StringBuilder receivedData;
 
-        protected StringBuilder ReceivedData { get; }
-
-        protected byte[] Buffer { get; }
-
-        protected Socket ReceiveSocket { get; }
+        protected MemoryStream Buffer { get; }
 
         protected StateObject(Socket socket)
         {
             encoding = new UTF8Encoding();
-            ReceivedData = new StringBuilder();
-            Buffer = new byte[BufferSize];
-            ReceiveSocket = socket;
+            receiveSocket = socket;
+            Buffer = new MemoryStream(BufferSize);
+            receivedData = new StringBuilder();
         }
 
-        public abstract void BeginReceive(AsyncCallback readCallback);
+        public void BeginReceive(AsyncCallback readCallback)
+        {
+            receiveSocket.BeginReceive(Buffer.GetBuffer(), 0, BufferSize, SocketFlags.None, readCallback, this);
+        }
 
         public void EndReceive(IAsyncResult asyncResult, AsyncCallback readCallback, Action<string> receivedStringAction)
         {
@@ -32,27 +34,25 @@ namespace TestApp
             if (bytesRead <= 0)
                 return;
 
-            var str = encoding.GetString(Buffer, 0, bytesRead);
-            ReceivedData.Append(str);
-
-            HandleFirstReceive(str);
-
-            if (IsLastReceive(str))
-                HandleLastReceive(receivedStringAction);
+            var bufferToString = BufferToString(0, bytesRead);
+            receivedData.Append(bufferToString);
+            HandleFirstReceive(Buffer, bufferToString);
+            HandleLastReceive(receivedData, bufferToString, receivedStringAction);
             BeginReceive(readCallback);
         }
 
-        protected abstract void HandleFirstReceive(string str);
-
-        protected abstract bool IsLastReceive(string str);
-
-        private void HandleLastReceive(Action<string> receivedStringAction)
+        protected string BufferToString(int position, int bytesRead)
         {
-            var receivedString = ReceivedData.ToString();
-            ReceivedData.Length = 0;
-            receivedStringAction(receivedString);
+            return encoding.GetString(Buffer.GetBuffer(), position, bytesRead);
         }
 
-        protected abstract int EndReceive(IAsyncResult asyncResult);
+        protected abstract void HandleFirstReceive(MemoryStream ms, string str);
+
+        protected abstract void HandleLastReceive(StringBuilder sb, string str, Action<string> receivedStringAction);
+
+        private int EndReceive(IAsyncResult asyncResult)
+        {
+            return receiveSocket.EndReceive(asyncResult);
+        }
     }
 }

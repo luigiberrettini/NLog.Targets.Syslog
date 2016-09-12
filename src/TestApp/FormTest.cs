@@ -14,22 +14,24 @@ namespace TestApp
     public partial class FormTest : Form
     {
         private static readonly Logger Logger;
+        private Action<ProtocolType, string> receivedStringAction;
+        private Action<Task> exceptionAction;
         private SyslogServer syslogServer;
 
         static FormTest()
         {
-            InternalLogger.LogLevel = LogLevel.Warn;
-            InternalLogger.LogToTrace = true;
+            //InternalLogger.LogLevel = LogLevel.Warn;
+            //InternalLogger.LogToTrace = true;
             Logger = LogManager.GetCurrentClassLogger();
         }
 
         public FormTest()
         {
             InitializeComponent();
-            StartSyslogServer();
+            InitSyslogServer();
         }
 
-        private void StartSyslogServer()
+        private void InitSyslogServer()
         {
             var tcpEndPoint = EndPoint("tcpIp", "tcpPort");
             var udpEndPoint = EndPoint("udpIp", "udpPort");
@@ -40,13 +42,12 @@ namespace TestApp
                 textBox.AppendText(recString);
                 textBox.AppendText(Environment.NewLine);
             };
-            Action<ProtocolType, string> receivedStringAction = (protocolType, recString) => Invoke(appendStringAction, protocolType, recString);
-
             Action<Task> msgBoxAction = task => MessageBox.Show(this, task.Exception?.GetBaseException().ToString());
-            Action<Task> exceptionAction = task => Invoke(msgBoxAction, task);
 
-            var server = new SyslogServer(udpEndPoint, tcpEndPoint);
-            server.Start(receivedStringAction, exceptionAction);
+            receivedStringAction = (protocolType, recString) => Invoke(appendStringAction, protocolType, recString);
+            exceptionAction = task => Invoke(msgBoxAction, task);
+
+            syslogServer = new SyslogServer(udpEndPoint, tcpEndPoint);
         }
 
         private static IPEndPoint EndPoint(string ipKey, string portKey)
@@ -111,6 +112,28 @@ namespace TestApp
                     ButtonParallel();
                     break;
                 }
+                case "buttonStartSyslogServer":
+                {
+                    btn.Enabled = false;
+                    btn.Name = "buttonStopSyslogServer";
+                    btn.Text = @"Stop Syslog Server";
+                    syslogServer.Start(receivedStringAction, exceptionAction);
+                    Action enableButton = () => btn.Enabled = true;
+                    Task.Delay(500).ContinueWith(_ => Invoke(enableButton));
+                    btn.Enabled = false;
+                    break;
+                }
+                case "buttonStopSyslogServer":
+                {
+                    btn.Enabled = false;
+                    btn.Name = "buttonStartSyslogServer";
+                    btn.Text = @"Start Syslog Server";
+                    syslogServer.Stop();
+                    Action enableButton = () => btn.Enabled = true;
+                    Task.Delay(500).ContinueWith(_ => Invoke(enableButton));
+                    btn.Enabled = false;
+                    break;
+                }
                 default:
                 {
                     throw new InvalidOperationException($"Button name '{btn.Name}' is not supported");
@@ -118,8 +141,9 @@ namespace TestApp
             }
         }
 
-        private static void ButtonFromFile()
+        private void ButtonFromFile()
         {
+            syslogServer.Stop();
             var logLevelName = ConfigurationManager.AppSettings["MessagesFromFileLogLevel"];
             var logLevel = logLevelName == null ? LogLevel.Trace : LogLevel.FromString(logLevelName);
             InternalLogger.Debug($"From file log level: {logLevel.Name}");
@@ -136,8 +160,9 @@ namespace TestApp
             messages.ForEach(m => Logger.Log(logLevel, m));
         }
 
-        private static void ButtonMultiple()
+        private void ButtonMultiple()
         {
+            syslogServer.Stop();
             const string paddedNumber = "D6";
             Parallel.For(1, 101, i => Logger.Log(LogLevel.Trace, i.ToString(paddedNumber)));
             Parallel.For(101, 201, i => Logger.Log(LogLevel.Debug, i.ToString(paddedNumber)));
@@ -147,8 +172,9 @@ namespace TestApp
             Parallel.For(501, 601, i => Logger.Log(LogLevel.Fatal, i.ToString(paddedNumber)));
         }
 
-        private static void ButtonContinuous()
+        private void ButtonContinuous()
         {
+            syslogServer.Stop();
             Task.Factory.StartNew(() =>
             {
                 for (var i = 0; i < 101202; i++)

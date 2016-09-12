@@ -5,12 +5,13 @@ using System.Threading.Tasks;
 
 namespace TestApp
 {
-    public class SyslogServer : IDisposable
+    public class SyslogServer
     {
         private readonly IPEndPoint udpEndPoint;
         private readonly IPEndPoint tcpEndPoint;
         private readonly UdpServer udpServer;
         private readonly TcpServer tcpServer;
+        private volatile bool stopped;
 
         public SyslogServer(IPEndPoint udpEndPoint, IPEndPoint tcpEndPoint)
         {
@@ -18,10 +19,16 @@ namespace TestApp
             this.tcpEndPoint = tcpEndPoint;
             udpServer = new UdpServer();
             tcpServer = new TcpServer();
+            stopped = true;
         }
 
         public void Start(Action<ProtocolType, string> receivedStringAction, Action<Task> exceptionAction)
         {
+            if (!stopped)
+                return;
+
+            stopped = false;
+
             Task.Factory
                 .StartNew(() => udpServer.StartListening(udpEndPoint, str => receivedStringAction(ProtocolType.Udp, str)))
                 .ContinueWith(t =>
@@ -39,8 +46,12 @@ namespace TestApp
                 });
         }
 
-        public void Dispose()
+        public void Stop()
         {
+            if (stopped)
+                return;
+
+            stopped = true;
             udpServer.Dispose();
             tcpServer.Dispose();
         }

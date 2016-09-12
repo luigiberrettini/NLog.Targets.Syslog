@@ -6,7 +6,9 @@ namespace TestApp
 {
     internal abstract class ServerSocket : IDisposable
     {
-        private volatile bool continueListening;
+        protected volatile bool KeepGoing;
+
+        protected Socket BoundSocket { get; private set; }
 
         protected ProtocolType ProtocolType { get; set; }
 
@@ -16,25 +18,25 @@ namespace TestApp
 
         public void StartListening(IPEndPoint ipEndPoint, Action<string> receivedStringAction)
         {
-            if (continueListening)
+            if (KeepGoing)
                 return;
-            continueListening = true;
+            KeepGoing = true;
 
             OnReceivedString = receivedStringAction;
 
-            var boundSocket = new Socket(AddressFamily.InterNetwork, SocketType, ProtocolType);
-            SetupSocket(ipEndPoint, boundSocket);
+            BoundSocket = new Socket(AddressFamily.InterNetwork, SocketType, ProtocolType);
+            SetupSocket(ipEndPoint);
 
-            while (continueListening)
-                Receive(boundSocket);
+            while (KeepGoing)
+                Receive();
         }
 
-        protected virtual void SetupSocket(IPEndPoint ipEndPoint, Socket boundSocket)
+        protected virtual void SetupSocket(IPEndPoint ipEndPoint)
         {
-            boundSocket.Bind(ipEndPoint);
+            BoundSocket.Bind(ipEndPoint);
         }
 
-        protected abstract void Receive(Socket receivingSocket);
+        protected abstract void Receive();
 
         public void Dispose()
         {
@@ -43,8 +45,10 @@ namespace TestApp
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
-                continueListening = false;
+            if (!disposing)
+                return;
+            KeepGoing = false;
+            BoundSocket.Dispose();
         }
     }
 }

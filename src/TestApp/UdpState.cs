@@ -1,35 +1,29 @@
 ﻿using System;
-using System.Net;
+using System.IO;
 using System.Net.Sockets;
+using System.Text;
 
 namespace TestApp
 {
     internal class UdpState : StateObject
     {
-        private EndPoint endPoint;
-
-        public UdpState(Socket receiveSocket, EndPoint endPoint) : base(receiveSocket)
-        {
-            this.endPoint = endPoint;
-        }
-
-        public override void BeginReceive(AsyncCallback readCallback)
-        {
-            ReceiveSocket.BeginReceiveFrom(Buffer, 0, BufferSize, SocketFlags.None, ref endPoint, readCallback, this);
-        }
-
-        protected override void HandleFirstReceive(string str)
+        public UdpState(Socket receiveSocket) : base(receiveSocket)
         {
         }
 
-        protected override bool IsLastReceive(string str)
+        protected override void HandleFirstReceive(MemoryStream ms, string str)
         {
-            return true;
+            var charsBeforePri = str.IndexOf("<", StringComparison.Ordinal);
+            if (charsBeforePri != 0)
+                ms.SetLength(0);
         }
 
-        protected override int EndReceive(IAsyncResult asyncResult)
+        protected override void HandleLastReceive(StringBuilder receivedData, string str, Action<string> receivedStringAction)
         {
-            return ReceiveSocket.EndReceiveFrom(asyncResult, ref endPoint);
+            var receivedString = receivedData.ToString();
+            receivedStringAction(receivedString);
+            Buffer.SetLength(0);
+            receivedData.Clear();
         }
     }
 }

@@ -8,6 +8,7 @@ namespace TestApp
     partial class FormTest
     {
         private IContainer components = null;
+        private Button buttonStartStopSyslogServer;
         private Button buttonTrace;
         private Button buttonDebug;
         private Button buttonInfo;
@@ -32,6 +33,7 @@ namespace TestApp
 
         private void InitializeComponent()
         {
+            buttonStartStopSyslogServer = new Button();
             buttonTrace = new Button();
             buttonDebug = new Button();
             buttonInfo = new Button();
@@ -48,9 +50,19 @@ namespace TestApp
             tcpTextBox = new TextBox();
             SuspendLayout();
             //
+            // buttonStartStopSyslogServer
+            //
+            buttonStartStopSyslogServer.Location = new Point(36, 20);
+            buttonStartStopSyslogServer.Name = "buttonStartSyslogServer";
+            buttonStartStopSyslogServer.Size = new Size(212, 38);
+            buttonStartStopSyslogServer.TabIndex = 0;
+            buttonStartStopSyslogServer.Text = @"Start Syslog Server";
+            buttonStartStopSyslogServer.UseVisualStyleBackColor = true;
+            buttonStartStopSyslogServer.Click += new EventHandler(ButtonLogClick);
+            //
             // buttonTrace
             //
-            buttonTrace.Location = new Point(36, 20);
+            buttonTrace.Location = new Point(36, 70);
             buttonTrace.Name = "buttonTrace";
             buttonTrace.Size = new Size(212, 38);
             buttonTrace.TabIndex = 0;
@@ -60,7 +72,7 @@ namespace TestApp
             //
             // buttonDebug
             //
-            buttonDebug.Location = new Point(36, 70);
+            buttonDebug.Location = new Point(36, 120);
             buttonDebug.Name = "buttonDebug";
             buttonDebug.Size = new Size(212, 38);
             buttonDebug.TabIndex = 1;
@@ -70,7 +82,7 @@ namespace TestApp
             //
             // buttonInfo
             //
-            buttonInfo.Location = new Point(36, 120);
+            buttonInfo.Location = new Point(36, 170);
             buttonInfo.Name = "buttonInfo";
             buttonInfo.Size = new Size(212, 38);
             buttonInfo.TabIndex = 2;
@@ -80,7 +92,7 @@ namespace TestApp
             //
             // buttonWarn
             //
-            buttonWarn.Location = new Point(36, 170);
+            buttonWarn.Location = new Point(36, 220);
             buttonWarn.Name = "buttonWarn";
             buttonWarn.Size = new Size(212, 38);
             buttonWarn.TabIndex = 3;
@@ -90,7 +102,7 @@ namespace TestApp
             //
             // buttonError
             //
-            buttonError.Location = new Point(36, 220);
+            buttonError.Location = new Point(36, 270);
             buttonError.Name = "buttonError";
             buttonError.Size = new Size(212, 38);
             buttonError.TabIndex = 4;
@@ -100,7 +112,7 @@ namespace TestApp
             //
             // buttonFatal
             //
-            buttonFatal.Location = new Point(36, 220);
+            buttonFatal.Location = new Point(36, 320);
             buttonFatal.Name = "buttonFatal";
             buttonFatal.Size = new Size(212, 38);
             buttonFatal.TabIndex = 5;
@@ -110,7 +122,7 @@ namespace TestApp
             //
             // buttonFromFile
             //
-            buttonFromFile.Location = new Point(36, 270);
+            buttonFromFile.Location = new Point(36, 370);
             buttonFromFile.Name = "buttonFromFile";
             buttonFromFile.Size = new Size(212, 38);
             buttonFromFile.TabIndex = 6;
@@ -120,7 +132,7 @@ namespace TestApp
             //
             // buttonMultiple
             //
-            buttonMultiple.Location = new Point(36, 320);
+            buttonMultiple.Location = new Point(36, 420);
             buttonMultiple.Name = "buttonMultiple";
             buttonMultiple.Size = new Size(212, 38);
             buttonMultiple.TabIndex = 7;
@@ -130,7 +142,7 @@ namespace TestApp
             //
             // buttonContinuous
             //
-            buttonContinuous.Location = new Point(36, 370);
+            buttonContinuous.Location = new Point(36, 470);
             buttonContinuous.Name = "buttonContinuous";
             buttonContinuous.Size = new Size(212, 38);
             buttonContinuous.TabIndex = 7;
@@ -140,7 +152,7 @@ namespace TestApp
             //
             // buttonParallel
             //
-            buttonParallel.Location = new Point(36, 420);
+            buttonParallel.Location = new Point(36, 520);
             buttonParallel.Name = "buttonParallel";
             buttonParallel.Size = new Size(212, 38);
             buttonParallel.TabIndex = 7;
@@ -159,7 +171,7 @@ namespace TestApp
             //
             udpTextBox.Location = new Point(260, 21);
             udpTextBox.Name = "udpTextBox";
-            udpTextBox.Size = new Size(620, 215);
+            udpTextBox.Size = new Size(620, 260);
             udpTextBox.TabIndex = 8;
             udpTextBox.Multiline = true;
             udpTextBox.ReadOnly = true;
@@ -167,16 +179,16 @@ namespace TestApp
             //
             // tcpLabel
             //
-            tcpLabel.Location = new Point(885, 242);
+            tcpLabel.Location = new Point(885, 298);
             tcpLabel.Name = "tcpLabel";
             tcpLabel.Text = "T" + Environment.NewLine + "C" + Environment.NewLine + "P";
             tcpLabel.AutoSize = true;
             //
             // tcpTextBox
             //
-            tcpTextBox.Location = new Point(260, 242);
+            tcpTextBox.Location = new Point(260, 298);
             tcpTextBox.Name = "tcpTextBox";
-            tcpTextBox.Size = new Size(620, 215);
+            tcpTextBox.Size = new Size(620,260);
             tcpTextBox.TabIndex = 9;
             tcpTextBox.Multiline = true;
             tcpTextBox.ReadOnly = true;
@@ -186,7 +198,8 @@ namespace TestApp
             //
             AutoScaleDimensions = new SizeF(6F, 13F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(925, 482);
+            ClientSize = new Size(925, 580);
+            Controls.Add(buttonStartStopSyslogServer);
             Controls.Add(buttonTrace);
             Controls.Add(buttonDebug);
             Controls.Add(buttonInfo);

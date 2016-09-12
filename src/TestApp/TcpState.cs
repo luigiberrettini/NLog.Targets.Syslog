@@ -1,31 +1,40 @@
 ﻿using System;
+using System.IO;
 using System.Net.Sockets;
+using System.Text;
 
 namespace TestApp
 {
     internal class TcpState : StateObject
     {
-        private volatile bool isFirstReceive;
+        private volatile bool firstReceive;
         private volatile bool octetCounting;
         private int octetsToReceive;
 
         public TcpState(Socket receiveSocket) : base(receiveSocket)
         {
-            isFirstReceive = true;
+            firstReceive = true;
         }
 
-        public override void BeginReceive(AsyncCallback readCallback)
+        protected override void HandleFirstReceive(MemoryStream ms, string str)
         {
-            ReceiveSocket.BeginReceive(Buffer, 0, BufferSize, SocketFlags.None, readCallback, this);
-        }
-
-        protected override void HandleFirstReceive(string str)
-        {
-            if (!isFirstReceive)
+            if (!firstReceive)
                 return;
 
-            isFirstReceive = false;
+            firstReceive = false;
+            HandleFirstChunk(ms, str);
+        }
+
+        private void HandleFirstChunk(Stream ms, string str)
+        {
             octetCounting = char.IsDigit(str[0]);
+
+            if (!IsFirstChunk(str))
+            {
+                ms.SetLength(0);
+                return;
+            }
+
             if (!octetCounting)
                 return;
 
@@ -34,15 +43,74 @@ namespace TestApp
             octetsToReceive = charsBeforePri + 1 + int.Parse(octectCount);
         }
 
-        protected override bool IsLastReceive(string str)
+        private bool IsFirstChunk(string str)
         {
-            return (octetCounting && ReceivedData.Length == octetsToReceive) ||
-                (!octetCounting && str.IndexOf("\n", StringComparison.Ordinal) != -1);
+            if (!octetCounting)
+            {
+                var charsBeforePri = str.IndexOf("<", StringComparison.Ordinal);
+                return charsBeforePri == 0;
+            }
+
+            var maxOctetCounLength = int.MaxValue.ToString().Length + 1;
+            var charsBeforeSpacePri = str.IndexOf(" <", StringComparison.Ordinal);
+            return charsBeforeSpacePri > -1 && charsBeforeSpacePri < maxOctetCounLength;
         }
 
-        protected override int EndReceive(IAsyncResult asyncResult)
+        protected override void HandleLastReceive(StringBuilder receivedData, string str, Action<string> receivedStringAction)
         {
-            return ReceiveSocket.EndReceive(asyncResult);
+            if (octetCounting)
+                HandleOctetCountingLastReceive(receivedData, str, receivedStringAction);
+            else
+                HandleNonTransparentLastReceive(receivedData, str, receivedStringAction);
+        }
+
+        private void HandleOctetCountingLastReceive(StringBuilder receivedData, string str, Action<string> receivedStringAction)
+        {
+            if (receivedData.Length < octetsToReceive)
+                return;
+
+            if (receivedData.Length == octetsToReceive)
+            {
+                receivedStringAction(receivedData.ToString());
+                Buffer.SetLength(0);
+                receivedData.Clear();
+                firstReceive = true;
+                return;
+            }
+
+            receivedStringAction(receivedData.ToString(0, octetsToReceive));
+            var nextString = receivedData.ToString(octetsToReceive, receivedData.Length - octetsToReceive);
+            receivedData.Clear();
+            receivedData.Append(nextString);
+            HandleFirstChunk(Buffer, nextString);
+            HandleLastReceive(receivedData, nextString, receivedStringAction);
+            firstReceive = true;
+        }
+
+        private void HandleNonTransparentLastReceive(StringBuilder receivedData, string str, Action<string> receivedStringAction)
+        {
+            var indexOfLineFeed = str.IndexOf("\n", StringComparison.Ordinal);
+
+            if (indexOfLineFeed == -1)
+                return;
+
+            if (indexOfLineFeed == str.Length - 1)
+            {
+                receivedStringAction(receivedData.ToString());
+                Buffer.SetLength(0);
+                receivedData.Clear();
+                firstReceive = true;
+                return;
+            }
+
+            var newPosition = indexOfLineFeed + 1;
+            receivedStringAction(receivedData.ToString(0, newPosition));
+            var nextString = receivedData.ToString(newPosition, receivedData.Length - newPosition);
+            receivedData.Clear();
+            receivedData.Append(nextString);
+            HandleFirstChunk(Buffer, nextString);
+            HandleLastReceive(receivedData, nextString, receivedStringAction);
+            firstReceive = true;
         }
     }
 }
