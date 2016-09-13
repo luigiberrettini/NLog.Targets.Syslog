@@ -7,7 +7,7 @@ namespace TestApp
 {
     internal abstract class StateObject
     {
-        private const int BufferSize = 65536;
+        private const int BufferSize = 65535;
         private readonly UTF8Encoding encoding;
         private readonly Socket receiveSocket;
 
