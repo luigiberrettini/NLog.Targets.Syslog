@@ -47,7 +47,11 @@ by means of configuration settings, as shown in the example configuration above.
 A more detailed example is included in the [test application](./src/TestApp/NLog.config).
 
 #### Enforcement element
-* `splitOnNewLine` - `false` or `true` to split log entries on new line (default: `false`)
+* `throttling` - settings related to message throttling:
+  * `limit` - the number of log entries, waiting to be processed, that triggers throttling (default: `0`)
+  * `strategy` - `None` / `DiscardOnFixedTimeout` / `DiscardOnPercentageTimeout` / `Discard` / `DeferForFixedTime` / `DeferForPercentageTime` / `Block`
+ (default: `None`)
+  * `delay` - the milliseconds/percentage delay for a `DiscardOnFixedTimeout` / `DiscardOnPercentageTimeout` / `Defer` throttling strategy (default: `0`)
 * `transliterate` - `false` or `true` to trasliterate strings from Unicode to ASCII when the RFC allows only ASCII characters for a fields (default: `false`)
 * `replaceInvalidCharacters` - `false` or `true` to replace invalid values usually with a question mark (default: `false`)
 * `truncateFieldsToMaxLength` - `false` or `true` to truncate fields to the length specified in the RFC (default: `false`)
