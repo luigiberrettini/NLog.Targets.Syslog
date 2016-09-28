@@ -27,7 +27,7 @@ namespace NLog.Targets.Syslog
 
         public LogEventMsgSet Build(Layout layout)
         {
-            logEntries = messageBuilder.BuildLogEntries(asyncLogEvent.LogEvent, layout).ToArray();
+            logEntries = messageBuilder.BuildLogEntries(asyncLogEvent.LogEvent, layout);
             return this;
         }
 

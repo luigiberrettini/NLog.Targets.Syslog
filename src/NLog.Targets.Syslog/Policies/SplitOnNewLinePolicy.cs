@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace NLog.Targets.Syslog.Policies
 {
-    internal class SplitOnNewLinePolicy : IBasicPolicy<string, IEnumerable<string>>
+    internal class SplitOnNewLinePolicy : IBasicPolicy<string, string[]>
     {
         private readonly Enforcement enforcement;
         private static readonly char[] LineSeps = { '\r', '\n' };
@@ -19,7 +19,7 @@ namespace NLog.Targets.Syslog.Policies
             return enforcement.SplitOnNewLine;
         }
 
-        public IEnumerable<string> Apply(string s)
+        public string[] Apply(string s)
         {
             var split = s.Split(LineSeps, StringSplitOptions.RemoveEmptyEntries);
             InternalLogger.Trace($"Split '{s}' on new line");

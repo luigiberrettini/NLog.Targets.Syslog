@@ -18,7 +18,7 @@ namespace NLog.Targets.Syslog.MessageCreation
             Message = new ByteArray(enforcement.TruncateMessageTo);
         }
 
-        internal IEnumerable<string> BuildLogEntries(LogEventInfo logEvent, Layout layout)
+        internal string[] BuildLogEntries(LogEventInfo logEvent, Layout layout)
         {
             var originalLogEntry = layout.Render(logEvent);
             return splitOnNewLinePolicy.IsApplicable() ? splitOnNewLinePolicy.Apply(originalLogEntry) : new[] { originalLogEntry };

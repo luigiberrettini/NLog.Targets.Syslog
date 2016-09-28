@@ -41,7 +41,7 @@ namespace NLog.Targets.Syslog.MessageCreation
             activeBuilder.Initialize(enforcement);
         }
 
-        internal IEnumerable<string> BuildLogEntries(LogEventInfo logEvent, Layout layout)
+        internal string[] BuildLogEntries(LogEventInfo logEvent, Layout layout)
         {
             return activeBuilder.BuildLogEntries(logEvent, layout);
         }
