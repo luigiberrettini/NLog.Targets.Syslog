@@ -14,7 +14,7 @@ namespace NLog.Targets.Syslog.Extensions
 
         public static IEnumerable<T> Select<T>(this int n, Func<T> func)
         {
-            return Enumerable.Range(1, n).Select(i => func());
+            return Enumerable.Range(0, n).Select(i => func());
         }
     }
 }
