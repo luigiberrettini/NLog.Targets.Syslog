@@ -1,47 +1,38 @@
 using System;
 using System.Threading;
 using NLog.Common;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.Policies
 {
     public class Throttling
     {
-        /// <summary>The number of log entries, waiting to be processed, that triggers throttling</summary>
-        public int Limit { get; set; }
+        private readonly int limit;
+        private readonly ThrottlingStrategy strategy;
+        private readonly decimal delay;
 
-        /// <summary>The throttling strategy to employ</summary>
-        public ThrottlingStrategy Strategy { get; set; }
-
-        /// <summary>The milliseconds/percentage delay for a DiscardOnFixedTimeout/DiscardOnPercentageTimeout/Defer throttling strategy</summary>
-        public decimal Delay { get; set; }
-
-        /// <summary>Builds a new instance of the Throttling class</summary>
-        public Throttling()
+        public static Throttling FromConfig(ThrottlingConfig throttlingConfig)
         {
-            Limit = 0;
-            Strategy = ThrottlingStrategy.None;
-            Delay = 0;
+            throttlingConfig.EnsureAllowedValues();
+            return new Throttling(throttlingConfig);
         }
 
-        internal void EnsureAllowedValues()
+        private Throttling(ThrottlingConfig throttlingConfig)
         {
-            if (Limit < 1)
-                Limit = 0;
-            if (Delay < 0)
-                Delay = 0;
-            if (Limit == 0)
-                Strategy = ThrottlingStrategy.None;
+            limit = throttlingConfig.Limit;
+            strategy = throttlingConfig.Strategy;
+            delay = throttlingConfig.Delay;
         }
 
-        internal void Apply(int waitingLogEntries, Action<int> actionWithTimeout)
+        public void Apply(int waitingLogEntries, Action<int> actionWithTimeout)
         {
-            if (Strategy == ThrottlingStrategy.None || waitingLogEntries < Limit)
+            if (strategy == ThrottlingStrategy.None || waitingLogEntries < limit)
             {
                 actionWithTimeout(0);
                 return;
             }
 
-            if (Strategy == ThrottlingStrategy.Discard)
+            if (strategy == ThrottlingStrategy.Discard)
             {
                 InternalLogger.Warn("Applied discard throttling strategy");
                 return;
@@ -53,39 +44,39 @@ namespace NLog.Targets.Syslog.Policies
 
         private void ApplyDeferment(int waitingLogEntries)
         {
-            var deferStrategy = Strategy == ThrottlingStrategy.DeferForFixedTime ||
-                Strategy == ThrottlingStrategy.DeferForPercentageTime;
+            var deferStrategy = strategy == ThrottlingStrategy.DeferForFixedTime ||
+                strategy == ThrottlingStrategy.DeferForPercentageTime;
 
             if (!deferStrategy)
                 return;
 
-            var delay = FixedTime(Delay, waitingLogEntries);
-            InternalLogger.Warn($"Applying defer throttling strategy ({delay} ms)");
-            Thread.SpinWait(delay);
+            var deferment = FixedTime(delay, waitingLogEntries);
+            InternalLogger.Warn($"Applying defer throttling strategy ({deferment} ms)");
+            Thread.SpinWait(deferment);
         }
 
         private int CalculateTimeout(int waitingLogEntries)
         {
-            var timeoutStrategy = Strategy == ThrottlingStrategy.DiscardOnFixedTimeout ||
-                Strategy == ThrottlingStrategy.DiscardOnPercentageTimeout;
+            var timeoutStrategy = strategy == ThrottlingStrategy.DiscardOnFixedTimeout ||
+                strategy == ThrottlingStrategy.DiscardOnPercentageTimeout;
 
             if (!timeoutStrategy)
                 return Timeout.Infinite;
 
-            var timeout = FixedTime(Delay, waitingLogEntries);
+            var timeout = FixedTime(delay, waitingLogEntries);
             InternalLogger.Warn($"Applying timeout throttling strategy ({timeout} ms)");
             return timeout;
         }
 
-        private int FixedTime(decimal delay, int waitingLogEntries)
+        private int FixedTime(decimal dlay, int waitingLogEntries)
         {
-            var isPercentageDelay = Strategy == ThrottlingStrategy.DiscardOnPercentageTimeout ||
-                Strategy == ThrottlingStrategy.DeferForPercentageTime;
+            var isPercentageDelay = strategy == ThrottlingStrategy.DiscardOnPercentageTimeout ||
+                strategy == ThrottlingStrategy.DeferForPercentageTime;
 
             if (!isPercentageDelay)
-                return (int)delay;
+                return (int)dlay;
 
-            var fixedTime = waitingLogEntries * delay / 100;
+            var fixedTime = waitingLogEntries * dlay / 100;
             return (int)fixedTime;
         }
     }

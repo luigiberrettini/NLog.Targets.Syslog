@@ -1,3 +1,5 @@
+using NLog.Targets.Syslog.Settings;
+
 namespace NLog.Targets.Syslog.Policies
 {
     internal class AsciiMessagePolicy
@@ -5,9 +7,9 @@ namespace NLog.Targets.Syslog.Policies
         private const bool AssumeAsciiEncoding = true;
         private readonly TruncateToComputedValuePolicy truncatePolicy;
 
-        public AsciiMessagePolicy(Enforcement enforcement)
+        public AsciiMessagePolicy(EnforcementConfig enforcementConfig)
         {
-            truncatePolicy = new TruncateToComputedValuePolicy(enforcement, AssumeAsciiEncoding);
+            truncatePolicy = new TruncateToComputedValuePolicy(enforcementConfig, AssumeAsciiEncoding);
         }
 
         public void Apply(ByteArray bytes)

@@ -41,7 +41,7 @@
                             <xs:attribute name="truncateMessageTo" type="xs:integer" />
                         </xs:complexType>
                     </xs:element>
-                    <xs:element name="messageBuilder" minOccurs="0" maxOccurs="1">
+                    <xs:element name="messageCreation" minOccurs="0" maxOccurs="1">
                         <xs:complexType>
                             <xs:choice minOccurs="0" maxOccurs="unbounded">
                                 <xs:element name="facility" type="xs:string" minOccurs="0" maxOccurs="1" />
@@ -99,11 +99,11 @@
                             </xs:choice>
                         </xs:complexType>
                     </xs:element>
-                    <xs:element name="messageTransmitter" minOccurs="0" maxOccurs="1">
+                    <xs:element name="messageSend" minOccurs="0" maxOccurs="1">
                         <xs:complexType>
                             <xs:choice minOccurs="0" maxOccurs="unbounded">
                                 <xs:element name="protocol" type="xs:string" minOccurs="0" maxOccurs="1" />
-                                <xs:element name="udpProtocol" minOccurs="0" maxOccurs="1">
+                                <xs:element name="udp" minOccurs="0" maxOccurs="1">
                                     <xs:complexType>
                                         <xs:choice minOccurs="0" maxOccurs="unbounded">
                                             <xs:element name="server" type="xs:string" minOccurs="1" maxOccurs="1" />
@@ -113,7 +113,7 @@
                                         <xs:attribute name="port" type="xs:integer" />
                                     </xs:complexType>
                                 </xs:element>
-                                <xs:element name="tcpProtocol" minOccurs="0" maxOccurs="1">
+                                <xs:element name="tcp" minOccurs="0" maxOccurs="1">
                                     <xs:complexType>
                                         <xs:choice minOccurs="0" maxOccurs="unbounded">
                                             <xs:element name="server" type="xs:string" minOccurs="1" maxOccurs="1" />

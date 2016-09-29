@@ -1,22 +1,22 @@
 using NLog.Common;
 using System;
-using System.Collections.Generic;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.Policies
 {
     internal class SplitOnNewLinePolicy : IBasicPolicy<string, string[]>
     {
-        private readonly Enforcement enforcement;
+        private readonly EnforcementConfig enforcementConfig;
         private static readonly char[] LineSeps = { '\r', '\n' };
 
-        public SplitOnNewLinePolicy(Enforcement enforcement)
+        public SplitOnNewLinePolicy(EnforcementConfig enforcementConfig)
         {
-            this.enforcement = enforcement;
+            this.enforcementConfig = enforcementConfig;
         }
 
         public bool IsApplicable()
         {
-            return enforcement.SplitOnNewLine;
+            return enforcementConfig.SplitOnNewLine;
         }
 
         public string[] Apply(string s)

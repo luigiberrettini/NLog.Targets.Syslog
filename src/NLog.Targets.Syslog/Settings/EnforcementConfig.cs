@@ -1,9 +1,10 @@
-﻿namespace NLog.Targets.Syslog.Policies
+﻿namespace NLog.Targets.Syslog.Settings
 {
-    public class Enforcement
+    /// <summary>Enforcement configuration</summary>
+    public class EnforcementConfig
     {
         /// <summary>Throttling to be triggered when a configured number of log entries are waiting to be processed</summary>
-        public Throttling Throttling { get; set; }
+        public ThrottlingConfig Throttling { get; set; }
 
         /// <summary>Whether or not to split each log entry by newlines and send each line separately</summary>
         public bool SplitOnNewLine { get; set; }
@@ -20,10 +21,9 @@
         /// <summary>The length to truncate the Syslog message to or zero</summary>
         public long TruncateMessageTo { get; set; }
 
-        /// <summary>Builds a new instance of the Enforcement class</summary>
-        public Enforcement()
+        public EnforcementConfig()
         {
-            Throttling = new Throttling();
+            Throttling = new ThrottlingConfig();
         }
     }
 }

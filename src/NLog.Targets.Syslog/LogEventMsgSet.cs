@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog.Common;
@@ -12,12 +11,12 @@ namespace NLog.Targets.Syslog
     internal class LogEventMsgSet
     {
         private readonly AsyncLogEventInfo asyncLogEvent;
-        private readonly MessageBuildersFacade messageBuilder;
-        private readonly MessageTransmittersFacade messageTransmitter;
+        private readonly MessageBuilder messageBuilder;
+        private readonly MessageTransmitter messageTransmitter;
         private int currentMessage;
         private string[] logEntries;
 
-        public LogEventMsgSet(AsyncLogEventInfo asyncLogEvent, MessageBuildersFacade messageBuilder, MessageTransmittersFacade messageTransmitter)
+        public LogEventMsgSet(AsyncLogEventInfo asyncLogEvent, MessageBuilder messageBuilder, MessageTransmitter messageTransmitter)
         {
             this.asyncLogEvent = asyncLogEvent;
             this.messageBuilder = messageBuilder;

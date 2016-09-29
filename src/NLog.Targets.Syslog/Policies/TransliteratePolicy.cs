@@ -1,19 +1,20 @@
 using NLog.Common;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.Policies
 {
     internal class TransliteratePolicy : IBasicPolicy<string, string>
     {
-        private readonly Enforcement enforcement;
+        private readonly EnforcementConfig enforcementConfig;
 
-        public TransliteratePolicy(Enforcement enforcement)
+        public TransliteratePolicy(EnforcementConfig enforcementConfig)
         {
-            this.enforcement = enforcement;
+            this.enforcementConfig = enforcementConfig;
         }
 
         public bool IsApplicable()
         {
-            return enforcement.Transliterate;
+            return enforcementConfig.Transliterate;
         }
 
         public string Apply(string s)

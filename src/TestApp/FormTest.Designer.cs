@@ -16,6 +16,7 @@ namespace TestApp
         private Button buttonError;
         private Button buttonFatal;
         private Button buttonFromFile;
+        private Button buttonHuge;
         private Button buttonMultiple;
         private Button buttonContinuous;
         private Button buttonParallel;
@@ -41,6 +42,7 @@ namespace TestApp
             buttonError = new Button();
             buttonFatal = new Button();
             buttonFromFile = new Button();
+            buttonHuge = new Button();
             buttonMultiple = new Button();
             buttonContinuous = new Button();
             buttonParallel = new Button();
@@ -130,9 +132,19 @@ namespace TestApp
             buttonFromFile.UseVisualStyleBackColor = true;
             buttonFromFile.Click += new EventHandler(ButtonLogClick);
             //
+            // buttonHuge
+            //
+            buttonHuge.Location = new Point(36, 420);
+            buttonHuge.Name = "buttonHuge";
+            buttonHuge.Size = new Size(212, 38);
+            buttonHuge.TabIndex = 6;
+            buttonHuge.Text = "Huge events";
+            buttonHuge.UseVisualStyleBackColor = true;
+            buttonHuge.Click += new EventHandler(ButtonLogClick);
+            //
             // buttonMultiple
             //
-            buttonMultiple.Location = new Point(36, 420);
+            buttonMultiple.Location = new Point(36, 470);
             buttonMultiple.Name = "buttonMultiple";
             buttonMultiple.Size = new Size(212, 38);
             buttonMultiple.TabIndex = 7;
@@ -142,7 +154,7 @@ namespace TestApp
             //
             // buttonContinuous
             //
-            buttonContinuous.Location = new Point(36, 470);
+            buttonContinuous.Location = new Point(36, 520);
             buttonContinuous.Name = "buttonContinuous";
             buttonContinuous.Size = new Size(212, 38);
             buttonContinuous.TabIndex = 7;
@@ -152,7 +164,7 @@ namespace TestApp
             //
             // buttonParallel
             //
-            buttonParallel.Location = new Point(36, 520);
+            buttonParallel.Location = new Point(36, 570);
             buttonParallel.Name = "buttonParallel";
             buttonParallel.Size = new Size(212, 38);
             buttonParallel.TabIndex = 7;
@@ -171,7 +183,7 @@ namespace TestApp
             //
             udpTextBox.Location = new Point(260, 21);
             udpTextBox.Name = "udpTextBox";
-            udpTextBox.Size = new Size(620, 260);
+            udpTextBox.Size = new Size(620, 285);
             udpTextBox.TabIndex = 8;
             udpTextBox.Multiline = true;
             udpTextBox.ReadOnly = true;
@@ -179,16 +191,16 @@ namespace TestApp
             //
             // tcpLabel
             //
-            tcpLabel.Location = new Point(885, 298);
+            tcpLabel.Location = new Point(885, 323);
             tcpLabel.Name = "tcpLabel";
             tcpLabel.Text = "T" + Environment.NewLine + "C" + Environment.NewLine + "P";
             tcpLabel.AutoSize = true;
             //
             // tcpTextBox
             //
-            tcpTextBox.Location = new Point(260, 298);
+            tcpTextBox.Location = new Point(260, 323);
             tcpTextBox.Name = "tcpTextBox";
-            tcpTextBox.Size = new Size(620,260);
+            tcpTextBox.Size = new Size(620,285);
             tcpTextBox.TabIndex = 9;
             tcpTextBox.Multiline = true;
             tcpTextBox.ReadOnly = true;
@@ -198,7 +210,7 @@ namespace TestApp
             //
             AutoScaleDimensions = new SizeF(6F, 13F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(925, 580);
+            ClientSize = new Size(925, 630);
             Controls.Add(buttonStartStopSyslogServer);
             Controls.Add(buttonTrace);
             Controls.Add(buttonDebug);
@@ -207,6 +219,7 @@ namespace TestApp
             Controls.Add(buttonError);
             Controls.Add(buttonFatal);
             Controls.Add(buttonFromFile);
+            Controls.Add(buttonHuge);
             Controls.Add(buttonMultiple);
             Controls.Add(buttonContinuous);
             Controls.Add(buttonParallel);

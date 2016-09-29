@@ -1,52 +1,28 @@
-using NLog.Config;
 using NLog.Targets.Syslog.Policies;
 using System.Collections.Generic;
 using System.Linq;
-using NLog.Targets.Syslog.Extensions;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {
-    /// <summary>A Syslog SD-ELEMENT field</summary>
-    [NLogConfigurationItem]
-    public class SdElement
+    internal class SdElement
     {
         private static readonly byte[] LeftBracketBytes = { 0x5B };
         private static readonly byte[] RightBracketBytes = { 0x5D };
 
-        /// <summary>The SD-ID field of an SD-ELEMENT field in the STRUCTURED-DATA part</summary>
-        public SdId SdId { get; set; }
+        private readonly SdId sdId;
+        private readonly IList<SdParam> sdParams;
 
-        /// <summary>The SD-PARAM fields belonging to an SD-ELEMENT field in the STRUCTURED-DATA part</summary>
-        [ArrayParameter(typeof(SdParam), nameof(SdParam))]
-        public IList<SdParam> SdParams { get; set; }
-
-        /// <summary>Builds a new instance of the SdElement class</summary>
-        public SdElement()
+        public SdElement(SdElementConfig sdElementConfig, EnforcementConfig enforcementConfig)
         {
-            SdParams = new List<SdParam>();
+            sdId = new SdId(sdElementConfig.SdId , enforcementConfig);
+            sdParams = sdElementConfig.SdParams.Select(sdParamConfig => new SdParam(sdParamConfig, enforcementConfig)).ToList();
         }
 
-        internal void Initialize(Enforcement enforcement)
-        {
-            SdId.Initialize(enforcement);
-            SdParams.ForEach(sdParam => sdParam.Initialize(enforcement));
-        }
-
-        internal static string ToString(IEnumerable<SdElement> sdElements)
-        {
-            return sdElements.Aggregate(string.Empty, (acc, curr) => acc.ToString() + curr.ToString());
-        }
-
-        /// <summary>Gives a string representation of an SdElement instance</summary>
-        public override string ToString()
-        {
-            return $"[{SdId}{SdParam.ToString(SdParams)}]";
-        }
-
-        internal static void AppendBytes(ByteArray message, IEnumerable<SdElement> sdElements, LogEventInfo logEvent, EncodingSet encodings)
+        public static void AppendBytes(ByteArray message, IEnumerable<SdElement> sdElements, LogEventInfo logEvent, EncodingSet encodings)
         {
             var elements = sdElements
-                .Select(x => new { x.SdId, RenderedSdId = x.SdId.Render(logEvent), x.SdParams })
+                .Select(x => new { SdId = x.sdId, RenderedSdId = x.sdId.Render(logEvent), SdParams = x.sdParams })
                 .ToList();
 
             InternalLogDuplicatesPolicy.Apply(elements, x => x.RenderedSdId);
@@ -59,6 +35,16 @@ namespace NLog.Targets.Syslog.MessageCreation
                     SdParam.AppendBytes(message, elem.SdParams, logEvent, SdIdToInvalidParamNamePattern.Map(elem.RenderedSdId), encodings);
                     message.Append(RightBracketBytes);
                 });
+        }
+
+        public static string ToString(IEnumerable<SdElement> sdElements)
+        {
+            return sdElements.Aggregate(string.Empty, (acc, curr) => acc.ToString() + curr.ToString());
+        }
+
+        public override string ToString()
+        {
+            return $"[{sdId}{SdParam.ToString(sdParams)}]";
         }
     }
 }

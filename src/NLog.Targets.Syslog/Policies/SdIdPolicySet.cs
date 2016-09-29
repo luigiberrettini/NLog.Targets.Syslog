@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.Policies
 {
@@ -13,13 +14,13 @@ namespace NLog.Targets.Syslog.Policies
         private const string QuestionMark = "?";
         private const int SdIdMaxLength = 32;
 
-        public SdIdPolicySet(Enforcement enforcement)
+        public SdIdPolicySet(EnforcementConfig enforcementConfig)
         {
             AddPolicies(new List<IBasicPolicy<string, string>>
             {
-                new TransliteratePolicy(enforcement),
-                new ReplaceKnownValuePolicy(enforcement, InvalidSdId, QuestionMark),
-                new TruncateToKnownValuePolicy(enforcement,SdIdMaxLength)
+                new TransliteratePolicy(enforcementConfig),
+                new ReplaceKnownValuePolicy(enforcementConfig, InvalidSdId, QuestionMark),
+                new TruncateToKnownValuePolicy(enforcementConfig,SdIdMaxLength)
             });
         }
     }

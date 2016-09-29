@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.Policies
 {
@@ -9,13 +10,13 @@ namespace NLog.Targets.Syslog.Policies
         private const string NonAlphaNumericFirstChar = @"^([a-zA-Z0-9])(.*)$";
         private const string PrefixWithSpaceReplacement = " $1$2";
 
-        public PlainContentPolicySet(Enforcement enforcement)
+        public PlainContentPolicySet(EnforcementConfig enforcementConfig)
         {
             AddPolicies(new List<IBasicPolicy<string, string>>
             {
-                new TransliteratePolicy(enforcement),
-                new ReplaceKnownValuePolicy(enforcement, NonSpaceOrPrintUsAscii, QuestionMark),
-                new ReplaceKnownValuePolicy(enforcement, NonAlphaNumericFirstChar, PrefixWithSpaceReplacement),
+                new TransliteratePolicy(enforcementConfig),
+                new ReplaceKnownValuePolicy(enforcementConfig, NonSpaceOrPrintUsAscii, QuestionMark),
+                new ReplaceKnownValuePolicy(enforcementConfig, NonAlphaNumericFirstChar, PrefixWithSpaceReplacement),
             });
         }
     }

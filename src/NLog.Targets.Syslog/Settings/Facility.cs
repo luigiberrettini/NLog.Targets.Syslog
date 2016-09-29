@@ -1,4 +1,4 @@
-﻿namespace NLog.Targets.Syslog.MessageCreation
+﻿namespace NLog.Targets.Syslog.Settings
 {
     /// <summary>Syslog facilities</summary>
     public enum Facility

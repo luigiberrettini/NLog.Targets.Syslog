@@ -1,41 +1,46 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageSend
 {
-    public abstract class MessageTransmitter
+    internal abstract class MessageTransmitter
     {
-        private const string Localhost = "localhost";
-        private const int DefaultPort = 514;
+        private static readonly Dictionary<ProtocolType, Func<MessageTransmitterConfig, MessageTransmitter>> TransmitterFactory;
 
-        /// <summary>The IP address of the Syslog server or an empty string</summary>
-        protected string IpAddress { get; private set; }
+        protected string Server { get; }
 
-        private string server;
+        protected string IpAddress { get; }
 
-        /// <summary>The IP address or hostname of the Syslog server</summary>
-        public string Server
+        protected int Port { get; }
+
+        static MessageTransmitter()
         {
-            get { return server; }
-            set { server = value; IpAddress = Dns.GetHostAddresses(Server).FirstOrDefault()?.ToString(); }
+            TransmitterFactory = new Dictionary<ProtocolType, Func<MessageTransmitterConfig, MessageTransmitter>>
+            {
+                { ProtocolType.Udp, (messageTransmitterConfig) => new Udp(messageTransmitterConfig.Udp) },
+                { ProtocolType.Tcp, (messageTransmitterConfig) => new Tcp(messageTransmitterConfig.Tcp) }
+            };
         }
 
-        /// <summary>The port number the Syslog server is listening on</summary>
-        public int Port { get; set; }
-
-        /// <summary>Builds the base part of a new instance of a class inheriting from MessageTransmitter</summary>
-        protected MessageTransmitter()
+        public static MessageTransmitter FromConfig(MessageTransmitterConfig messageTransmitterConfig)
         {
-            Server = Localhost;
-            Port = DefaultPort;
+            return TransmitterFactory[messageTransmitterConfig.Protocol](messageTransmitterConfig);
         }
 
-        internal abstract void Initialize();
+        protected MessageTransmitter(string server, int port)
+        {
+            Server = server;
+            IpAddress = Dns.GetHostAddresses(server).FirstOrDefault()?.ToString();
+            Port = port;
+        }
 
-        internal abstract Task SendMessageAsync(ByteArray message, CancellationToken token);
+        public abstract Task SendMessageAsync(ByteArray message, CancellationToken token);
 
-        internal abstract void Dispose();
+        public abstract void Dispose();
     }
 }

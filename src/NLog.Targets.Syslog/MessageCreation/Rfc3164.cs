@@ -1,44 +1,34 @@
-﻿using NLog.Config;
-using NLog.Layouts;
+﻿using NLog.Layouts;
 using NLog.Targets.Syslog.Policies;
 using System.Globalization;
-using System.Net;
-using System.Reflection;
 using System.Text;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {
     /// <summary>Allows to build Syslog messages compliant with RFC 3164</summary>
-    [NLogConfigurationItem]
-    public class Rfc3164 : MessageBuilder
+    internal class Rfc3164 : MessageBuilder
     {
-        private PlainHostnamePolicySet hostnamePolicySet;
-        private TagPolicySet tagPolicySet;
-        private PlainContentPolicySet plainContentPolicySet;
-        private AsciiMessagePolicy asciiMessagePolicy;
         private const string TimestampFormat = "{0:MMM} {0,11:d HH:mm:ss}";
         private static readonly byte[] SpaceBytes = { 0x20 };
 
-        /// <summary>The HOSTNAME field of the HEADER part</summary>
-        public Layout Hostname { get; set; }
-
-        /// <summary>The TAG field of the MSG part</summary>
-        public Layout Tag { get; set; }
+        private readonly Layout hostname;
+        private readonly Layout tag;
+        private readonly PlainHostnamePolicySet hostnamePolicySet;
+        private readonly TagPolicySet tagPolicySet;
+        private readonly PlainContentPolicySet plainContentPolicySet;
+        private readonly AsciiMessagePolicy asciiMessagePolicy;
 
         /// <summary>Builds a new instance of the Rfc3164 class</summary>
-        public Rfc3164()
+        public Rfc3164(Facility facility, Rfc3164Config rfc3164Config, EnforcementConfig enforcementConfig) : base(facility, enforcementConfig)
         {
-            Hostname = Dns.GetHostName();
-            Tag = Assembly.GetCallingAssembly().GetName().Name;
-        }
+            hostnamePolicySet = new PlainHostnamePolicySet(enforcementConfig);
+            tagPolicySet = new TagPolicySet(enforcementConfig);
+            plainContentPolicySet = new PlainContentPolicySet(enforcementConfig);
+            asciiMessagePolicy = new AsciiMessagePolicy(enforcementConfig);
 
-        internal override void Initialize(Enforcement enforcement)
-        {
-            base.Initialize(enforcement);
-            hostnamePolicySet = new PlainHostnamePolicySet(enforcement);
-            tagPolicySet = new TagPolicySet(enforcement);
-            plainContentPolicySet = new PlainContentPolicySet(enforcement);
-            asciiMessagePolicy = new AsciiMessagePolicy(enforcement);
+            hostname = rfc3164Config.Hostname;
+            tag = rfc3164Config.Tag;
         }
 
         protected override ByteArray BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
@@ -64,7 +54,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         private void AppendHeaderBytes(LogEventInfo logEvent, Encoding encoding)
         {
             var timestamp = string.Format(CultureInfo.InvariantCulture, TimestampFormat, logEvent.TimeStamp);
-            var hostname = hostnamePolicySet.Apply(Hostname.Render(logEvent));
+            var hostname = hostnamePolicySet.Apply(this.hostname.Render(logEvent));
             var header = $"{timestamp} {hostname}";
             var headerBytes = encoding.GetBytes(header);
             Message.Append(headerBytes);
@@ -78,7 +68,7 @@ namespace NLog.Targets.Syslog.MessageCreation
 
         private void AppendTagBytes(LogEventInfo logEvent, Encoding encoding)
         {
-            var tag = tagPolicySet.Apply(Tag.Render(logEvent));
+            var tag = tagPolicySet.Apply(this.tag.Render(logEvent));
             var tagBytes = encoding.GetBytes(tag);
             Message.Append(tagBytes);
         }

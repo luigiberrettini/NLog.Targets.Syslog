@@ -1,22 +1,23 @@
 using NLog.Common;
 using System.Text.RegularExpressions;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.Policies
 {
     internal class ReplaceComputedValuePolicy
     {
-        private readonly Enforcement enforcement;
+        private readonly EnforcementConfig enforcementConfig;
         private readonly string replaceWith;
 
-        public ReplaceComputedValuePolicy(Enforcement enforcement, string replaceWith)
+        public ReplaceComputedValuePolicy(EnforcementConfig enforcementConfig, string replaceWith)
         {
-            this.enforcement = enforcement;
+            this.enforcementConfig = enforcementConfig;
             this.replaceWith = replaceWith;
         }
 
         public bool IsApplicable()
         {
-            return enforcement.ReplaceInvalidCharacters;
+            return enforcementConfig.ReplaceInvalidCharacters;
         }
 
         public string Apply(string s, string searchFor)

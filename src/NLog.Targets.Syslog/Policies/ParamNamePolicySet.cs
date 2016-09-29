@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.Policies
 {
@@ -11,15 +12,15 @@ namespace NLog.Targets.Syslog.Policies
         private readonly List<IBasicPolicy<string, string>> basicPolicies;
         private readonly ReplaceComputedValuePolicy replaceComputedValuePolicy;
 
-        public ParamNamePolicySet(Enforcement enforcement)
+        public ParamNamePolicySet(EnforcementConfig enforcementConfig)
         {
             basicPolicies = new List<IBasicPolicy<string, string>>
             {
-                new TransliteratePolicy(enforcement),
-                new ReplaceKnownValuePolicy(enforcement, NonSafePrintUsAscii, QuestionMark),
-                new TruncateToKnownValuePolicy(enforcement, ParamNameMaxLength)
+                new TransliteratePolicy(enforcementConfig),
+                new ReplaceKnownValuePolicy(enforcementConfig, NonSafePrintUsAscii, QuestionMark),
+                new TruncateToKnownValuePolicy(enforcementConfig, ParamNameMaxLength)
             };
-            replaceComputedValuePolicy = new ReplaceComputedValuePolicy(enforcement, QuestionMark);
+            replaceComputedValuePolicy = new ReplaceComputedValuePolicy(enforcementConfig, QuestionMark);
         }
 
         public string Apply(string s, string searchFor)

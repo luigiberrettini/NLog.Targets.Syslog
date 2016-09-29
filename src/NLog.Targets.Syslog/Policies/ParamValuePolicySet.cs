@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.Policies
 {
@@ -7,11 +8,11 @@ namespace NLog.Targets.Syslog.Policies
         private const string InvalidParamValuePattern = @"([^\\""\]]*)([\\""\]])([^\\""\]]*)";
         private const string InvalidParamValueReplacement = "$1\\$2$3";
 
-        public ParamValuePolicySet(Enforcement enforcement)
+        public ParamValuePolicySet(EnforcementConfig enforcementConfig)
         {
             AddPolicies(new List<IBasicPolicy<string, string>>
             {
-                new ReplaceKnownValuePolicy(enforcement, InvalidParamValuePattern, InvalidParamValueReplacement)
+                new ReplaceKnownValuePolicy(enforcementConfig, InvalidParamValuePattern, InvalidParamValueReplacement)
             });
         }
     }

@@ -1,4 +1,4 @@
-﻿namespace NLog.Targets.Syslog.MessageCreation
+﻿namespace NLog.Targets.Syslog.Settings
 {
     /// <summary>The Syslog protocol RFC to be followed</summary>
     public enum RfcNumber

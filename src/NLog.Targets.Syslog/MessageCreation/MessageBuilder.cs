@@ -1,30 +1,50 @@
+using System;
 using NLog.Layouts;
 using NLog.Targets.Syslog.Policies;
 using System.Collections.Generic;
 using System.Globalization;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {
     /// <summary>Allows to build Syslog messages</summary>
-    public abstract class MessageBuilder
+    internal abstract class MessageBuilder
     {
-        private SplitOnNewLinePolicy splitOnNewLinePolicy;
+        private static readonly Dictionary<RfcNumber, Func<MessageBuilderConfig, EnforcementConfig, MessageBuilder>> BuilderFactory;
 
-        internal ByteArray Message { get; set; }
+        private readonly SplitOnNewLinePolicy splitOnNewLinePolicy;
+        private readonly Facility facility;
 
-        internal virtual void Initialize(Enforcement enforcement)
+        protected ByteArray Message { get; }
+
+        static MessageBuilder()
         {
-            splitOnNewLinePolicy = new SplitOnNewLinePolicy(enforcement);
-            Message = new ByteArray(enforcement.TruncateMessageTo);
+            BuilderFactory = new Dictionary<RfcNumber, Func<MessageBuilderConfig, EnforcementConfig, MessageBuilder>>
+            {
+                { RfcNumber.Rfc3164, (msgBuilderCfg, enforcementCfg) => new Rfc3164(msgBuilderCfg.Facility, msgBuilderCfg.Rfc3164, enforcementCfg) },
+                { RfcNumber.Rfc5424, (msgBuilderCfg, enforcementCfg) => new Rfc5424(msgBuilderCfg.Facility, msgBuilderCfg.Rfc5424, enforcementCfg) }
+            };
         }
 
-        internal string[] BuildLogEntries(LogEventInfo logEvent, Layout layout)
+        public static MessageBuilder FromConfig(MessageBuilderConfig messageBuilderConfig, EnforcementConfig enforcementConfig)
+        {
+            return BuilderFactory[messageBuilderConfig.Rfc](messageBuilderConfig, enforcementConfig);
+        }
+
+        protected MessageBuilder(Facility facility, EnforcementConfig enforcementConfig)
+        {
+            this.facility = facility;
+            splitOnNewLinePolicy = new SplitOnNewLinePolicy(enforcementConfig);
+            Message = new ByteArray(enforcementConfig.TruncateMessageTo);
+        }
+
+        public string[] BuildLogEntries(LogEventInfo logEvent, Layout layout)
         {
             var originalLogEntry = layout.Render(logEvent);
             return splitOnNewLinePolicy.IsApplicable() ? splitOnNewLinePolicy.Apply(originalLogEntry) : new[] { originalLogEntry };
         }
 
-        internal ByteArray BuildMessage(Facility facility, LogEventInfo logEvent, string logEntry)
+        public ByteArray BuildMessage(LogEventInfo logEvent, string logEntry)
         {
             Message.Reset();
             var pri = Pri(facility, (Severity)logEvent.Level);
@@ -36,11 +56,10 @@ namespace NLog.Targets.Syslog.MessageCreation
         private static string Pri(Facility facility, Severity severity)
         {
             var priVal = (int)facility * 8 + (int)severity;
-            var priValString = priVal.ToString(CultureInfo.InvariantCulture);
-            return $"<{priValString}>";
+            return $"<{priVal.ToString(CultureInfo.InvariantCulture)}>";
         }
 
-        internal void Dispose()
+        public void Dispose()
         {
             Message.Dispose();
         }

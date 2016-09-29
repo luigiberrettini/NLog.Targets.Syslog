@@ -1,4 +1,5 @@
 using System.Net;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.Policies
 {
@@ -7,13 +8,13 @@ namespace NLog.Targets.Syslog.Policies
         private const string NonPrintUsAscii = @"[^\u0021-\u007E]";
         private const string QuestionMark = "?";
 
-        public PlainHostnamePolicySet(Enforcement enforcement)
+        public PlainHostnamePolicySet(EnforcementConfig enforcementConfig)
         {
             AddPolicies(new IBasicPolicy<string, string>[]
             {
-                new TransliteratePolicy(enforcement),
+                new TransliteratePolicy(enforcementConfig),
                 new DefaultIfEmptyPolicy(Dns.GetHostName()),
-                new ReplaceKnownValuePolicy(enforcement, NonPrintUsAscii, QuestionMark)
+                new ReplaceKnownValuePolicy(enforcementConfig, NonPrintUsAscii, QuestionMark)
             });
         }
     }

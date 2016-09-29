@@ -24,6 +24,7 @@ using NLog.Common;
 using NLog.Targets.Syslog.MessageCreation;
 using NLog.Targets.Syslog.MessageSend;
 using NLog.Targets.Syslog.Policies;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog
 {
@@ -31,36 +32,39 @@ namespace NLog.Targets.Syslog
     [Target("Syslog")]
     public class SyslogTarget : TargetWithLayout
     {
-        private readonly CancellationTokenSource cts;
+        private volatile bool toBeInited;
+        private CancellationTokenSource cts;
         private BlockingCollection<LogEventMsgSet> queue;
+        private Throttling throttling;
+        private MessageBuilder messageBuilder;
+        private MessageTransmitter messageTransmitter;
 
         /// <summary>The enforcement to be applied on the Syslog message</summary>
-        public Enforcement Enforcement { get; set; }
+        public EnforcementConfig Enforcement { get; set; }
 
         /// <summary>The builder used to create messages according to RFCs</summary>
-        public MessageBuildersFacade MessageBuilder { get; set; }
+        public MessageBuilderConfig MessageCreation { get; set; }
 
         /// <summary>The transmitter used to send messages to the Syslog server</summary>
-        public MessageTransmittersFacade MessageTransmitter { get; set; }
+        public MessageTransmitterConfig MessageSend { get; set; }
 
         /// <summary>Builds a new instance of the SyslogTarget class</summary>
         public SyslogTarget()
         {
-            cts = new CancellationTokenSource();
-            Enforcement = new Enforcement();
-            MessageBuilder = new MessageBuildersFacade();
-            MessageTransmitter = new MessageTransmittersFacade();
+            toBeInited = true;
+            Enforcement = new EnforcementConfig();
+            MessageCreation = new MessageBuilderConfig();
+            MessageSend = new MessageTransmitterConfig();
         }
 
         /// <summary>Initializes the SyslogTarget</summary>
         protected override void InitializeTarget()
         {
             base.InitializeTarget();
-            Enforcement.Throttling.EnsureAllowedValues();
-            queue = NewBlockingCollection();
-            MessageBuilder.Initialize(Enforcement);
-            MessageTransmitter.Initialize();
-            Task.Factory.StartNew(() => ProcessQueueAsync(cts.Token));
+            CleanupOnConfigReload();
+            Initialize();
+            StartBackgroundProcessing();
+            toBeInited = false;
         }
 
         /// <summary>Writes a single event</summary>
@@ -69,8 +73,29 @@ namespace NLog.Targets.Syslog
         protected override void Write(AsyncLogEventInfo asyncLogEvent)
         {
             MergeEventProperties(asyncLogEvent.LogEvent);
-            var logEventMsgSet = new LogEventMsgSet(asyncLogEvent, MessageBuilder, MessageTransmitter);
-            Enforcement.Throttling.Apply(queue.Count, delay => Enqueue(logEventMsgSet, delay));
+            var logEventMsgSet = new LogEventMsgSet(asyncLogEvent, messageBuilder, messageTransmitter);
+            throttling.Apply(queue.Count, delay => Enqueue(logEventMsgSet, delay));
+        }
+
+        private void CleanupOnConfigReload()
+        {
+            if (toBeInited)
+                return;
+            DisposeDependencies();
+        }
+
+        private void Initialize()
+        {
+            cts = new CancellationTokenSource();
+            queue = NewBlockingCollection();
+            throttling = Throttling.FromConfig(Enforcement.Throttling);
+            messageBuilder = MessageBuilder.FromConfig(MessageCreation, Enforcement);
+            messageTransmitter = MessageTransmitter.FromConfig(MessageSend);
+        }
+
+        private void StartBackgroundProcessing()
+        {
+            Task.Factory.StartNew(() => ProcessQueueAsync(cts.Token));
         }
 
         private BlockingCollection<LogEventMsgSet> NewBlockingCollection()
@@ -128,20 +153,24 @@ namespace NLog.Targets.Syslog
         protected override void Dispose(bool disposing)
         {
             if (disposing)
-            {
-                try
-                {
-                    cts.Cancel();
-                    queue.Dispose();
-                    MessageBuilder.Dispose();
-                    MessageTransmitter.Dispose();
-                }
-                catch (Exception ex)
-                {
-                    InternalLogger.Debug(ex, $"{GetType().Name} dispose error");
-                }
-            }
+                DisposeDependencies();
             base.Dispose(disposing);
+        }
+
+        private void DisposeDependencies()
+        {
+            try
+            {
+                cts.Cancel();
+                cts.Dispose();
+                queue.Dispose();
+                messageBuilder.Dispose();
+                messageTransmitter.Dispose();
+            }
+            catch (Exception ex)
+            {
+                InternalLogger.Debug(ex, $"{GetType().Name} dispose error");
+            }
         }
     }
 }

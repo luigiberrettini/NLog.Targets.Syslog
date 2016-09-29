@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -14,14 +15,22 @@ namespace TestApp
     public partial class FormTest : Form
     {
         private static readonly Logger Logger;
+        private static readonly string HugeMessage;
+
         private Action<ProtocolType, string> receivedStringAction;
         private Action<Task> exceptionAction;
         private SyslogServer syslogServer;
 
         static FormTest()
         {
-            //InternalLogger.LogLevel = LogLevel.Warn;
+            var sb = new StringBuilder(65000);
+            for (var i = 10; i <= 64000; i += 10)
+                sb.Append(i.ToString("D10"));
+            HugeMessage = sb.ToString();
+
+            //InternalLogger.LogLevel = LogLevel.Trace;
             //InternalLogger.LogToTrace = true;
+
             Logger = LogManager.GetCurrentClassLogger();
         }
 
@@ -97,6 +106,11 @@ namespace TestApp
                     ButtonFromFile();
                     break;
                 }
+                case "buttonHuge":
+                {
+                    ButtonHuge();
+                    break;
+                }
                 case "buttonMultiple":
                 {
                     ButtonMultiple();
@@ -145,6 +159,18 @@ namespace TestApp
 
             var messages = File.ReadAllLines(path).ToList();
             messages.ForEach(m => Logger.Log(logLevel, m));
+        }
+
+        private static void ButtonHuge()
+        {
+            Task.Factory.StartNew(() =>
+            {
+                for (var i = 0; i < 25; i++)
+                {
+                    Logger.Warn(HugeMessage);
+                    //Thread.Sleep(100);
+                }
+            });
         }
 
         private static void ButtonMultiple()

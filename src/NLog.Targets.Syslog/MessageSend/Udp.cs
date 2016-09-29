@@ -1,27 +1,29 @@
-using System.ComponentModel;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageSend
 {
-    [DisplayName("Udp")]
-    public class UdpProtocol : MessageTransmitter
+    internal class Udp : MessageTransmitter
     {
-        private UdpClient udp;
+        private readonly UdpClient udp;
         private volatile bool disposed;
 
-        internal override void Initialize()
+        public Udp(UdpConfig udpConfig) : base(udpConfig.Server, udpConfig.Port)
         {
             udp = new UdpClient(IpAddress, Port);
         }
 
-        internal override Task SendMessageAsync(ByteArray message, CancellationToken token)
+        public override Task SendMessageAsync(ByteArray message, CancellationToken token)
         {
+            if (token.IsCancellationRequested)
+                return Task.FromResult<object>(null);
+
             return udp.SendAsync(message, message.Length);
         }
 
-        internal override void Dispose()
+        public override void Dispose()
         {
             if (disposed)
                 return;

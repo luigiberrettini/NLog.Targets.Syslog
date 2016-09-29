@@ -1,3 +1,5 @@
+using NLog.Targets.Syslog.Settings;
+
 namespace NLog.Targets.Syslog.Policies
 {
     internal class TagPolicySet : PolicySet
@@ -6,13 +8,13 @@ namespace NLog.Targets.Syslog.Policies
         private const string QuestionMark = "?";
         private const int TagMaxLength = 32;
 
-        public TagPolicySet(Enforcement enforcement)
+        public TagPolicySet(EnforcementConfig enforcementConfig)
         {
             AddPolicies(new IBasicPolicy<string, string>[]
             {
-                new TransliteratePolicy(enforcement),
-                new ReplaceKnownValuePolicy(enforcement, NonAlphaNumeric, QuestionMark),
-                new TruncateToKnownValuePolicy(enforcement, TagMaxLength),
+                new TransliteratePolicy(enforcementConfig),
+                new ReplaceKnownValuePolicy(enforcementConfig, NonAlphaNumeric, QuestionMark),
+                new TruncateToKnownValuePolicy(enforcementConfig, TagMaxLength),
             });
         }
     }

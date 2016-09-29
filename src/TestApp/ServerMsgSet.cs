@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using NLog.Targets.Syslog.MessageSend;
+using NLog.Targets.Syslog.Settings;
 
 namespace TestApp
 {

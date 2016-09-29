@@ -4,7 +4,7 @@ using NLog.Targets.Syslog.Extensions;
 
 namespace NLog.Targets.Syslog
 {
-    public class ByteArray : IDisposable
+    internal class ByteArray : IDisposable
     {
         private const int Zero = 0;
         private const int DefaultBufferCapacity = 65535;

@@ -1,3 +1,5 @@
+using NLog.Targets.Syslog.Settings;
+
 namespace NLog.Targets.Syslog.Policies
 {
     internal class MsgIdPolicySet : PolicySet
@@ -7,14 +9,14 @@ namespace NLog.Targets.Syslog.Policies
         private const string QuestionMark = "?";
         private const int MsgIdMaxLength = 32;
 
-        public MsgIdPolicySet(Enforcement enforcement)
+        public MsgIdPolicySet(EnforcementConfig enforcementConfig)
         {
             AddPolicies(new IBasicPolicy<string, string>[]
             {
-                new TransliteratePolicy(enforcement),
+                new TransliteratePolicy(enforcementConfig),
                 new DefaultIfEmptyPolicy(NilValue),
-                new ReplaceKnownValuePolicy(enforcement, NonPrintUsAscii, QuestionMark),
-                new TruncateToKnownValuePolicy(enforcement, MsgIdMaxLength),
+                new ReplaceKnownValuePolicy(enforcementConfig, NonPrintUsAscii, QuestionMark),
+                new TruncateToKnownValuePolicy(enforcementConfig, MsgIdMaxLength),
             });
         }
     }

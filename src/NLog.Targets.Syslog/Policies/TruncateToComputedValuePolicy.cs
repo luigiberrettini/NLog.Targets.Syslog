@@ -1,5 +1,6 @@
 using NLog.Common;
 using NLog.Targets.Syslog.Extensions;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.Policies
 {
@@ -10,9 +11,9 @@ namespace NLog.Targets.Syslog.Policies
         private readonly long messageMaxLength;
         private readonly bool assumeAscii;
 
-        public TruncateToComputedValuePolicy(Enforcement enforcement, bool assumeAsciiEncoding)
+        public TruncateToComputedValuePolicy(EnforcementConfig enforcementConfig, bool assumeAsciiEncoding)
         {
-            messageMaxLength = enforcement.TruncateMessageTo > MaxLengthNotToBeExceeded ? MaxLengthNotToBeExceeded : enforcement.TruncateMessageTo;
+            messageMaxLength = enforcementConfig.TruncateMessageTo > MaxLengthNotToBeExceeded ? MaxLengthNotToBeExceeded : enforcementConfig.TruncateMessageTo;
             assumeAscii = assumeAsciiEncoding;
         }
 

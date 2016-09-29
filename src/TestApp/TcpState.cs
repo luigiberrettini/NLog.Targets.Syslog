@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net.Sockets;
-using NLog.Targets.Syslog.MessageSend;
+using NLog.Targets.Syslog.Settings;
 
 namespace TestApp
 {

@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 
 namespace NLog.Targets.Syslog.Extensions
 {
-    public static class TaskExtensions
+    internal static class TaskExtensions
     {
-        internal static Task<TResult> Then<TResult>(this Task task, Func<Task, TResult> continuationFunction, CancellationToken token)
+        public static Task<TResult> Then<TResult>(this Task task, Func<Task, TResult> continuationFunction, CancellationToken token)
         {
             return task
                 .ContinueWith(t =>

@@ -1,46 +1,27 @@
-using NLog.Config;
 using NLog.Layouts;
-using NLog.Targets.Syslog.Policies;
 using System.Collections.Generic;
-using NLog.Targets.Syslog.Extensions;
+using System.Linq;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {
-    /// <summary>A Syslog STRUCTURED-DATA part</summary>
-    [NLogConfigurationItem]
-    public class StructuredData
+    internal class StructuredData
     {
         private const string NilValue = "-";
         private static readonly byte[] NilValueBytes = { 0x2D };
 
-        /// <summary>Allows to use log event properties data enabling different STRUCTURED-DATA for each log message</summary>
-        public Layout FromEventProperties { get; set; }
+        private readonly Layout fromEventProperties;
+        private readonly IList<SdElement> sdElements;
 
-        /// <summary>The SD-ELEMENTs contained in the STRUCTURED-DATA part</summary>
-        [ArrayParameter(typeof(SdElement), nameof(SdElement))]
-        public IList<SdElement> SdElements { get; set; }
-
-        /// <summary>Builds a new instance of the StructuredData class</summary>
-        public StructuredData()
+        public StructuredData(StructuredDataConfig sdConfig, EnforcementConfig enforcementConfig)
         {
-            FromEventProperties = string.Empty;
-            SdElements = new List<SdElement>();
+            fromEventProperties = sdConfig.FromEventProperties;
+            sdElements = sdConfig.SdElements.Select(sdElementConfig => new SdElement(sdElementConfig, enforcementConfig)).ToList();
         }
 
-        internal void Initialize(Enforcement enforcement)
+        public void AppendBytes(ByteArray message, LogEventInfo logEvent, EncodingSet encodings)
         {
-            SdElements.ForEach(sdElem => sdElem.Initialize(enforcement));
-        }
-
-        /// <summary>Gives a string representation of a StructuredData instance</summary>
-        public override string ToString()
-        {
-            return SdElements.Count == 0 ? NilValue : SdElement.ToString(SdElements);
-        }
-
-        internal void AppendBytes(ByteArray message, LogEventInfo logEvent, EncodingSet encodings)
-        {
-            var sdFromEvtProps = FromEventProperties.Render(logEvent);
+            var sdFromEvtProps = fromEventProperties.Render(logEvent);
 
             if (!string.IsNullOrEmpty(sdFromEvtProps))
             {
@@ -49,10 +30,15 @@ namespace NLog.Targets.Syslog.MessageCreation
                 return;
             }
 
-            if (SdElements.Count == 0)
+            if (sdElements.Count == 0)
                 message.Append(NilValueBytes);
             else
-                SdElement.AppendBytes(message, SdElements, logEvent, encodings);
+                SdElement.AppendBytes(message, sdElements, logEvent, encodings);
+        }
+
+        public override string ToString()
+        {
+            return sdElements.Count == 0 ? NilValue : SdElement.ToString(sdElements);
         }
     }
 }

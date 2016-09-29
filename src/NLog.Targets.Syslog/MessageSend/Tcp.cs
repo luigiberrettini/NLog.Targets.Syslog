@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 using System.IO;
 using System.Net.Security;
 using System.Net.Sockets;
@@ -8,67 +7,46 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog.Targets.Syslog.Extensions;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageSend
 {
-    [DisplayName("Tcp")]
-    public class TcpProtocol : MessageTransmitter
+    internal class Tcp : MessageTransmitter
     {
-        private const int DefaultReconnectInterval = 500;
-        private const int DefaultBufferSize = 4096;
-        private FramingMethod framing;
+        private static readonly TimeSpan ZeroSecondsTimeSpan = TimeSpan.FromSeconds(0);
         private static readonly byte[] LineFeedBytes = { 0x0A };
+
         private volatile bool isFirstSend;
-        private TimeSpan recoveryTime;
-        private TcpClient tcp;
+        private readonly TimeSpan recoveryTime;
+        private readonly bool useTls;
+        private readonly int dataChunkSize;
+        private readonly FramingMethod framing;
+        private readonly TcpClient tcp;
         private Stream stream;
         private volatile bool disposed;
 
-        /// <summary>The time interval, in milliseconds, after which a connection is retried</summary>
-        public int ReconnectInterval
-        {
-            get { return recoveryTime.Milliseconds; }
-            set { recoveryTime = TimeSpan.FromMilliseconds(value); }
-        }
-
-        /// <summary>Whether to use TLS or not (TLS 1.2 only)</summary>
-        public bool UseTls { get; set; }
-
-        /// <summary>Which framing method to use</summary>
-        /// <remarks>If <see cref="UseTls">is true</see> get will always return OctetCounting (RFC 5425)</remarks>
-        public FramingMethod Framing
-        {
-            get { return UseTls ? FramingMethod.OctetCounting : framing; }
-            set { framing = value; }
-        }
-
-        /// <summary>The size of chunks in which data is split to be sent over the wire</summary>
-        public int DataChunkSize { get; set; }
-
-        /// <summary>Builds a new instance of the TcpProtocol class</summary>
-        public TcpProtocol()
+        public Tcp(TcpConfig tcpConfig) : base(tcpConfig.Server, tcpConfig.Port)
         {
             isFirstSend = true;
-            ReconnectInterval = DefaultReconnectInterval;
-            UseTls = true;
-            Framing = FramingMethod.OctetCounting;
-            DataChunkSize = DefaultBufferSize;
-        }
-
-        internal override void Initialize()
-        {
+            recoveryTime = TimeSpan.FromMilliseconds(tcpConfig.ReconnectInterval);
+            useTls = tcpConfig.UseTls;
+            framing = tcpConfig.Framing;
+            dataChunkSize = tcpConfig.DataChunkSize;
             tcp = new TcpClient();
             tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
         }
 
-        internal override Task SendMessageAsync(ByteArray message, CancellationToken token)
+        public override Task SendMessageAsync(ByteArray message, CancellationToken token)
         {
+            if (token.IsCancellationRequested)
+                return Task.FromResult<object>(null);
+
             FrameMessageOrLeaveItUnchanged(message);
 
             if (tcp.Connected)
                 return WriteAsync(0, message, token);
 
-            var delay = isFirstSend ? TimeSpan.FromSeconds(0) : recoveryTime;
+            var delay = isFirstSend ? ZeroSecondsTimeSpan : recoveryTime;
             isFirstSend = false;
 
             return Task.Delay(delay, token)
@@ -86,7 +64,7 @@ namespace NLog.Targets.Syslog.MessageSend
 
         private void OctectCountingFramedOrUnchanged(ByteArray message)
         {
-            if (Framing != FramingMethod.OctetCounting)
+            if (framing != FramingMethod.OctetCounting)
                 return;
 
             var octetCount = message.Length;
@@ -96,7 +74,7 @@ namespace NLog.Targets.Syslog.MessageSend
 
         private void NonTransparentFramedOrUnchanged(ByteArray message)
         {
-            if (Framing == FramingMethod.NonTransparent)
+            if (framing == FramingMethod.NonTransparent)
                 message.Append(LineFeedBytes);
         }
 
@@ -111,7 +89,7 @@ namespace NLog.Targets.Syslog.MessageSend
         {
             var tcpStream = tcpClient.GetStream();
 
-            if (!UseTls)
+            if (!useTls)
                 return tcpStream;
 
             // Do not dispose TcpClient inner stream when disposing SslStream (TcpClient disposes it)
@@ -122,24 +100,27 @@ namespace NLog.Targets.Syslog.MessageSend
 
         private Task WriteAsync(int offset, ByteArray data, CancellationToken token)
         {
+            if (token.IsCancellationRequested)
+                return Task.FromResult<object>(null);
+
             var toBeWrittenTotal = data.Length - offset;
-            var isLastWrite = toBeWrittenTotal <= DataChunkSize;
-            var count = isLastWrite ? toBeWrittenTotal : DataChunkSize;
+            var isLastWrite = toBeWrittenTotal <= dataChunkSize;
+            var count = isLastWrite ? toBeWrittenTotal : dataChunkSize;
 
             return Task.Factory
                 .FromAsync(stream.BeginWrite, stream.EndWrite, (byte[])data, offset, count, null)
-                .Then(task => isLastWrite ? task : WriteAsync(offset + DataChunkSize, data, token), token)
+                .Then(task => isLastWrite ? task : WriteAsync(offset + dataChunkSize, data, token), token)
                 .Unwrap();
         }
 
-        internal override void Dispose()
+        public override void Dispose()
         {
             if (disposed)
                 return;
             disposed = true;
 
             // Dispose SslStream without disposing TcpClient inner stream
-            if (UseTls)
+            if (useTls)
                 stream.Dispose();
 
             // Dispose TcpClient and its inner stream
