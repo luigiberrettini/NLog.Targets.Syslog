@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using NLog.Targets.Syslog.Extensions;
 using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageSend
@@ -27,9 +28,10 @@ namespace NLog.Targets.Syslog.MessageSend
             };
         }
 
-        public static MessageTransmitter FromConfig(MessageTransmitterConfig messageTransmitterConfig)
+        public static MessageTransmitter[] FromConfig(int messageProcessors, MessageTransmitterConfig messageTransmitterConfig)
         {
-            return TransmitterFactory[messageTransmitterConfig.Protocol](messageTransmitterConfig);
+            var factoryMethod = TransmitterFactory[messageTransmitterConfig.Protocol];
+            return messageProcessors.Select(() => factoryMethod(messageTransmitterConfig)).ToArray();
         }
 
         protected MessageTransmitter(string server, int port)

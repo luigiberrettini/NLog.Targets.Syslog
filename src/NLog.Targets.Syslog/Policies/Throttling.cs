@@ -13,7 +13,6 @@ namespace NLog.Targets.Syslog.Policies
 
         public static Throttling FromConfig(ThrottlingConfig throttlingConfig)
         {
-            throttlingConfig.EnsureAllowedValues();
             return new Throttling(throttlingConfig);
         }
 

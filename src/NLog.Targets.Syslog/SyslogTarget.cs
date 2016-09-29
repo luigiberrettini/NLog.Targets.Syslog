@@ -21,6 +21,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog.Common;
+using NLog.Targets.Syslog.Extensions;
 using NLog.Targets.Syslog.MessageCreation;
 using NLog.Targets.Syslog.MessageSend;
 using NLog.Targets.Syslog.Policies;
@@ -34,10 +35,10 @@ namespace NLog.Targets.Syslog
     {
         private volatile bool toBeInited;
         private CancellationTokenSource cts;
-        private BlockingCollection<LogEventMsgSet> queue;
+        private BlockingCollection<AsyncLogEventInfo> queue;
         private Throttling throttling;
-        private MessageBuilder messageBuilder;
-        private MessageTransmitter messageTransmitter;
+        private MessageBuilder[] messageBuilders;
+        private MessageTransmitter[] messageTransmitters;
 
         /// <summary>The enforcement to be applied on the Syslog message</summary>
         public EnforcementConfig Enforcement { get; set; }
@@ -73,8 +74,7 @@ namespace NLog.Targets.Syslog
         protected override void Write(AsyncLogEventInfo asyncLogEvent)
         {
             MergeEventProperties(asyncLogEvent.LogEvent);
-            var logEventMsgSet = new LogEventMsgSet(asyncLogEvent, messageBuilder, messageTransmitter);
-            throttling.Apply(queue.Count, delay => Enqueue(logEventMsgSet, delay));
+            throttling.Apply(queue.Count, delay => Enqueue(asyncLogEvent, delay));
         }
 
         private void CleanupOnConfigReload()
@@ -88,23 +88,19 @@ namespace NLog.Targets.Syslog
         {
             cts = new CancellationTokenSource();
             queue = NewBlockingCollection();
+            Enforcement.EnsureAllowedValues();
             throttling = Throttling.FromConfig(Enforcement.Throttling);
-            messageBuilder = MessageBuilder.FromConfig(MessageCreation, Enforcement);
-            messageTransmitter = MessageTransmitter.FromConfig(MessageSend);
+            messageBuilders = MessageBuilder.FromConfig(Enforcement.MessageProcessors, MessageCreation, Enforcement);
+            messageTransmitters = MessageTransmitter.FromConfig(Enforcement.MessageProcessors, MessageSend);
         }
 
-        private void StartBackgroundProcessing()
-        {
-            Task.Factory.StartNew(() => ProcessQueueAsync(cts.Token));
-        }
-
-        private BlockingCollection<LogEventMsgSet> NewBlockingCollection()
+        private BlockingCollection<AsyncLogEventInfo> NewBlockingCollection()
         {
             var throttlingLimit = Enforcement.Throttling.Limit;
 
             return BoundedBlockingCollection ?
-                new BlockingCollection<LogEventMsgSet>(throttlingLimit) :
-                new BlockingCollection<LogEventMsgSet>();
+                new BlockingCollection<AsyncLogEventInfo>(throttlingLimit) :
+                new BlockingCollection<AsyncLogEventInfo>();
         }
 
         private bool BoundedBlockingCollection
@@ -119,12 +115,22 @@ namespace NLog.Targets.Syslog
             }
         }
 
-        private void ProcessQueueAsync(CancellationToken token)
+        private void StartBackgroundProcessing()
+        {
+            Enforcement.MessageProcessors.ForEach(StartMessageProcessor);
+        }
+
+        private void StartMessageProcessor(int id)
+        {
+            Task.Factory.StartNew(() => ProcessQueueAsync(id, cts.Token));
+        }
+
+        private void ProcessQueueAsync(int msgProcessorId, CancellationToken token)
         {
             if (token.IsCancellationRequested)
                 return;
 
-            var logEventMsgSet = queue.Take(token);
+            var logEventMsgSet = new LogEventMsgSet(queue.Take(token), messageBuilders[msgProcessorId], messageTransmitters[msgProcessorId]);
 
             logEventMsgSet
                 .Build(Layout)
@@ -133,21 +139,21 @@ namespace NLog.Targets.Syslog
                 {
                     if (t.IsCanceled)
                     {
-                        InternalLogger.Debug("Task canceled");
+                        InternalLogger.Debug($"Message processor {msgProcessorId} - Task canceled");
                         return;
                     }
                     if (t.Exception != null) // t.IsFaulted is true
-                        InternalLogger.Debug(t.Exception.GetBaseException(), "Task faulted with exception");
+                        InternalLogger.Debug(t.Exception.GetBaseException(), $"Message processor {msgProcessorId} - Task faulted");
                     else
-                        InternalLogger.Debug($"Successfully sent the dequeued message set '{logEventMsgSet.ToString()}'");
-                    ProcessQueueAsync(token);
+                        InternalLogger.Debug($"Message processor {msgProcessorId} - Successfully sent the dequeued message set '{logEventMsgSet}'");
+                    ProcessQueueAsync(msgProcessorId, token);
                 }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current);
         }
 
-        private void Enqueue(LogEventMsgSet logEventMsgSet, int delay)
+        private void Enqueue(AsyncLogEventInfo asyncLogEventInfo, int delay)
         {
-            queue.TryAdd(logEventMsgSet, delay, cts.Token);
-            InternalLogger.Debug($"Enqueued {logEventMsgSet}");
+            queue.TryAdd(asyncLogEventInfo, delay, cts.Token);
+            InternalLogger.Debug($"Enqueued '{asyncLogEventInfo.LogEvent.FormattedMessage}'");
         }
 
         protected override void Dispose(bool disposing)
@@ -164,8 +170,11 @@ namespace NLog.Targets.Syslog
                 cts.Cancel();
                 cts.Dispose();
                 queue.Dispose();
-                messageBuilder.Dispose();
-                messageTransmitter.Dispose();
+                Enforcement.MessageProcessors.ForEach(i =>
+                {
+                    messageBuilders[i].Dispose();
+                    messageTransmitters[i].Dispose();
+                });
             }
             catch (Exception ex)
             {

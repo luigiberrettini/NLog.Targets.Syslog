@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ByteArray.cs" />
+    <Compile Include="Extensions\NumberExtensions.cs" />
     <Compile Include="Settings\MessageTransmitterConfig.cs" />
     <Compile Include="Settings\TcpConfig.cs" />
     <Compile Include="Settings\ThrottlingConfig.cs" />

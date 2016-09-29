@@ -3,6 +3,8 @@ using NLog.Layouts;
 using NLog.Targets.Syslog.Policies;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using NLog.Targets.Syslog.Extensions;
 using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageCreation
@@ -26,9 +28,10 @@ namespace NLog.Targets.Syslog.MessageCreation
             };
         }
 
-        public static MessageBuilder FromConfig(MessageBuilderConfig messageBuilderConfig, EnforcementConfig enforcementConfig)
+        public static MessageBuilder[] FromConfig(int messageProcessors, MessageBuilderConfig messageBuilderConfig, EnforcementConfig enforcementConfig)
         {
-            return BuilderFactory[messageBuilderConfig.Rfc](messageBuilderConfig, enforcementConfig);
+            var factoryMethod = BuilderFactory[messageBuilderConfig.Rfc];
+            return messageProcessors.Select(() => factoryMethod(messageBuilderConfig, enforcementConfig)).ToArray();
         }
 
         protected MessageBuilder(Facility facility, EnforcementConfig enforcementConfig)

@@ -28,8 +28,8 @@ namespace TestApp
                 sb.Append(i.ToString("D10"));
             HugeMessage = sb.ToString();
 
-            //InternalLogger.LogLevel = LogLevel.Trace;
-            //InternalLogger.LogToTrace = true;
+            InternalLogger.LogLevel = LogLevel.Warn;
+            InternalLogger.LogToTrace = true;
 
             Logger = LogManager.GetCurrentClassLogger();
         }

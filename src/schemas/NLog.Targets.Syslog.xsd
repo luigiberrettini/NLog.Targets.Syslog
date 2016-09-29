@@ -28,12 +28,14 @@
                                         <xs:attribute name="delay" type="xs:decimal" />
                                     </xs:complexType>
                                 </xs:element>
+                                <xs:element name="messageProcessors" type="xs:integer" minOccurs="0" maxOccurs="1" />
                                 <xs:element name="splitOnNewLine" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                 <xs:element name="transliterate" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                 <xs:element name="replaceInvalidCharacters" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                 <xs:element name="truncateFieldsToMaxLength" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                 <xs:element name="truncateMessageTo" type="xs:integer" minOccurs="0" maxOccurs="1" />
                             </xs:choice>
+                            <xs:attribute name="messageProcessors" type="xs:integer" />
                             <xs:attribute name="splitOnNewLine" type="xs:boolean" />
                             <xs:attribute name="transliterate" type="xs:boolean" />
                             <xs:attribute name="replaceInvalidCharacters" type="xs:boolean" />

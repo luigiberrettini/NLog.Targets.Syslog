@@ -1,10 +1,15 @@
-﻿namespace NLog.Targets.Syslog.Settings
+﻿using System;
+
+namespace NLog.Targets.Syslog.Settings
 {
     /// <summary>Enforcement configuration</summary>
     public class EnforcementConfig
     {
         /// <summary>Throttling to be triggered when a configured number of log entries are waiting to be processed</summary>
         public ThrottlingConfig Throttling { get; set; }
+
+        /// <summary>The amount of parallel message processors</summary>
+        public int MessageProcessors { get; set; }
 
         /// <summary>Whether or not to split each log entry by newlines and send each line separately</summary>
         public bool SplitOnNewLine { get; set; }
@@ -23,7 +28,15 @@
 
         public EnforcementConfig()
         {
+            MessageProcessors = 1;
             Throttling = new ThrottlingConfig();
+        }
+
+        internal void EnsureAllowedValues()
+        {
+            if (MessageProcessors <= 0)
+                MessageProcessors = Environment.ProcessorCount;
+            Throttling.EnsureAllowedValues();
         }
     }
 }
