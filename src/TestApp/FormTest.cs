@@ -28,8 +28,8 @@ namespace TestApp
                 sb.Append(i.ToString("D10"));
             HugeMessage = sb.ToString();
 
-            InternalLogger.LogLevel = LogLevel.Warn;
-            InternalLogger.LogToTrace = true;
+            //InternalLogger.LogLevel = LogLevel.Warn;
+            //InternalLogger.LogToTrace = true;
 
             Logger = LogManager.GetCurrentClassLogger();
         }
@@ -165,10 +165,10 @@ namespace TestApp
         {
             Task.Factory.StartNew(() =>
             {
-                for (var i = 0; i < 25; i++)
+                for (var i = 0; i < 101202; i++)
                 {
                     Logger.Warn(HugeMessage);
-                    //Thread.Sleep(100);
+                    //Thread.Sleep(10);
                 }
             });
         }
@@ -191,7 +191,7 @@ namespace TestApp
                 for (var i = 0; i < 101202; i++)
                 {
                     Logger.Warn(i);
-                    //Thread.Sleep(100);
+                    //Thread.Sleep(10);
                 }
             });
         }
