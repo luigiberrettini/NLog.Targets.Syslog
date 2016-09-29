@@ -99,7 +99,7 @@ namespace NLog.Targets.Syslog
 
         private BlockingCollection<AsyncLogEventInfo>[] NewBlockingCollections(int messageProcessors)
         {
-            return Enforcement.MessageProcessors.Select(NewBlockingCollection).ToArray();
+            return messageProcessors.Select(NewBlockingCollection).ToArray();
         }
 
         private BlockingCollection<AsyncLogEventInfo> NewBlockingCollection()
