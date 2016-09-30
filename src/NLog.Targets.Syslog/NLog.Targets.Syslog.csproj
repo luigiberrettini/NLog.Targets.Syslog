@@ -50,8 +50,11 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extensions\AsyncLogEventInfoExtensions.cs" />
+    <Compile Include="AsyncLogger.cs" />
     <Compile Include="ByteArray.cs" />
     <Compile Include="Extensions\NumberExtensions.cs" />
+    <Compile Include="Settings\Configuration.cs" />
     <Compile Include="Settings\MessageTransmitterConfig.cs" />
     <Compile Include="Settings\TcpConfig.cs" />
     <Compile Include="Settings\ThrottlingConfig.cs" />

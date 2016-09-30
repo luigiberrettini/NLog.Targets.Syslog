@@ -5,11 +5,18 @@ using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.Policies
 {
-    public class Throttling
+    internal class Throttling
     {
-        private readonly int limit;
-        private readonly ThrottlingStrategy strategy;
-        private readonly decimal delay;
+        public int Limit { get; }
+
+        private ThrottlingStrategy Strategy { get; }
+
+        private decimal Delay { get; }
+
+        public bool BoundedBlockingCollectionNeeded =>
+            Strategy == ThrottlingStrategy.DiscardOnFixedTimeout ||
+            Strategy == ThrottlingStrategy.DiscardOnPercentageTimeout ||
+            Strategy == ThrottlingStrategy.Block;
 
         public static Throttling FromConfig(ThrottlingConfig throttlingConfig)
         {
@@ -18,20 +25,20 @@ namespace NLog.Targets.Syslog.Policies
 
         private Throttling(ThrottlingConfig throttlingConfig)
         {
-            limit = throttlingConfig.Limit;
-            strategy = throttlingConfig.Strategy;
-            delay = throttlingConfig.Delay;
+            Limit = throttlingConfig.Limit;
+            Strategy = throttlingConfig.Strategy;
+            Delay = throttlingConfig.Delay;
         }
 
         public void Apply(int waitingLogEntries, Action<int> actionWithTimeout)
         {
-            if (strategy == ThrottlingStrategy.None || waitingLogEntries < limit)
+            if (Strategy == ThrottlingStrategy.None || waitingLogEntries < Limit)
             {
                 actionWithTimeout(0);
                 return;
             }
 
-            if (strategy == ThrottlingStrategy.Discard)
+            if (Strategy == ThrottlingStrategy.Discard)
             {
                 InternalLogger.Warn("Applied discard throttling strategy");
                 return;
@@ -43,39 +50,39 @@ namespace NLog.Targets.Syslog.Policies
 
         private void ApplyDeferment(int waitingLogEntries)
         {
-            var deferStrategy = strategy == ThrottlingStrategy.DeferForFixedTime ||
-                strategy == ThrottlingStrategy.DeferForPercentageTime;
+            var deferStrategy = Strategy == ThrottlingStrategy.DeferForFixedTime ||
+                Strategy == ThrottlingStrategy.DeferForPercentageTime;
 
             if (!deferStrategy)
                 return;
 
-            var deferment = FixedTime(delay, waitingLogEntries);
+            var deferment = FixedTime(Delay, waitingLogEntries);
             InternalLogger.Warn($"Applying defer throttling strategy ({deferment} ms)");
             Thread.SpinWait(deferment);
         }
 
         private int CalculateTimeout(int waitingLogEntries)
         {
-            var timeoutStrategy = strategy == ThrottlingStrategy.DiscardOnFixedTimeout ||
-                strategy == ThrottlingStrategy.DiscardOnPercentageTimeout;
+            var timeoutStrategy = Strategy == ThrottlingStrategy.DiscardOnFixedTimeout ||
+                Strategy == ThrottlingStrategy.DiscardOnPercentageTimeout;
 
             if (!timeoutStrategy)
                 return Timeout.Infinite;
 
-            var timeout = FixedTime(delay, waitingLogEntries);
+            var timeout = FixedTime(Delay, waitingLogEntries);
             InternalLogger.Warn($"Applying timeout throttling strategy ({timeout} ms)");
             return timeout;
         }
 
-        private int FixedTime(decimal dlay, int waitingLogEntries)
+        private int FixedTime(decimal delay, int waitingLogEntries)
         {
-            var isPercentageDelay = strategy == ThrottlingStrategy.DiscardOnPercentageTimeout ||
-                strategy == ThrottlingStrategy.DeferForPercentageTime;
+            var isPercentageDelay = Strategy == ThrottlingStrategy.DiscardOnPercentageTimeout ||
+                Strategy == ThrottlingStrategy.DeferForPercentageTime;
 
             if (!isPercentageDelay)
-                return (int)dlay;
+                return (int)delay;
 
-            var fixedTime = waitingLogEntries * dlay / 100;
+            var fixedTime = waitingLogEntries * delay / 100;
             return (int)fixedTime;
         }
     }

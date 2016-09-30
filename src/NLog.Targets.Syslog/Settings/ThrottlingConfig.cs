@@ -3,14 +3,35 @@ namespace NLog.Targets.Syslog.Settings
     /// <summary>Throttling configuration</summary>
     public class ThrottlingConfig
     {
+        private int limit;
+        private decimal delay;
+
         /// <summary>The number of log entries, waiting to be processed, that triggers throttling</summary>
-        public int Limit { get; set; }
+        public int Limit
+        {
+            get
+            {
+                return limit;
+            }
+            set
+            {
+                limit = value;
+                if (value >= 1)
+                    return;
+                limit = 0;
+                Strategy = ThrottlingStrategy.None;
+            }
+        }
 
         /// <summary>The throttling strategy to employ</summary>
         public ThrottlingStrategy Strategy { get; set; }
 
         /// <summary>The milliseconds/percentage delay for a DiscardOnFixedTimeout/DiscardOnPercentageTimeout/Defer throttling strategy</summary>
-        public decimal Delay { get; set; }
+        public decimal Delay
+        {
+            get { return delay; }
+            set { delay = value < 0 ? 0 : value; }
+        }
 
         /// <summary>Builds a new instance of the Throttling class</summary>
         public ThrottlingConfig()
@@ -18,16 +39,6 @@ namespace NLog.Targets.Syslog.Settings
             Limit = 0;
             Strategy = ThrottlingStrategy.None;
             Delay = 0;
-        }
-
-        internal void EnsureAllowedValues()
-        {
-            if (Limit < 1)
-                Limit = 0;
-            if (Delay < 0)
-                Delay = 0;
-            if (Limit == 0)
-                Strategy = ThrottlingStrategy.None;
         }
     }
 }

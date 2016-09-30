@@ -12,9 +12,9 @@ namespace NLog.Targets.Syslog.Extensions
                 action(i);
         }
 
-        public static IEnumerable<T> Select<T>(this int n, Func<T> func)
+        public static IEnumerable<T> Select<T>(this int n, Func<int, T> func)
         {
-            return Enumerable.Range(0, n).Select(i => func());
+            return Enumerable.Range(0, n).Select(func);
         }
     }
 }

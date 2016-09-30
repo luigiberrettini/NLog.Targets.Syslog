@@ -17,15 +17,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 using System;
-using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using NLog.Common;
 using NLog.Targets.Syslog.Extensions;
-using NLog.Targets.Syslog.MessageCreation;
-using NLog.Targets.Syslog.MessageSend;
-using NLog.Targets.Syslog.Policies;
 using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog
@@ -34,39 +29,31 @@ namespace NLog.Targets.Syslog
     [Target("Syslog")]
     public class SyslogTarget : TargetWithLayout
     {
-        private volatile bool toBeInited;
+        private volatile bool inited;
         private CancellationTokenSource cts;
-        private BlockingCollection<AsyncLogEventInfo>[] queues;
-        private Throttling throttling;
-        private MessageBuilder[] messageBuilders;
-        private MessageTransmitter[] messageTransmitters;
+        private AsyncLogger[] asyncLoggers;
 
-        /// <summary>The enforcement to be applied on the Syslog message</summary>
-        public EnforcementConfig Enforcement { get; set; }
-
-        /// <summary>The builder used to create messages according to RFCs</summary>
-        public MessageBuilderConfig MessageCreation { get; set; }
-
-        /// <summary>The transmitter used to send messages to the Syslog server</summary>
-        public MessageTransmitterConfig MessageSend { get; set; }
+        /// <summary>SyslogTarget specific configuration</summary>
+        public Configuration Configuration { get; set; }
 
         /// <summary>Builds a new instance of the SyslogTarget class</summary>
         public SyslogTarget()
         {
-            toBeInited = true;
-            Enforcement = new EnforcementConfig();
-            MessageCreation = new MessageBuilderConfig();
-            MessageSend = new MessageTransmitterConfig();
+            Configuration = new Configuration();
         }
 
         /// <summary>Initializes the SyslogTarget</summary>
         protected override void InitializeTarget()
         {
             base.InitializeTarget();
-            CleanupOnConfigReload();
-            Initialize();
-            StartMessageProcessors();
-            toBeInited = false;
+
+            if (inited)
+                DisposeDependencies();
+
+            cts = new CancellationTokenSource();
+            asyncLoggers = Configuration.Enforcement.MessageProcessors.Select(i => new AsyncLogger(Layout, Configuration, i, cts.Token)).ToArray();
+
+            inited = true;
         }
 
         /// <summary>Writes a single event</summary>
@@ -74,94 +61,9 @@ namespace NLog.Targets.Syslog
         /// <remarks>Write(LogEventInfo) is called only by Write(AsyncLogEventInfo/AsyncLogEventInfo[]): no need to override it</remarks>
         protected override void Write(AsyncLogEventInfo asyncLogEvent)
         {
-            var logEventInfo = asyncLogEvent.LogEvent;
-            var msgProcessorId = logEventInfo.SequenceID % Enforcement.MessageProcessors;
-            MergeEventProperties(logEventInfo);
-            throttling.Apply(queues[msgProcessorId].Count, delay => Enqueue(msgProcessorId, asyncLogEvent, delay));
-        }
-
-        private void CleanupOnConfigReload()
-        {
-            if (toBeInited)
-                return;
-            DisposeDependencies();
-        }
-
-        private void Initialize()
-        {
-            Enforcement.EnsureAllowedValues();
-            cts = new CancellationTokenSource();
-            queues = NewBlockingCollections(Enforcement.MessageProcessors);
-            throttling = Throttling.FromConfig(Enforcement.Throttling);
-            messageBuilders = MessageBuilder.FromConfig(Enforcement.MessageProcessors, MessageCreation, Enforcement);
-            messageTransmitters = MessageTransmitter.FromConfig(Enforcement.MessageProcessors, MessageSend);
-        }
-
-        private BlockingCollection<AsyncLogEventInfo>[] NewBlockingCollections(int messageProcessors)
-        {
-            return messageProcessors.Select(NewBlockingCollection).ToArray();
-        }
-
-        private BlockingCollection<AsyncLogEventInfo> NewBlockingCollection()
-        {
-            var throttlingLimit = Enforcement.Throttling.Limit;
-
-            return BoundedBlockingCollection ?
-                new BlockingCollection<AsyncLogEventInfo>(throttlingLimit) :
-                new BlockingCollection<AsyncLogEventInfo>();
-        }
-
-        private bool BoundedBlockingCollection
-        {
-            get
-            {
-                var throttlingStrategy = Enforcement.Throttling.Strategy;
-
-                return throttlingStrategy == ThrottlingStrategy.DiscardOnFixedTimeout ||
-                       throttlingStrategy == ThrottlingStrategy.DiscardOnPercentageTimeout ||
-                       throttlingStrategy == ThrottlingStrategy.Block;
-            }
-        }
-
-        private void StartMessageProcessors()
-        {
-            Enforcement.MessageProcessors.ForEach(StartMessageProcessor);
-        }
-
-        private void StartMessageProcessor(int msgProcessorId)
-        {
-            Task.Factory.StartNew(() => ProcessQueueAsync(msgProcessorId, cts.Token));
-        }
-
-        private void ProcessQueueAsync(int msgProcessorId, CancellationToken token)
-        {
-            if (token.IsCancellationRequested)
-                return;
-
-            var logEventMsgSet = new LogEventMsgSet(queues[msgProcessorId].Take(token), messageBuilders[msgProcessorId], messageTransmitters[msgProcessorId]);
-
-            logEventMsgSet
-                .Build(Layout)
-                .SendAsync(token)
-                .ContinueWith(t =>
-                {
-                    if (t.IsCanceled)
-                    {
-                        InternalLogger.Debug($"Message processor {msgProcessorId} - Task canceled");
-                        return;
-                    }
-                    if (t.Exception != null) // t.IsFaulted is true
-                        InternalLogger.Debug(t.Exception.GetBaseException(), $"Message processor {msgProcessorId} - Task faulted");
-                    else
-                        InternalLogger.Debug($"Message processor {msgProcessorId} - Successfully sent the dequeued message set '{logEventMsgSet}'");
-                    ProcessQueueAsync(msgProcessorId, token);
-                }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current);
-        }
-
-        private void Enqueue(int msgProcessorId, AsyncLogEventInfo asyncLogEventInfo, int delay)
-        {
-            queues[msgProcessorId].TryAdd(asyncLogEventInfo, delay, cts.Token);
-            InternalLogger.Debug($"Enqueued '{asyncLogEventInfo.LogEvent.FormattedMessage}'");
+            MergeEventProperties(asyncLogEvent.LogEvent);
+            var asyncLoggerId = asyncLogEvent.LogEvent.SequenceID % Configuration.Enforcement.MessageProcessors;
+            asyncLoggers[asyncLoggerId].Log(asyncLogEvent);
         }
 
         protected override void Dispose(bool disposing)
@@ -177,12 +79,7 @@ namespace NLog.Targets.Syslog
             {
                 cts.Cancel();
                 cts.Dispose();
-                Enforcement.MessageProcessors.ForEach(i =>
-                {
-                    queues[i].Dispose();
-                    messageBuilders[i].Dispose();
-                    messageTransmitters[i].Dispose();
-                });
+                Configuration.Enforcement.MessageProcessors.ForEach(i => asyncLoggers[i].Dispose());
             }
             catch (Exception ex)
             {

@@ -3,13 +3,10 @@ using NLog.Layouts;
 using NLog.Targets.Syslog.Policies;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using NLog.Targets.Syslog.Extensions;
 using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {
-    /// <summary>Allows to build Syslog messages</summary>
     internal abstract class MessageBuilder
     {
         private static readonly Dictionary<RfcNumber, Func<MessageBuilderConfig, EnforcementConfig, MessageBuilder>> BuilderFactory;
@@ -28,10 +25,9 @@ namespace NLog.Targets.Syslog.MessageCreation
             };
         }
 
-        public static MessageBuilder[] FromConfig(int messageProcessors, MessageBuilderConfig messageBuilderConfig, EnforcementConfig enforcementConfig)
+        public static MessageBuilder FromConfig(MessageBuilderConfig messageBuilderConfig, EnforcementConfig enforcementConfig)
         {
-            var factoryMethod = BuilderFactory[messageBuilderConfig.Rfc];
-            return messageProcessors.Select(() => factoryMethod(messageBuilderConfig, enforcementConfig)).ToArray();
+            return BuilderFactory[messageBuilderConfig.Rfc](messageBuilderConfig, enforcementConfig);
         }
 
         protected MessageBuilder(Facility facility, EnforcementConfig enforcementConfig)

@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NLog.Common;
 using NLog.Layouts;
+using NLog.Targets.Syslog.Extensions;
 using NLog.Targets.Syslog.MessageCreation;
 using NLog.Targets.Syslog.MessageSend;
 
@@ -84,7 +85,7 @@ namespace NLog.Targets.Syslog
 
         public override string ToString()
         {
-            return asyncLogEvent.LogEvent.FormattedMessage;
+            return asyncLogEvent.ToFormattedMessage();
         }
     }
 }
