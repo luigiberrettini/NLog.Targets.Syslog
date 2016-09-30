@@ -18,17 +18,19 @@ Below is a sample NLog.config file:
   <targets>
     <target type="Syslog" name="cee-udp">
       <layout type="SimpleLayout" text="@cee: {&quot;message&quot;: &quot;${message}&quot;}" />
-      <messageBuilder>
-        <facility>Local4</facility>
-        <rfc>Rfc5424</rfc>
-        <rfc5424>
-          <hostname type="SimpleLayout" text="${machinename}" />
-          <appName type="SimpleLayout" text="DAEMON.MyAppName" />
-          <procId type="SimpleLayout" text="${processid}" />
-          <msgId type="SimpleLayout" text="${threadid}" />
-          <disableBom>true</disableBom>
-        </rfc5424>
-      </messageBuilder>
+      <configuration>
+        <messageBuilder>
+          <facility>Local4</facility>
+          <rfc>Rfc5424</rfc>
+          <rfc5424>
+            <hostname type="SimpleLayout" text="${machinename}" />
+            <appName type="SimpleLayout" text="DAEMON.MyAppName" />
+            <procId type="SimpleLayout" text="${processid}" />
+            <msgId type="SimpleLayout" text="${threadid}" />
+            <disableBom>true</disableBom>
+          </rfc5424>
+        </messageBuilder>
+      </configuration>
     </target>
   </targets>
   <rules>
@@ -42,16 +44,25 @@ The package is also available through NuGet. Simply search for "NLog.Targets.Sys
 ### Options
 This NLog target supports the standard NLog [layout](https://github.com/NLog/NLog/wiki/Layouts)
 directive to modify the log message body (Syslog packet elements are not affected).
-It provides default values for all configuration options which can be overridden
-by means of configuration settings, as shown in the example configuration above.
+
+It provides default values for all settings which can be overridden by means of the configuration element, as shown above.
 A more detailed example is included in the [test application](./src/TestApp/NLog.config).
 
-#### Enforcement element
+
+#### Configuration element
+* `enforcement` - the enforcement to be applied on the Syslog message
+* `messageCreation` - Syslog message creation configuration
+* `messageSend` - Syslog message send configuration
+
+
+##### Enforcement element
 * `throttling` - settings related to message throttling:
   * `limit` - the number of log entries, waiting to be processed, that triggers throttling (default: `0`)
   * `strategy` - `None` / `DiscardOnFixedTimeout` / `DiscardOnPercentageTimeout` / `Discard` / `DeferForFixedTime` / `DeferForPercentageTime` / `Block`
  (default: `None`)
   * `delay` - the milliseconds/percentage delay for a `DiscardOnFixedTimeout` / `DiscardOnPercentageTimeout` / `Defer` throttling strategy (default: `0`)
+* `messageProcessors` - the amount of parallel message processors (default: `1`; `0` means `Environment.ProcessorCount`)
+* `splitOnNewLine` - whether or not to split each log entry by newlines and send each line separately (default: `false`)
 * `transliterate` - `false` or `true` to trasliterate strings from Unicode to ASCII when the RFC allows only ASCII characters for a fields (default: `false`)
 * `replaceInvalidCharacters` - `false` or `true` to replace invalid values usually with a question mark (default: `false`)
 * `truncateFieldsToMaxLength` - `false` or `true` to truncate fields to the length specified in the RFC (default: `false`)
@@ -75,7 +86,7 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
 <sup>2</sup> Using jumbograms (limited by Int32.MaxValue = 2147483647, i.e. the maximum size for an array)
 
 
-#### Message builder element
+##### Message creation element
 * `facility` - facility name (default: `Local1`)
 * `rfc` - `rfc3164` or `rfc5424` (default: `rfc5424`)
 * `rfc3164` - settings related to RFC 3164:
@@ -93,12 +104,12 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
     enabling different STRUCTURED-DATA for each log message
   * `disableBom` - `true` or `false` to handle RSyslog [issue 284](http://github.com/rsyslog/rsyslog/issues/284) (default: `false`)
 
-#### Message transmitter element
+##### Message send element
 * `protocol` - `udp` or `tcp` (default: `udp`)
-* `udpProtocol` - settings related to UDP:
+* `udp` - settings related to UDP:
   * `server` - IP or hostname of the Syslog server (default: `127.0.0.1`)
   * `port` - port the Syslog server is listening on (default: `514`)
-* `tcpProtocol` - settings related to TCP:
+* `tcp` - settings related to TCP:
   * `server` - IP or hostname of the Syslog server (default: `127.0.0.1`)
   * `port` - port the Syslog server is listening on (default: `514`)
   * `reconnectInterval` - the time interval, in milliseconds, after which a connection is retried (default: `500`)

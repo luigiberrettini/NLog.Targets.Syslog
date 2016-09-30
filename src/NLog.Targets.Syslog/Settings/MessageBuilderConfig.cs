@@ -18,6 +18,7 @@ namespace NLog.Targets.Syslog.Settings
         /// <summary>Builds a new instance of the MessageBuilderConfig class</summary>
         public MessageBuilderConfig()
         {
+            Rfc = RfcNumber.Rfc5424;
             Rfc3164 = new Rfc3164Config();
             Rfc5424 = new Rfc5424Config();
         }
