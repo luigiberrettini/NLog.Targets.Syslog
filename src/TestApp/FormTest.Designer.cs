@@ -51,9 +51,7 @@ namespace TestApp
             tcpLabel = new Label();
             tcpTextBox = new TextBox();
             SuspendLayout();
-            //
-            // buttonStartStopSyslogServer
-            //
+
             buttonStartStopSyslogServer.Location = new Point(36, 20);
             buttonStartStopSyslogServer.Name = "buttonStartSyslogServer";
             buttonStartStopSyslogServer.Size = new Size(212, 38);
@@ -61,9 +59,7 @@ namespace TestApp
             buttonStartStopSyslogServer.Text = @"Start Syslog Server";
             buttonStartStopSyslogServer.UseVisualStyleBackColor = true;
             buttonStartStopSyslogServer.Click += new EventHandler(ButtonLogClick);
-            //
-            // buttonTrace
-            //
+
             buttonTrace.Location = new Point(36, 70);
             buttonTrace.Name = "buttonTrace";
             buttonTrace.Size = new Size(212, 38);
@@ -71,9 +67,7 @@ namespace TestApp
             buttonTrace.Text = "Trace event";
             buttonTrace.UseVisualStyleBackColor = true;
             buttonTrace.Click += new EventHandler(ButtonLogClick);
-            //
-            // buttonDebug
-            //
+
             buttonDebug.Location = new Point(36, 120);
             buttonDebug.Name = "buttonDebug";
             buttonDebug.Size = new Size(212, 38);
@@ -81,9 +75,7 @@ namespace TestApp
             buttonDebug.Text = "Debug event";
             buttonDebug.UseVisualStyleBackColor = true;
             buttonDebug.Click += new EventHandler(ButtonLogClick);
-            //
-            // buttonInfo
-            //
+
             buttonInfo.Location = new Point(36, 170);
             buttonInfo.Name = "buttonInfo";
             buttonInfo.Size = new Size(212, 38);
@@ -91,9 +83,7 @@ namespace TestApp
             buttonInfo.Text = "Info event";
             buttonInfo.UseVisualStyleBackColor = true;
             buttonInfo.Click += new EventHandler(ButtonLogClick);
-            //
-            // buttonWarn
-            //
+
             buttonWarn.Location = new Point(36, 220);
             buttonWarn.Name = "buttonWarn";
             buttonWarn.Size = new Size(212, 38);
@@ -101,9 +91,7 @@ namespace TestApp
             buttonWarn.Text = "Warn event";
             buttonWarn.UseVisualStyleBackColor = true;
             buttonWarn.Click += new EventHandler(ButtonLogClick);
-            //
-            // buttonError
-            //
+
             buttonError.Location = new Point(36, 270);
             buttonError.Name = "buttonError";
             buttonError.Size = new Size(212, 38);
@@ -111,9 +99,7 @@ namespace TestApp
             buttonError.Text = "Error event";
             buttonError.UseVisualStyleBackColor = true;
             buttonError.Click += new EventHandler(ButtonLogClick);
-            //
-            // buttonFatal
-            //
+
             buttonFatal.Location = new Point(36, 320);
             buttonFatal.Name = "buttonFatal";
             buttonFatal.Size = new Size(212, 38);
@@ -121,9 +107,7 @@ namespace TestApp
             buttonFatal.Text = "Fatal event";
             buttonFatal.UseVisualStyleBackColor = true;
             buttonFatal.Click += new EventHandler(ButtonLogClick);
-            //
-            // buttonFromFile
-            //
+
             buttonFromFile.Location = new Point(36, 370);
             buttonFromFile.Name = "buttonFromFile";
             buttonFromFile.Size = new Size(212, 38);
@@ -131,9 +115,7 @@ namespace TestApp
             buttonFromFile.Text = "From file events";
             buttonFromFile.UseVisualStyleBackColor = true;
             buttonFromFile.Click += new EventHandler(ButtonLogClick);
-            //
-            // buttonHuge
-            //
+
             buttonHuge.Location = new Point(36, 420);
             buttonHuge.Name = "buttonHuge";
             buttonHuge.Size = new Size(212, 38);
@@ -141,9 +123,7 @@ namespace TestApp
             buttonHuge.Text = "Huge events";
             buttonHuge.UseVisualStyleBackColor = true;
             buttonHuge.Click += new EventHandler(ButtonLogClick);
-            //
-            // buttonMultiple
-            //
+
             buttonMultiple.Location = new Point(36, 470);
             buttonMultiple.Name = "buttonMultiple";
             buttonMultiple.Size = new Size(212, 38);
@@ -151,9 +131,7 @@ namespace TestApp
             buttonMultiple.Text = "Multiple events";
             buttonMultiple.UseVisualStyleBackColor = true;
             buttonMultiple.Click += new EventHandler(ButtonLogClick);
-            //
-            // buttonContinuous
-            //
+
             buttonContinuous.Location = new Point(36, 520);
             buttonContinuous.Name = "buttonContinuous";
             buttonContinuous.Size = new Size(212, 38);
@@ -161,9 +139,7 @@ namespace TestApp
             buttonContinuous.Text = "Continuous events";
             buttonContinuous.UseVisualStyleBackColor = true;
             buttonContinuous.Click += new EventHandler(ButtonLogClick);
-            //
-            // buttonParallel
-            //
+
             buttonParallel.Location = new Point(36, 570);
             buttonParallel.Name = "buttonParallel";
             buttonParallel.Size = new Size(212, 38);
@@ -171,16 +147,12 @@ namespace TestApp
             buttonParallel.Text = "Parallel events";
             buttonParallel.UseVisualStyleBackColor = true;
             buttonParallel.Click += new EventHandler(ButtonLogClick);
-            //
-            // udpLabel
-            //
+
             udpLabel.Location = new Point(885, 21);
             udpLabel.Name = "udpLabel";
             udpLabel.Text = "U" + Environment.NewLine + "D" + Environment.NewLine + "P";
             udpLabel.AutoSize = true;
-            //
-            // udpTextBox
-            //
+
             udpTextBox.Location = new Point(260, 21);
             udpTextBox.Name = "udpTextBox";
             udpTextBox.Size = new Size(620, 285);
@@ -188,16 +160,12 @@ namespace TestApp
             udpTextBox.Multiline = true;
             udpTextBox.ReadOnly = true;
             udpTextBox.ScrollBars = ScrollBars.Vertical;
-            //
-            // tcpLabel
-            //
+
             tcpLabel.Location = new Point(885, 323);
             tcpLabel.Name = "tcpLabel";
             tcpLabel.Text = "T" + Environment.NewLine + "C" + Environment.NewLine + "P";
             tcpLabel.AutoSize = true;
-            //
-            // tcpTextBox
-            //
+
             tcpTextBox.Location = new Point(260, 323);
             tcpTextBox.Name = "tcpTextBox";
             tcpTextBox.Size = new Size(620,285);
@@ -205,9 +173,7 @@ namespace TestApp
             tcpTextBox.Multiline = true;
             tcpTextBox.ReadOnly = true;
             tcpTextBox.ScrollBars = ScrollBars.Vertical;
-            //
-            // FormTest
-            //
+
             AutoScaleDimensions = new SizeF(6F, 13F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(925, 630);
