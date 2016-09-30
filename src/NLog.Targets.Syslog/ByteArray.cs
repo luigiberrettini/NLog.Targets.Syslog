@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using NLog.Targets.Syslog.Extensions;
 
 namespace NLog.Targets.Syslog
 {
@@ -33,19 +32,6 @@ namespace NLog.Targets.Syslog
 
                 return memoryStream.GetBuffer()[index];
             }
-        }
-
-        public void Prepend(byte[] prefix)
-        {
-            var oldLength = memoryStream.Length;
-
-            var newLength = oldLength + prefix.Length;
-            memoryStream.SetLength(newLength);
-
-            var buffer = memoryStream.GetBuffer();
-            buffer.ShiftBytesRight((int)oldLength, (int)newLength);
-
-            Buffer.BlockCopy(prefix, 0, buffer, 0, prefix.Length);
         }
 
         public void Append(byte[] buffer)

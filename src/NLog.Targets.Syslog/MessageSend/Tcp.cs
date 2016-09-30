@@ -41,10 +41,8 @@ namespace NLog.Targets.Syslog.MessageSend
             if (token.IsCancellationRequested)
                 return Task.FromResult<object>(null);
 
-            FrameMessageOrLeaveItUnchanged(message);
-
             if (tcp.Connected)
-                return WriteAsync(0, message, token);
+                return WriteAsync(message, token);
 
             var delay = isFirstSend ? ZeroSecondsTimeSpan : recoveryTime;
             isFirstSend = false;
@@ -52,30 +50,8 @@ namespace NLog.Targets.Syslog.MessageSend
             return Task.Delay(delay, token)
                 .Then(_ => ConnectAsync(), token)
                 .Unwrap()
-                .Then(_ => WriteAsync(0, message, token), token)
+                .Then(_ => WriteAsync(message, token), token)
                 .Unwrap();
-        }
-
-        private void FrameMessageOrLeaveItUnchanged(ByteArray message)
-        {
-            OctectCountingFramedOrUnchanged(message);
-            NonTransparentFramedOrUnchanged(message);
-        }
-
-        private void OctectCountingFramedOrUnchanged(ByteArray message)
-        {
-            if (framing != FramingMethod.OctetCounting)
-                return;
-
-            var octetCount = message.Length;
-            var prefix = new ASCIIEncoding().GetBytes($"{octetCount} ");
-            message.Prepend(prefix);
-        }
-
-        private void NonTransparentFramedOrUnchanged(ByteArray message)
-        {
-            if (framing == FramingMethod.NonTransparent)
-                message.Append(LineFeedBytes);
         }
 
         private Task ConnectAsync()
@@ -96,6 +72,26 @@ namespace NLog.Targets.Syslog.MessageSend
             var sslStream = new SslStream(tcpStream, true);
             sslStream.AuthenticateAsClient(Server, null, SslProtocols.Tls12, false);
             return sslStream;
+        }
+
+        private Task WriteAsync(ByteArray message, CancellationToken token)
+        {
+            return FramingTask(message)
+                .Then(_ => WriteAsync(0, message, token), token)
+                .Unwrap();
+        }
+
+        private Task FramingTask(ByteArray message)
+        {
+            if (framing == FramingMethod.NonTransparent)
+            {
+                message.Append(LineFeedBytes);
+                return Task.FromResult<object>(null);
+            }
+
+            var octetCount = message.Length;
+            var prefix = new ASCIIEncoding().GetBytes($"{octetCount} ");
+            return Task.Factory.FromAsync(stream.BeginWrite, stream.EndWrite, prefix, 0, prefix.Length, null);
         }
 
         private Task WriteAsync(int offset, ByteArray data, CancellationToken token)

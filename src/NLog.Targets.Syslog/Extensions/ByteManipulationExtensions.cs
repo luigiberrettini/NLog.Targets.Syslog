@@ -1,17 +1,7 @@
-﻿using System.Collections.Generic;
-
-namespace NLog.Targets.Syslog.Extensions
+﻿namespace NLog.Targets.Syslog.Extensions
 {
     internal static class ByteManipulationExtensions
     {
-        public static void ShiftBytesRight(this IList<byte> buffer, int oldLength, int newLength)
-        {
-            var idxOld = oldLength - 1;
-            var idxNew = newLength - 1;
-            while (idxOld >= 0)
-                buffer[idxNew--] = buffer[idxOld--];
-        }
-
         public static bool IsIndexOfCharTerminatingByte(this int i, ByteArray bytes)
         {
             return i.IsLastIndex(bytes) ||
