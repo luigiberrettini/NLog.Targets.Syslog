@@ -50,8 +50,8 @@ namespace TestApp
 
             var splitted = Regex.Split(message, "(\\d{1,11}) (.*)").Where(x => x != string.Empty).ToArray();
             var octetCount = splitted[0];
-            var octets = encoding.GetBytes(splitted[1]);
-            return octetCount == octets.Length.ToString();
+            var octets = splitted.Length < 2 ? null : encoding.GetBytes(splitted[1]);
+            return octetCount == octets?.Length.ToString();
         }
 
         private static ServerMsgSet FromStringNonTransparent(string s, ServerMsgSet serverMsgSet)
@@ -70,11 +70,11 @@ namespace TestApp
             var matches = Regex
                 .Split(s, "(\\d{1,11} <\\d{1,3}>)")
                 .Where(x => !string.IsNullOrEmpty(x))
-                .Select((value, index) => new { value, index})
+                .Select((value, index) => new { value, index })
                 .ToArray();
             serverMsgSet.messages = matches
                 .Where(x => x.index % 2 == 0)
-                .Select(x => x.value + matches[x.index + 1].value)
+                .Select(x => x.value + (matches.Length <= x.index + 1 ? string.Empty : matches[x.index + 1].value))
                 .ToArray();
 
             serverMsgSet.LastIsPartial = !serverMsgSet.IsValid(serverMsgSet.LastMessage, FramingMethod.OctetCounting);

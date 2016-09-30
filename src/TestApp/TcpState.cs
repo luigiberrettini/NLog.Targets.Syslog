@@ -41,10 +41,11 @@ namespace TestApp
                 receivedStringAction(msgSet.IsValid(msg, framing) ? msg : $"Error handling string {receivedString}");
             }
 
+            Buffer.SetLength(0);
+
             if (!msgSet.LastIsPartial)
                 return;
 
-            Buffer.SetLength(0);
             var lastMessage = msgSet.LastMessageBytes;
             Buffer.Write(lastMessage, 0, lastMessage.Length);
         }
