@@ -29,7 +29,7 @@ namespace NLog.Targets.Syslog.MessageCreation
             tagLayout = rfc3164Config.Tag;
         }
 
-        protected override void BuildMessage(ByteArray buffer, LogEventInfo logEvent, string pri, string logEntry)
+        protected override void AppendTo(ByteArray buffer, LogEventInfo logEvent, string pri, string logEntry)
         {
             var encoding = new ASCIIEncoding();
 

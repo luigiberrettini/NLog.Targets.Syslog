@@ -46,8 +46,10 @@ namespace NLog.Targets.Syslog
             if (AllSent)
                 return SendSucceededTcsTask(tcs);
 
+            PrepareMessage();
+
             messageTransmitter
-                .SendMessageAsync(NextMessage, token)
+                .SendMessageAsync(buffer, token)
                 .ContinueWith(t =>
                 {
                     if (t.IsCanceled)
@@ -63,7 +65,7 @@ namespace NLog.Targets.Syslog
 
         private bool AllSent => currentMessage == logEntries.Length;
 
-        private ByteArray NextMessage => messageBuilder.BuildMessage(buffer, asyncLogEvent.LogEvent, logEntries[currentMessage++]);
+        private void PrepareMessage() => messageBuilder.AppendTo(buffer, asyncLogEvent.LogEvent, logEntries[currentMessage++]);
 
         private static Task SendCanceledTcsTask(TaskCompletionSource<object> tcs)
         {
