@@ -22,8 +22,8 @@ namespace NLog.Targets.Syslog.MessageSend
         {
             TransmitterFactory = new Dictionary<ProtocolType, Func<MessageTransmitterConfig, MessageTransmitter>>
             {
-                { ProtocolType.Udp, (messageTransmitterConfig) => new Udp(messageTransmitterConfig.Udp) },
-                { ProtocolType.Tcp, (messageTransmitterConfig) => new Tcp(messageTransmitterConfig.Tcp) }
+                { ProtocolType.Udp, messageTransmitterConfig => new Udp(messageTransmitterConfig.Udp) },
+                { ProtocolType.Tcp, messageTransmitterConfig => new Tcp(messageTransmitterConfig.Tcp) }
             };
         }
 

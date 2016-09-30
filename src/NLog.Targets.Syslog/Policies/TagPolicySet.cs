@@ -14,7 +14,7 @@ namespace NLog.Targets.Syslog.Policies
             {
                 new TransliteratePolicy(enforcementConfig),
                 new ReplaceKnownValuePolicy(enforcementConfig, NonAlphaNumeric, QuestionMark),
-                new TruncateToKnownValuePolicy(enforcementConfig, TagMaxLength),
+                new TruncateToKnownValuePolicy(enforcementConfig, TagMaxLength)
             });
         }
     }

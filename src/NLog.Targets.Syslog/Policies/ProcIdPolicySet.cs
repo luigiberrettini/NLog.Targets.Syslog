@@ -16,7 +16,7 @@ namespace NLog.Targets.Syslog.Policies
                 new TransliteratePolicy(enforcementConfig),
                 new DefaultIfEmptyPolicy(NilValue),
                 new ReplaceKnownValuePolicy(enforcementConfig, NonPrintUsAscii, QuestionMark),
-                new TruncateToKnownValuePolicy(enforcementConfig, ProcIdMaxLength),
+                new TruncateToKnownValuePolicy(enforcementConfig, ProcIdMaxLength)
             });
         }
     }

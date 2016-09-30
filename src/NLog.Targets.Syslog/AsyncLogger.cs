@@ -62,11 +62,11 @@ namespace NLog.Targets.Syslog
                 {
                     if (t.IsCanceled)
                     {
-                        InternalLogger.Debug($"Task canceled");
+                        InternalLogger.Debug("Task canceled");
                         return;
                     }
                     if (t.Exception != null) // t.IsFaulted is true
-                        InternalLogger.Debug(t.Exception.GetBaseException(), $"Task faulted");
+                        InternalLogger.Debug(t.Exception.GetBaseException(), "Task faulted");
                     else
                         InternalLogger.Debug($"Successfully sent message '{logEventMsgSet}'");
                     ProcessQueueAsync(messageBuilder);

@@ -16,7 +16,7 @@ namespace NLog.Targets.Syslog.Policies
             {
                 new TransliteratePolicy(enforcementConfig),
                 new ReplaceKnownValuePolicy(enforcementConfig, NonSpaceOrPrintUsAscii, QuestionMark),
-                new ReplaceKnownValuePolicy(enforcementConfig, NonAlphaNumericFirstChar, PrefixWithSpaceReplacement),
+                new ReplaceKnownValuePolicy(enforcementConfig, NonAlphaNumericFirstChar, PrefixWithSpaceReplacement)
             });
         }
     }

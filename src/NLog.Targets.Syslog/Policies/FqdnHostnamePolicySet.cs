@@ -15,7 +15,7 @@ namespace NLog.Targets.Syslog.Policies
                 new TransliteratePolicy(enforcementConfig),
                 new DefaultIfEmptyPolicy(defaultHostname),
                 new ReplaceKnownValuePolicy(enforcementConfig, NonPrintUsAscii, QuestionMark),
-                new TruncateToKnownValuePolicy(enforcementConfig, HostnameMaxLength),
+                new TruncateToKnownValuePolicy(enforcementConfig, HostnameMaxLength)
             });
         }
     }
