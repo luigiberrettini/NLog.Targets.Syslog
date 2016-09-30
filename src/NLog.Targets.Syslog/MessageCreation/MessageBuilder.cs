@@ -14,8 +14,6 @@ namespace NLog.Targets.Syslog.MessageCreation
         private readonly SplitOnNewLinePolicy splitOnNewLinePolicy;
         private readonly Facility facility;
 
-        protected ByteArray Message { get; }
-
         static MessageBuilder()
         {
             BuilderFactory = new Dictionary<RfcNumber, Func<MessageBuilderConfig, EnforcementConfig, MessageBuilder>>
@@ -34,7 +32,6 @@ namespace NLog.Targets.Syslog.MessageCreation
         {
             this.facility = facility;
             splitOnNewLinePolicy = new SplitOnNewLinePolicy(enforcementConfig);
-            Message = new ByteArray(enforcementConfig.TruncateMessageTo);
         }
 
         public string[] BuildLogEntries(LogEventInfo logEvent, Layout layout)
@@ -43,24 +40,20 @@ namespace NLog.Targets.Syslog.MessageCreation
             return splitOnNewLinePolicy.IsApplicable() ? splitOnNewLinePolicy.Apply(originalLogEntry) : new[] { originalLogEntry };
         }
 
-        public ByteArray BuildMessage(LogEventInfo logEvent, string logEntry)
+        public ByteArray BuildMessage(ByteArray buffer, LogEventInfo logEvent, string logEntry)
         {
-            Message.Reset();
+            buffer.Reset();
             var pri = Pri(facility, (Severity)logEvent.Level);
-            return BuildMessage(logEvent, pri, logEntry);
+            BuildMessage(buffer, logEvent, pri, logEntry);
+            return buffer;
         }
 
-        protected abstract ByteArray BuildMessage(LogEventInfo logEvent, string pri, string logEntry);
+        protected abstract void BuildMessage(ByteArray buffer, LogEventInfo logEvent, string pri, string logEntry);
 
         private static string Pri(Facility facility, Severity severity)
         {
             var priVal = (int)facility * 8 + (int)severity;
             return $"<{priVal.ToString(CultureInfo.InvariantCulture)}>";
-        }
-
-        public void Dispose()
-        {
-            Message.Dispose();
         }
     }
 }

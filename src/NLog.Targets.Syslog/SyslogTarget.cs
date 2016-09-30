@@ -18,9 +18,9 @@
 
 using System;
 using System.Linq;
-using System.Threading;
 using NLog.Common;
 using NLog.Targets.Syslog.Extensions;
+using NLog.Targets.Syslog.MessageCreation;
 using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog
@@ -30,7 +30,7 @@ namespace NLog.Targets.Syslog
     public class SyslogTarget : TargetWithLayout
     {
         private volatile bool inited;
-        private CancellationTokenSource cts;
+        private MessageBuilder messageBuilder;
         private AsyncLogger[] asyncLoggers;
 
         /// <summary>SyslogTarget specific configuration</summary>
@@ -50,9 +50,8 @@ namespace NLog.Targets.Syslog
             if (inited)
                 DisposeDependencies();
 
-            cts = new CancellationTokenSource();
-            asyncLoggers = Configuration.Enforcement.MessageProcessors.Select(i => new AsyncLogger(Layout, Configuration, i, cts.Token)).ToArray();
-
+            messageBuilder = MessageBuilder.FromConfig(Configuration.MessageCreation, Configuration.Enforcement);
+            asyncLoggers = Configuration.Enforcement.MessageProcessors.Select(i => new AsyncLogger(Layout, Configuration, messageBuilder)).ToArray();
             inited = true;
         }
 
@@ -77,8 +76,6 @@ namespace NLog.Targets.Syslog
         {
             try
             {
-                cts.Cancel();
-                cts.Dispose();
                 Configuration.Enforcement.MessageProcessors.ForEach(i => asyncLoggers[i].Dispose());
             }
             catch (Exception ex)

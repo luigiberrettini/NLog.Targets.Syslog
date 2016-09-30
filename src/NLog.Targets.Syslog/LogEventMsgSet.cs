@@ -12,14 +12,16 @@ namespace NLog.Targets.Syslog
     internal class LogEventMsgSet
     {
         private AsyncLogEventInfo asyncLogEvent;
+        private readonly ByteArray buffer;
         private readonly MessageBuilder messageBuilder;
         private readonly MessageTransmitter messageTransmitter;
         private int currentMessage;
         private string[] logEntries;
 
-        public LogEventMsgSet(AsyncLogEventInfo asyncLogEvent, MessageBuilder messageBuilder, MessageTransmitter messageTransmitter)
+        public LogEventMsgSet(AsyncLogEventInfo asyncLogEvent, ByteArray buffer, MessageBuilder messageBuilder, MessageTransmitter messageTransmitter)
         {
             this.asyncLogEvent = asyncLogEvent;
+            this.buffer = buffer;
             this.messageBuilder = messageBuilder;
             this.messageTransmitter = messageTransmitter;
             currentMessage = 0;
@@ -61,7 +63,7 @@ namespace NLog.Targets.Syslog
 
         private bool AllSent => currentMessage == logEntries.Length;
 
-        private ByteArray NextMessage => messageBuilder.BuildMessage(asyncLogEvent.LogEvent, logEntries[currentMessage++]);
+        private ByteArray NextMessage => messageBuilder.BuildMessage(buffer, asyncLogEvent.LogEvent, logEntries[currentMessage++]);
 
         private static Task SendCanceledTcsTask(TaskCompletionSource<object> tcs)
         {

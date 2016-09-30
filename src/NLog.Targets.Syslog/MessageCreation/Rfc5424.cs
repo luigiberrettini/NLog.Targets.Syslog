@@ -13,10 +13,10 @@ namespace NLog.Targets.Syslog.MessageCreation
         private static readonly byte[] SpaceBytes = { 0x20 };
 
         private readonly string version;
-        private readonly Layout hostname;
-        private readonly Layout appName;
-        private readonly Layout procId;
-        private readonly Layout msgId;
+        private readonly Layout hostnameLayout;
+        private readonly Layout appNameLayout;
+        private readonly Layout procIdLayout;
+        private readonly Layout msgIdLayout;
         private readonly StructuredData structuredData;
         private readonly bool disableBom;
         private readonly FqdnHostnamePolicySet hostnamePolicySet;
@@ -28,10 +28,10 @@ namespace NLog.Targets.Syslog.MessageCreation
         public Rfc5424(Facility facility, Rfc5424Config rfc5424Config, EnforcementConfig enforcementConfig) : base(facility, enforcementConfig)
         {
             version = DefaultVersion;
-            hostname = rfc5424Config.DefaultHostname;
-            appName = rfc5424Config.DefaultAppName;
-            procId = NilValue;
-            msgId = NilValue;
+            hostnameLayout = rfc5424Config.DefaultHostname;
+            appNameLayout = rfc5424Config.DefaultAppName;
+            procIdLayout = NilValue;
+            msgIdLayout = NilValue;
             structuredData = new StructuredData(rfc5424Config.StructuredData, enforcementConfig);
             disableBom = false;
             hostnamePolicySet = new FqdnHostnamePolicySet(enforcementConfig, rfc5424Config.DefaultHostname);
@@ -41,54 +41,52 @@ namespace NLog.Targets.Syslog.MessageCreation
             utf8MessagePolicy = new Utf8MessagePolicy(enforcementConfig);
         }
 
-        protected override ByteArray BuildMessage(LogEventInfo logEvent, string pri, string logEntry)
+        protected override void BuildMessage(ByteArray buffer, LogEventInfo logEvent, string pri, string logEntry)
         {
             var encodings = new EncodingSet(!disableBom);
 
-            AppendHeaderBytes(pri, logEvent, encodings);
-            Message.Append(SpaceBytes);
-            AppendStructuredDataBytes(logEvent, encodings);
-            Message.Append(SpaceBytes);
-            AppendMsgBytes(logEntry, encodings);
+            AppendHeaderBytes(buffer, pri, logEvent, encodings);
+            buffer.Append(SpaceBytes);
+            AppendStructuredDataBytes(buffer, logEvent, encodings);
+            buffer.Append(SpaceBytes);
+            AppendMsgBytes(buffer, logEntry, encodings);
 
-            utf8MessagePolicy.Apply(Message);
-
-            return Message;
+            utf8MessagePolicy.Apply(buffer);
         }
 
-        private void AppendHeaderBytes(string pri, LogEventInfo logEvent, EncodingSet encodings)
+        private void AppendHeaderBytes(ByteArray buffer, string pri, LogEventInfo logEvent, EncodingSet encodings)
         {
             var timestamp = string.Format(CultureInfo.InvariantCulture, TimestampFormat, logEvent.TimeStamp);
-            var hostname = hostnamePolicySet.Apply(this.hostname.Render(logEvent));
-            var appName = appNamePolicySet.Apply(this.appName.Render(logEvent));
-            var procId = procIdPolicySet.Apply(this.procId.Render(logEvent));
-            var msgId = msgIdPolicySet.Apply(this.msgId.Render(logEvent));
+            var hostname = hostnamePolicySet.Apply(hostnameLayout.Render(logEvent));
+            var appName = appNamePolicySet.Apply(appNameLayout.Render(logEvent));
+            var procId = procIdPolicySet.Apply(procIdLayout.Render(logEvent));
+            var msgId = msgIdPolicySet.Apply(msgIdLayout.Render(logEvent));
             var header = $"{pri}{version} {timestamp} {hostname} {appName} {procId} {msgId}";
             var headerBytes = encodings.Ascii.GetBytes(header);
-            Message.Append(headerBytes);
+            buffer.Append(headerBytes);
         }
 
-        private void AppendStructuredDataBytes(LogEventInfo logEvent, EncodingSet encodings)
+        private void AppendStructuredDataBytes(ByteArray buffer, LogEventInfo logEvent, EncodingSet encodings)
         {
-            structuredData.AppendBytes(Message, logEvent, encodings);
+            structuredData.AppendBytes(buffer, logEvent, encodings);
         }
 
-        private void AppendMsgBytes(string logEntry, EncodingSet encodings)
+        private static void AppendMsgBytes(ByteArray buffer, string logEntry, EncodingSet encodings)
         {
-            AppendPreambleBytes(encodings);
-            AppendLogEntryBytes(logEntry, encodings);
+            AppendPreambleBytes(buffer, encodings);
+            AppendLogEntryBytes(buffer, logEntry, encodings);
         }
 
-        private void AppendPreambleBytes(EncodingSet encodings)
+        private static void AppendPreambleBytes(ByteArray buffer, EncodingSet encodings)
         {
             var preambleBytes = encodings.Utf8.GetPreamble();
-            Message.Append(preambleBytes);
+            buffer.Append(preambleBytes);
         }
 
-        private void AppendLogEntryBytes(string logEntry, EncodingSet encodings)
+        private static void AppendLogEntryBytes(ByteArray buffer, string logEntry, EncodingSet encodings)
         {
             var logEntryBytes = encodings.Utf8.GetBytes(logEntry);
-            Message.Append(logEntryBytes);
+            buffer.Append(logEntryBytes);
         }
     }
 }
