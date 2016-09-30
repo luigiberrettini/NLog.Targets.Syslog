@@ -12,6 +12,7 @@ namespace NLog.Targets.Syslog.Settings
         /// <summary>TCP related fields</summary>
         public TcpConfig Tcp { get; set; }
 
+        /// <summary>Builds a new instance of the MessageTransmitterConfig class</summary>
         public MessageTransmitterConfig()
         {
             Udp = new UdpConfig();
