@@ -6,7 +6,6 @@ using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {
-    /// <summary>Allows to build Syslog messages compliant with RFC 3164</summary>
     internal class Rfc3164 : MessageBuilder
     {
         private const string TimestampFormat = "{0:MMM} {0,11:d HH:mm:ss}";
@@ -19,7 +18,6 @@ namespace NLog.Targets.Syslog.MessageCreation
         private readonly PlainContentPolicySet plainContentPolicySet;
         private readonly AsciiMessagePolicy asciiMessagePolicy;
 
-        /// <summary>Builds a new instance of the Rfc3164 class</summary>
         public Rfc3164(Facility facility, Rfc3164Config rfc3164Config, EnforcementConfig enforcementConfig) : base(facility, enforcementConfig)
         {
             hostnamePolicySet = new PlainHostnamePolicySet(enforcementConfig);
