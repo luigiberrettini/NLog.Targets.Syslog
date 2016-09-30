@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace TestApp
 {
-    public class SyslogServer
+    internal class SyslogServer
     {
         private readonly IPEndPoint udpEndPoint;
         private readonly IPEndPoint tcpEndPoint;
