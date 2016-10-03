@@ -65,7 +65,7 @@ namespace NLog.Targets.Syslog
 
         private bool AllSent => currentMessage == logEntries.Length;
 
-        private void PrepareMessage() => messageBuilder.AppendTo(buffer, asyncLogEvent.LogEvent, logEntries[currentMessage++]);
+        private void PrepareMessage() => messageBuilder.PrepareMessage(buffer, asyncLogEvent.LogEvent, logEntries[currentMessage++]);
 
         private static Task SendCanceledTcsTask(TaskCompletionSource<object> tcs)
         {

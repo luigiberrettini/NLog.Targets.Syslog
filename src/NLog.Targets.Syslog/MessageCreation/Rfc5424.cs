@@ -41,7 +41,7 @@ namespace NLog.Targets.Syslog.MessageCreation
             utf8MessagePolicy = new Utf8MessagePolicy(enforcementConfig);
         }
 
-        protected override void AppendTo(ByteArray buffer, LogEventInfo logEvent, string pri, string logEntry)
+        protected override void PrepareMessage(ByteArray buffer, LogEventInfo logEvent, string pri, string logEntry)
         {
             var encodings = new EncodingSet(!disableBom);
 

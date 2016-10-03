@@ -40,14 +40,14 @@ namespace NLog.Targets.Syslog.MessageCreation
             return splitOnNewLinePolicy.IsApplicable() ? splitOnNewLinePolicy.Apply(originalLogEntry) : new[] { originalLogEntry };
         }
 
-        public void AppendTo(ByteArray buffer, LogEventInfo logEvent, string logEntry)
+        public void PrepareMessage(ByteArray buffer, LogEventInfo logEvent, string logEntry)
         {
             buffer.Reset();
             var pri = Pri(facility, (Severity)logEvent.Level);
-            AppendTo(buffer, logEvent, pri, logEntry);
+            PrepareMessage(buffer, logEvent, pri, logEntry);
         }
 
-        protected abstract void AppendTo(ByteArray buffer, LogEventInfo logEvent, string pri, string logEntry);
+        protected abstract void PrepareMessage(ByteArray buffer, LogEventInfo logEvent, string pri, string logEntry);
 
         private static string Pri(Facility facility, Severity severity)
         {
