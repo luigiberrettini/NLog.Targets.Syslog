@@ -21,15 +21,15 @@ namespace NLog.Targets.Syslog
         private readonly ByteArray buffer;
         private readonly MessageTransmitter messageTransmitter;
 
-        public AsyncLogger(Layout loggingLayout, Configuration config, MessageBuilder messageBuilder)
+        public AsyncLogger(Layout loggingLayout, EnforcementConfig enforcementConfig, MessageBuilder messageBuilder, MessageTransmitterConfig messageTransmitterConfig)
         {
             layout = loggingLayout;
             cts = new CancellationTokenSource();
             token = cts.Token;
-            throttling = Throttling.FromConfig(config.Enforcement.Throttling);
+            throttling = Throttling.FromConfig(enforcementConfig.Throttling);
             queue = NewBlockingCollection();
-            buffer = new ByteArray(config.Enforcement.TruncateMessageTo);
-            messageTransmitter = MessageTransmitter.FromConfig(config.MessageSend);
+            buffer = new ByteArray(enforcementConfig.TruncateMessageTo);
+            messageTransmitter = MessageTransmitter.FromConfig(messageTransmitterConfig);
             Task.Factory.StartNew(() => ProcessQueueAsync(messageBuilder));
         }
 

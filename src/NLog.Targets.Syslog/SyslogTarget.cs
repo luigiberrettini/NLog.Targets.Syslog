@@ -33,13 +33,21 @@ namespace NLog.Targets.Syslog
         private MessageBuilder messageBuilder;
         private AsyncLogger[] asyncLoggers;
 
-        /// <summary>SyslogTarget specific configuration</summary>
-        public Configuration Configuration { get; set; }
+        /// <summary>The enforcement to be applied on the Syslog message</summary>
+        public EnforcementConfig Enforcement { get; set; }
+
+        /// <summary>The settings used to create messages according to RFCs</summary>
+        public MessageBuilderConfig MessageCreation { get; set; }
+
+        /// <summary>The settings used to send messages to the Syslog server</summary>
+        public MessageTransmitterConfig MessageSend { get; set; }
 
         /// <summary>Builds a new instance of the SyslogTarget class</summary>
         public SyslogTarget()
         {
-            Configuration = new Configuration();
+            Enforcement = new EnforcementConfig();
+            MessageCreation = new MessageBuilderConfig();
+            MessageSend = new MessageTransmitterConfig();
         }
 
         /// <summary>Initializes the SyslogTarget</summary>
@@ -50,8 +58,8 @@ namespace NLog.Targets.Syslog
             if (inited)
                 DisposeDependencies();
 
-            messageBuilder = MessageBuilder.FromConfig(Configuration.MessageCreation, Configuration.Enforcement);
-            asyncLoggers = Configuration.Enforcement.MessageProcessors.Select(i => new AsyncLogger(Layout, Configuration, messageBuilder)).ToArray();
+            messageBuilder = MessageBuilder.FromConfig(MessageCreation, Enforcement);
+            asyncLoggers = Enforcement.MessageProcessors.Select(i => new AsyncLogger(Layout, Enforcement, messageBuilder, MessageSend)).ToArray();
             inited = true;
         }
 
@@ -61,7 +69,7 @@ namespace NLog.Targets.Syslog
         protected override void Write(AsyncLogEventInfo asyncLogEvent)
         {
             MergeEventProperties(asyncLogEvent.LogEvent);
-            var asyncLoggerId = asyncLogEvent.LogEvent.SequenceID % Configuration.Enforcement.MessageProcessors;
+            var asyncLoggerId = asyncLogEvent.LogEvent.SequenceID % Enforcement.MessageProcessors;
             asyncLoggers[asyncLoggerId].Log(asyncLogEvent);
         }
 
@@ -76,7 +84,7 @@ namespace NLog.Targets.Syslog
         {
             try
             {
-                Configuration.Enforcement.MessageProcessors.ForEach(i => asyncLoggers[i].Dispose());
+                Enforcement.MessageProcessors.ForEach(i => asyncLoggers[i].Dispose());
             }
             catch (Exception ex)
             {

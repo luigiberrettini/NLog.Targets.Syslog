@@ -45,17 +45,11 @@ The package is also available through NuGet. Simply search for "NLog.Targets.Sys
 This NLog target supports the standard NLog [layout](https://github.com/NLog/NLog/wiki/Layouts)
 directive to modify the log message body (Syslog packet elements are not affected).
 
-It provides default values for all settings which can be overridden by means of the configuration element, as shown above.
+It provides default values for all settings which can be overridden by means of the XML configuration, as shown above.
 A more detailed example is included in the [test application](./src/TestApp/NLog.config).
 
 
-#### Configuration element
-* `enforcement` - the enforcement to be applied on the Syslog message
-* `messageCreation` - Syslog message creation configuration
-* `messageSend` - Syslog message send configuration
-
-
-##### Enforcement element
+#### Enforcement element
 * `throttling` - settings related to message throttling:
   * `limit` - the number of log entries, waiting to be processed, that triggers throttling (default: `0`)
   * `strategy` - `None` / `DiscardOnFixedTimeout` / `DiscardOnPercentageTimeout` / `Discard` / `DeferForFixedTime` / `DeferForPercentageTime` / `Block`
@@ -86,7 +80,7 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
 <sup>2</sup> Using jumbograms (limited by Int32.MaxValue = 2147483647, i.e. the maximum size for an array)
 
 
-##### Message creation element
+#### Message creation element
 * `facility` - facility name (default: `Local1`)
 * `rfc` - `rfc3164` or `rfc5424` (default: `rfc5424`)
 * `rfc3164` - settings related to RFC 3164:
@@ -104,7 +98,7 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
     enabling different STRUCTURED-DATA for each log message
   * `disableBom` - `true` or `false` to handle RSyslog [issue 284](http://github.com/rsyslog/rsyslog/issues/284) (default: `false`)
 
-##### Message send element
+#### Message send element
 * `protocol` - `udp` or `tcp` (default: `udp`)
 * `udp` - settings related to UDP:
   * `server` - IP or hostname of the Syslog server (default: `127.0.0.1`)
