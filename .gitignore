@@ -154,3 +154,6 @@ $RECYCLE.BIN/
 
 # Mac desktop service store files
 .DS_Store
+/src/Nlog.Targets.Syslog.NetStandard/NuGet
+/src/.vs
+/src/Nlog.Targets.Syslog.NetStandard/project.lock.json
