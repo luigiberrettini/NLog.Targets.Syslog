@@ -97,7 +97,11 @@ namespace NLog.Targets
         {
             SyslogServer = "127.0.0.1";
             Port = 514;
+#if !NET45
+            Sender = Assembly.GetEntryAssembly().GetName().Name;
+#else
             Sender = Assembly.GetCallingAssembly().GetName().Name;
+#endif
             Facility = SyslogFacility.Local1;
             Protocol = ProtocolType.Udp;
             TimestampFormat = "MMM dd HH:mm:ss";
@@ -129,6 +133,7 @@ namespace NLog.Targets
             SendEventsBatch(logEvents);
         }
 
+#if NET45
         /// <summary>Sends array of events to syslog server</summary>
         /// <param name="logEvents">The array of NLog.AsyncLogEventInfo</param>
         private void SendEventsBatch(params AsyncLogEventInfo[] logEvents)
@@ -171,6 +176,53 @@ namespace NLog.Targets
                     throw new NLogConfigurationException($"Protocol '{Protocol}' is not supported.");
             }
         }
+#else
+        /// <summary>Sends array of events to syslog server</summary>
+        /// <param name="logEvents">The array of NLog.AsyncLogEventInfo</param>
+        private async void SendEventsBatch(params AsyncLogEventInfo[] logEvents)
+        {
+            var logServerIps = await Dns.GetHostAddressesAsync(SyslogServer);
+            var logServerIp = logServerIps.FirstOrDefault();
+            if (logServerIp == null)
+            {
+                return;
+            }
+            var ipAddress = logServerIp.ToString();
+            switch (Protocol)
+            {
+                case ProtocolType.Udp:
+                    using (var udp = new UdpClient(Port))
+                    {
+                        ProcessAndSendEvents(logEvents, messageData => udp.SendAsync(messageData, messageData.Length, ipAddress, Port));
+                    }
+                    break;
+                case ProtocolType.Tcp:
+                    using (var tcp = new TcpClient())
+                    {
+                        await tcp.ConnectAsync(ipAddress, Port);
+
+                        // disposition of tcp also disposes stream
+                        var stream = tcp.GetStream();
+                        if (Ssl)
+                        {
+                            // leave stream open so that we don't double dispose
+                            using (var sslStream = new SslStream(stream, true))
+                            {
+                                await sslStream.AuthenticateAsClientAsync(SyslogServer);
+                                ProcessAndSendEvents(logEvents, messageData => sslStream.Write(messageData, 0, messageData.Length));
+                            }
+                        }
+                        else
+                        {
+                            ProcessAndSendEvents(logEvents, messageData => stream.Write(messageData, 0, messageData.Length));
+                        }
+                    }
+                    break;
+                default:
+                    throw new NLogConfigurationException($"Protocol '{Protocol}' is not supported.");
+            }
+        }
+#endif
 
         /// <summary>Processes array of events and sends messages bytes using action</summary>
         /// <param name="logEvents">The array of NLog.AsyncLogEventInfo</param>
