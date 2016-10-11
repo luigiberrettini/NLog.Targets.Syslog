@@ -1,0 +1,14 @@
+﻿{
+    "supports": {},
+    "dependencies": {
+        "NETStandard.Library": "1.6.0",
+        "NLog.Extensions.Logging": "1.0.0-*",
+        "System.Net.Security": "4.0.0",
+        "System.Net.Sockets": "4.1.0"
+    },
+    "frameworks": {
+        "netstandard1.5": {
+            "imports": [ "dnxcore50", "dotnet54", "portable-net40+sl4+win+wp7" ]
+        }
+    }
+}
