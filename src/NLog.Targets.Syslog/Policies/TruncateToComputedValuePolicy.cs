@@ -26,7 +26,7 @@ namespace NLog.Targets.Syslog.Policies
         {
             var maxLength = messageMaxLength;
 
-            if (maxLength <= 0 || maxLength >= bytes.Length)
+            if (maxLength <= bytes.EmptyContentLength || maxLength >= bytes.Length)
                 return;
 
             var computedMaxLength = MaxLengthToAvoidCharCorruption(bytes, maxLength);
@@ -39,8 +39,9 @@ namespace NLog.Targets.Syslog.Policies
             if (assumeAscii)
                 return updatedMaxLength;
 
-            var computedMaxLength = bytes.Length;
-            for (var i = bytes.Length - 1; i >= 0; i--)
+            var bytesLength = bytes.Length;
+            var computedMaxLength = bytesLength;
+            for (var i = bytesLength - 1; i >= 0; i--)
             {
                 if (computedMaxLength <= updatedMaxLength && i.IsIndexOfCharTerminatingByte(bytes))
                     break;

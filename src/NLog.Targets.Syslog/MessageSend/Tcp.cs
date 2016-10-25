@@ -3,7 +3,6 @@ using System.IO;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog.Targets.Syslog.Extensions;
@@ -14,13 +13,11 @@ namespace NLog.Targets.Syslog.MessageSend
     internal class Tcp : MessageTransmitter
     {
         private static readonly TimeSpan ZeroSecondsTimeSpan = TimeSpan.FromSeconds(0);
-        private static readonly byte[] LineFeedBytes = { 0x0A };
 
         private volatile bool isFirstSend;
         private readonly TimeSpan recoveryTime;
         private readonly bool useTls;
         private readonly int dataChunkSize;
-        private readonly FramingMethod framing;
         private readonly TcpClient tcp;
         private Stream stream;
         private volatile bool disposed;
@@ -30,7 +27,6 @@ namespace NLog.Targets.Syslog.MessageSend
             isFirstSend = true;
             recoveryTime = TimeSpan.FromMilliseconds(tcpConfig.ReconnectInterval);
             useTls = tcpConfig.UseTls;
-            framing = tcpConfig.Framing;
             dataChunkSize = tcpConfig.DataChunkSize;
             tcp = new TcpClient();
             tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
@@ -76,22 +72,8 @@ namespace NLog.Targets.Syslog.MessageSend
 
         private Task WriteAsync(ByteArray message, CancellationToken token)
         {
-            return FramingTask(message)
-                .Then(_ => WriteAsync(0, message, token), token)
-                .Unwrap();
-        }
-
-        private Task FramingTask(ByteArray message)
-        {
-            if (framing == FramingMethod.NonTransparent)
-            {
-                message.Append(LineFeedBytes);
-                return Task.FromResult<object>(null);
-            }
-
-            var octetCount = message.Length;
-            var prefix = new ASCIIEncoding().GetBytes($"{octetCount} ");
-            return Task.Factory.FromAsync(stream.BeginWrite, stream.EndWrite, prefix, 0, prefix.Length, null);
+            message.PrepareForSend();
+            return WriteAsync(message.SendOffset, message, token);
         }
 
         private Task WriteAsync(int offset, ByteArray data, CancellationToken token)

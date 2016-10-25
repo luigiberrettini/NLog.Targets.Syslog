@@ -28,7 +28,7 @@ namespace NLog.Targets.Syslog
             token = cts.Token;
             throttling = Throttling.FromConfig(enforcementConfig.Throttling);
             queue = NewBlockingCollection();
-            buffer = new ByteArray(enforcementConfig.TruncateMessageTo);
+            buffer = new ByteArray(enforcementConfig.TruncateMessageTo, FramingMethod(messageTransmitterConfig));
             messageTransmitter = MessageTransmitter.FromConfig(messageTransmitterConfig);
             Task.Factory.StartNew(() => ProcessQueueAsync(messageBuilder));
         }
@@ -36,6 +36,13 @@ namespace NLog.Targets.Syslog
         public void Log(AsyncLogEventInfo asyncLogEvent)
         {
             throttling.Apply(queue.Count, delay => Enqueue(asyncLogEvent, delay));
+        }
+
+        private static FramingMethod? FramingMethod(MessageTransmitterConfig messageTransmitterConfig)
+        {
+            if (messageTransmitterConfig.Protocol == ProtocolType.Udp)
+                return null;
+            return messageTransmitterConfig.Tcp.Framing;
         }
 
         private BlockingCollection<AsyncLogEventInfo> NewBlockingCollection()
