@@ -28,12 +28,12 @@ namespace NLog.Targets.Syslog.MessageCreation
         public Rfc5424(Facility facility, Rfc5424Config rfc5424Config, EnforcementConfig enforcementConfig) : base(facility, enforcementConfig)
         {
             version = DefaultVersion;
-            hostnameLayout = rfc5424Config.DefaultHostname;
-            appNameLayout = rfc5424Config.DefaultAppName;
+            hostnameLayout = rfc5424Config.Hostname;
+            appNameLayout = rfc5424Config.AppName;
             procIdLayout = NilValue;
             msgIdLayout = NilValue;
             structuredData = new StructuredData(rfc5424Config.StructuredData, enforcementConfig);
-            disableBom = false;
+            disableBom = rfc5424Config.DisableBom;
             hostnamePolicySet = new FqdnHostnamePolicySet(enforcementConfig, rfc5424Config.DefaultHostname);
             appNamePolicySet = new AppNamePolicySet(enforcementConfig, rfc5424Config.DefaultAppName);
             procIdPolicySet = new ProcIdPolicySet(enforcementConfig);
