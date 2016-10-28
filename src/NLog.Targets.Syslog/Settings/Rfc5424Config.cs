@@ -43,7 +43,7 @@ namespace NLog.Targets.Syslog.Settings
         public Rfc5424Config()
         {
             DefaultHostname = HostFqdn();
-            DefaultAppName = Assembly.GetCallingAssembly().GetName().Name;
+            DefaultAppName = Assembly.GetEntryAssembly().GetName().Name;
             Version = DefaultVersion;
             Hostname = DefaultHostname;
             AppName = DefaultAppName;

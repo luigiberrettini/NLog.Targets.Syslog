@@ -17,7 +17,7 @@ namespace NLog.Targets.Syslog.Settings
         public Rfc3164Config()
         {
             Hostname = Dns.GetHostName();
-            Tag = Assembly.GetCallingAssembly().GetName().Name;
+            Tag = Assembly.GetEntryAssembly().GetName().Name;
         }
     }
 }
