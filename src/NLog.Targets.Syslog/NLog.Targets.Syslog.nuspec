@@ -12,10 +12,9 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <copyright>Copyright 2016 Jesper Hess Nielsen &lt;jesper@graffen.dk&gt;</copyright>
-    <tags>>NLog Syslog Log Logging</tags>
+    <tags>NLog Syslog Log Logging</tags>
     <dependencies>
-      <dependency id="NLog" version="4.3.3"/>
-      <dependency id="UnidecodeSharpFork" version="1.0.0"/>
+      <dependency id="NLog" version="4.3.7"/>
     </dependencies>
     <releaseNotes>
       See latest changes on github.
