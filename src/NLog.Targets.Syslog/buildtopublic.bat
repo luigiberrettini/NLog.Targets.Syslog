@@ -3,4 +3,5 @@
 call build.bat
 
 echo Publishing NuGet package...
-for /f %%a in ('dir /b /s .\deploy\*.nupkg') do call ..\..\tools\NuGet.exe push %%a
+
+..\..\tools\NuGet.exe push .\deploy\*.nupkg -Source https://www.nuget.org/api/v2/package %1
