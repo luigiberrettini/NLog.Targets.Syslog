@@ -1,6 +1,6 @@
-using System.Net;
-using System.Reflection;
 using NLog.Layouts;
+using NLog.Targets.Syslog.Helpers;
+using System.Net;
 
 namespace NLog.Targets.Syslog.Settings
 {
@@ -17,7 +17,7 @@ namespace NLog.Targets.Syslog.Settings
         public Rfc3164Config()
         {
             Hostname = Dns.GetHostName();
-            Tag = Assembly.GetEntryAssembly().GetName().Name;
+            Tag = ReflectionHelper.GetEntryAssembly().GetName().Name;
         }
     }
 }

@@ -1,7 +1,7 @@
+using NLog.Layouts;
+using NLog.Targets.Syslog.Helpers;
 using System.Net;
 using System.Net.NetworkInformation;
-using System.Reflection;
-using NLog.Layouts;
 
 namespace NLog.Targets.Syslog.Settings
 {
@@ -43,7 +43,7 @@ namespace NLog.Targets.Syslog.Settings
         public Rfc5424Config()
         {
             DefaultHostname = HostFqdn();
-            DefaultAppName = Assembly.GetEntryAssembly().GetName().Name;
+            DefaultAppName = ReflectionHelper.GetEntryAssembly().GetName().Name;
             Version = DefaultVersion;
             Hostname = DefaultHostname;
             AppName = DefaultAppName;
