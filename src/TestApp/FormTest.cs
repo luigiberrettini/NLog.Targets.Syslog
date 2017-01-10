@@ -1,7 +1,9 @@
 ﻿using NLog;
 using NLog.Common;
 using System;
+using System.Collections.ObjectModel;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -36,8 +38,19 @@ namespace TestApp
 
         public FormTest()
         {
+            TaskScheduler.UnobservedTaskException += HandleUnobservedTaskException;
             InitializeComponent();
             InitSyslogServer();
+        }
+
+        private static void HandleUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
+        {
+            e.SetObserved();
+            foreach (var innerException in e.Exception.Flatten().InnerExceptions)
+            {
+                Trace.WriteLine("******************** DANGEROUSLY UNOBSERVED TASK EXCEPTION!!!");
+                Trace.WriteLine(innerException);
+            }
         }
 
         private void InitSyslogServer()
