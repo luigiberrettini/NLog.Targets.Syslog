@@ -20,19 +20,17 @@ Below is a sample NLog.config file:
   <targets>
     <target type="Syslog" name="cee-udp">
       <layout type="SimpleLayout" text="@cee: {&quot;message&quot;: &quot;${message}&quot;}" />
-      <configuration>
-        <messageBuilder>
-          <facility>Local4</facility>
-          <rfc>Rfc5424</rfc>
-          <rfc5424>
-            <hostname type="SimpleLayout" text="${machinename}" />
-            <appName type="SimpleLayout" text="DAEMON.MyAppName" />
-            <procId type="SimpleLayout" text="${processid}" />
-            <msgId type="SimpleLayout" text="${threadid}" />
-            <disableBom>true</disableBom>
-          </rfc5424>
-        </messageBuilder>
-      </configuration>
+      <messageCreation>
+        <facility>Local4</facility>
+        <rfc>Rfc5424</rfc>
+        <rfc5424>
+          <hostname type="SimpleLayout" text="${machinename}" />
+          <appName type="SimpleLayout" text="DAEMON.MyAppName" />
+          <procId type="SimpleLayout" text="${processid}" />
+          <msgId type="SimpleLayout" text="${threadid}" />
+          <disableBom>true</disableBom>
+        </rfc5424>
+      </messageCreation>
     </target>
   </targets>
   <rules>
