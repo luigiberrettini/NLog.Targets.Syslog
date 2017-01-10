@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using NLog.Layouts;
 using System.Net;
 using System.Net.NetworkInformation;
