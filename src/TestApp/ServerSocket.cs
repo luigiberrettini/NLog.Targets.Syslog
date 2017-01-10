@@ -38,6 +38,14 @@ namespace TestApp
 
         protected abstract void Receive();
 
+        public void StopListening()
+        {
+            if (!KeepGoing)
+                return;
+            KeepGoing = false;
+            BoundSocket.Dispose();
+        }
+
         public void Dispose()
         {
             Dispose(true);
@@ -47,8 +55,7 @@ namespace TestApp
         {
             if (!disposing)
                 return;
-            KeepGoing = false;
-            BoundSocket.Dispose();
+            StopListening();
         }
     }
 }

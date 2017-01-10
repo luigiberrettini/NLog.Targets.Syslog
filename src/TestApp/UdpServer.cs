@@ -6,12 +6,13 @@ namespace TestApp
 {
     internal class UdpServer: ServerSocket
     {
-        private static readonly ManualResetEvent Signal = new ManualResetEvent(false);
+        private readonly ManualResetEvent signal;
 
         public UdpServer()
         {
             ProtocolType = ProtocolType.Udp;
             SocketType = SocketType.Dgram;
+            signal = new ManualResetEvent(false);
         }
 
         protected override void Receive()
@@ -19,10 +20,10 @@ namespace TestApp
             if (!KeepGoing)
                 return;
 
-            Signal.Reset();
+            signal.Reset();
             var state = new UdpState(BoundSocket);
             state.BeginReceive(ReadCallback);
-            Signal.WaitOne();
+            signal.WaitOne();
         }
 
         private void ReadCallback(IAsyncResult asyncResult)
@@ -30,7 +31,7 @@ namespace TestApp
             if (!KeepGoing)
                 return;
 
-            Signal.Set();
+            signal.Set();
             var state = (UdpState)asyncResult.AsyncState;
             state.EndReceive(asyncResult, ReadCallback, OnReceivedString);
         }
@@ -38,7 +39,7 @@ namespace TestApp
         protected override void Dispose(bool disposing)
         {
             if (disposing)
-                Signal.Dispose();
+                signal.Dispose();
             base.Dispose(disposing);
         }
     }

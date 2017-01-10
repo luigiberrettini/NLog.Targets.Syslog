@@ -231,5 +231,10 @@ namespace TestApp
             Action enableButton = () => buttonStartStopSyslogServer.Enabled = true;
             Task.Delay(500).ContinueWith(_ => Invoke(enableButton));
         }
+
+        private void OnFormClosing(object sender, FormClosingEventArgs e)
+        {
+            syslogServer.Dispose();
+        }
     }
 }

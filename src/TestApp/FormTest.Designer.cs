@@ -199,6 +199,7 @@ namespace TestApp
             Name = "FormTest";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "Syslog Target Demo";
+            this.FormClosing += new FormClosingEventHandler(OnFormClosing);
             ResumeLayout(false);
         }
     }

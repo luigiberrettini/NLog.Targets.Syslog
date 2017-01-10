@@ -52,6 +52,13 @@ namespace TestApp
                 return;
 
             stopped = true;
+            udpServer.StopListening();
+            tcpServer.StopListening();
+        }
+
+        public void Dispose()
+        {
+            Stop();
             udpServer.Dispose();
             tcpServer.Dispose();
         }
