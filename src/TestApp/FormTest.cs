@@ -1,7 +1,6 @@
 ﻿using NLog;
 using NLog.Common;
 using System;
-using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
