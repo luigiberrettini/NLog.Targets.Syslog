@@ -49,10 +49,14 @@ namespace TestApp
 
         private void ReadCallback(IAsyncResult asyncResult)
         {
-            if (!KeepGoing)
-                return;
-
             var state = (TcpState)asyncResult.AsyncState;
+
+            if (!KeepGoing)
+            {
+                state.Dispose();
+                return;
+            }
+
             state.EndReceive(asyncResult, ReadCallback, OnReceivedString);
         }
 

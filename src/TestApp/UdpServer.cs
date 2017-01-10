@@ -28,11 +28,15 @@ namespace TestApp
 
         private void ReadCallback(IAsyncResult asyncResult)
         {
+            var state = (UdpState)asyncResult.AsyncState;
+
             if (!KeepGoing)
+            {
+                state.Dispose();
                 return;
+            }
 
             signal.Set();
-            var state = (UdpState)asyncResult.AsyncState;
             state.EndReceive(asyncResult, ReadCallback, OnReceivedString);
         }
 

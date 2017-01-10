@@ -51,5 +51,10 @@ namespace TestApp
         {
             return receiveSocket.EndReceive(asyncResult);
         }
+
+        public void Dispose()
+        {
+            receiveSocket.Dispose();
+        }
     }
 }
