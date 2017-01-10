@@ -8,13 +8,14 @@ namespace TestApp
     internal class TcpServer: ServerSocket
     {
         private const int DefaultListeningSocketBacklog = 1000;
-        private static readonly ManualResetEvent Signal = new ManualResetEvent(false);
+        private readonly ManualResetEvent signal;
         private readonly int listeningSocketBacklog;
 
         public TcpServer(int socketBacklog = 0)
         {
             ProtocolType = ProtocolType.Tcp;
             SocketType = SocketType.Stream;
+            signal = new ManualResetEvent(false);
             listeningSocketBacklog = socketBacklog == 0 ? DefaultListeningSocketBacklog : socketBacklog;
         }
 
@@ -29,9 +30,9 @@ namespace TestApp
             if (!KeepGoing)
                 return;
 
-            Signal.Reset();
+            signal.Reset();
             BoundSocket.BeginAccept(AcceptCallback, BoundSocket);
-            Signal.WaitOne();
+            signal.WaitOne();
         }
 
         private void AcceptCallback(IAsyncResult asyncResult)
@@ -39,7 +40,7 @@ namespace TestApp
             if (!KeepGoing)
                 return;
 
-            Signal.Set();
+            signal.Set();
             var boundSocket = (Socket)asyncResult.AsyncState;
             var receivingSocket = boundSocket.EndAccept(asyncResult);
             var state = new TcpState(receivingSocket);
@@ -59,7 +60,7 @@ namespace TestApp
         {
             base.Dispose(disposing);
             if (disposing)
-                Signal.Dispose();
+                signal.Dispose();
         }
     }
 }
