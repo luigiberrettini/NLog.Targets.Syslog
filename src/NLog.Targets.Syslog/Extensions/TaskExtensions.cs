@@ -25,6 +25,18 @@ namespace NLog.Targets.Syslog.Extensions
                 .Unwrap();
         }
 
+        public static Task SafeFromAsync<TArg1, TArg2, TArg3>(this TaskFactory taskFactory, Func<TArg1, TArg2, TArg3, AsyncCallback, object, IAsyncResult> beginMethod, Action<IAsyncResult> endMethod, TArg1 arg1, TArg2 arg2, TArg3 arg3, object state)
+        {
+            try
+            {
+                return taskFactory.FromAsync(beginMethod, endMethod, arg1, arg2, arg3, state);
+            }
+            catch (Exception exception)
+            {
+                return new TaskCompletionSource<object>().FailedTask(exception);
+            }
+        }
+
         public static Task CanceledTask(this TaskCompletionSource<object> tcs)
         {
             tcs.SetCanceled();
@@ -43,18 +55,6 @@ namespace NLog.Targets.Syslog.Extensions
             action?.Invoke(exception);
             tcs.SetException(exception);
             return tcs.Task;
-        }
-
-        public static Task SafeFromAsync<TArg1, TArg2, TArg3>(this TaskFactory taskFactory, Func<TArg1, TArg2, TArg3, AsyncCallback, object, IAsyncResult> beginMethod, Action<IAsyncResult> endMethod, TArg1 arg1, TArg2 arg2, TArg3 arg3, object state)
-        {
-            try
-            {
-                return taskFactory.FromAsync(beginMethod, endMethod, arg1, arg2, arg3, state);
-            }
-            catch (Exception exception)
-            {
-                return new TaskCompletionSource<object>().FailedTask(exception);
-            }
         }
     }
 }
