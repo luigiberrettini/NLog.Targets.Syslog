@@ -41,10 +41,10 @@ namespace NLog.Targets.Syslog
         private Task SendAsync(CancellationToken token, TaskCompletionSource<object> tcs)
         {
             if (token.IsCancellationRequested)
-                return SendCanceledTcsTask(tcs);
+                return tcs.CanceledTask();
 
             if (AllSent)
-                return SendSucceededTcsTask(tcs);
+                return tcs.SucceededTask(() => asyncLogEvent.Continuation(null));
 
             PrepareMessage();
 
@@ -53,9 +53,9 @@ namespace NLog.Targets.Syslog
                 .ContinueWith(t =>
                 {
                     if (t.IsCanceled)
-                        return SendCanceledTcsTask(tcs);
+                        return tcs.CanceledTask();
                     if (t.Exception != null)
-                        return SendFailedTcsTask(tcs, t.Exception);
+                        return tcs.FailedTask(t.Exception, exception => asyncLogEvent.Continuation(exception.GetBaseException()));
                     return SendAsync(token, tcs);
                 }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
                 .Unwrap();
@@ -66,26 +66,6 @@ namespace NLog.Targets.Syslog
         private bool AllSent => currentMessage == logEntries.Length;
 
         private void PrepareMessage() => messageBuilder.PrepareMessage(buffer, asyncLogEvent.LogEvent, logEntries[currentMessage++]);
-
-        private static Task SendCanceledTcsTask(TaskCompletionSource<object> tcs)
-        {
-            tcs.SetCanceled();
-            return tcs.Task;
-        }
-
-        private Task SendSucceededTcsTask(TaskCompletionSource<object> tcs)
-        {
-            asyncLogEvent.Continuation(null);
-            tcs.SetResult(null);
-            return tcs.Task;
-        }
-
-        private Task SendFailedTcsTask(TaskCompletionSource<object> tcs, Exception exception)
-        {
-            asyncLogEvent.Continuation(exception.GetBaseException());
-            tcs.SetException(exception);
-            return tcs.Task;
-        }
 
         public override string ToString()
         {

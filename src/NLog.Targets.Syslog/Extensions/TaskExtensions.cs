@@ -25,6 +25,26 @@ namespace NLog.Targets.Syslog.Extensions
                 .Unwrap();
         }
 
+        public static Task CanceledTask(this TaskCompletionSource<object> tcs)
+        {
+            tcs.SetCanceled();
+            return tcs.Task;
+        }
+
+        public static Task SucceededTask(this TaskCompletionSource<object> tcs, Action action = null)
+        {
+            action?.Invoke();
+            tcs.SetResult(null);
+            return tcs.Task;
+        }
+
+        public static Task FailedTask(this TaskCompletionSource<object> tcs, Exception exception, Action<Exception> action = null)
+        {
+            action?.Invoke(exception);
+            tcs.SetException(exception);
+            return tcs.Task;
+        }
+
         public static Task SafeFromAsync<TArg1, TArg2, TArg3>(this TaskFactory taskFactory, Func<TArg1, TArg2, TArg3, AsyncCallback, object, IAsyncResult> beginMethod, Action<IAsyncResult> endMethod, TArg1 arg1, TArg2 arg2, TArg3 arg3, object state)
         {
             try
