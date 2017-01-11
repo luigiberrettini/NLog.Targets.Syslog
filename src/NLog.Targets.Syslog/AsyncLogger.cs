@@ -53,7 +53,7 @@ namespace NLog.Targets.Syslog
             return ProcessQueueAsync(messageBuilder, new TaskCompletionSource<object>())
                 .ContinueWith(t =>
                 {
-                    InternalLogger.Debug(t.Exception?.GetBaseException(), "ProcessQueueAsync faulted within try");
+                    InternalLogger.Warn(t.Exception?.GetBaseException(), "ProcessQueueAsync faulted within try");
                     return ProcessQueueAsync(messageBuilder);
                 }, token, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Current)
                 .Unwrap();
@@ -80,7 +80,7 @@ namespace NLog.Targets.Syslog
                             return tcs.CanceledTask();
                         }
                         if (t.Exception != null) // t.IsFaulted is true
-                            InternalLogger.Debug(t.Exception.GetBaseException(), "Task faulted");
+                            InternalLogger.Warn(t.Exception.GetBaseException(), "Task faulted");
                         else
                             InternalLogger.Debug($"Successfully sent message '{logEventMsgSet}'");
                         return ProcessQueueAsync(messageBuilder, tcs);
