@@ -106,7 +106,7 @@ namespace NLog.Targets.Syslog.MessageSend
             var octetCount = message.Length;
             var prefix = new ASCIIEncoding().GetBytes($"{octetCount} ");
 
-            return Task.Factory.FromAsync(stream.BeginWrite, stream.EndWrite, prefix, 0, prefix.Length, null);
+            return Task.Factory.SafeFromAsync(stream.BeginWrite, stream.EndWrite, prefix, 0, prefix.Length, null);
         }
 
         private Task WriteAsync(int offset, ByteArray data, CancellationToken token)
@@ -119,7 +119,7 @@ namespace NLog.Targets.Syslog.MessageSend
             var count = isLastWrite ? toBeWrittenTotal : dataChunkSize;
 
             return Task.Factory
-                .FromAsync(stream.BeginWrite, stream.EndWrite, (byte[])data, offset, count, null)
+                .SafeFromAsync(stream.BeginWrite, stream.EndWrite, (byte[])data, offset, count, null)
                 .Then(task => isLastWrite ? task : WriteAsync(offset + dataChunkSize, data, token), token)
                 .Unwrap();
         }
