@@ -46,21 +46,28 @@ namespace NLog.Targets.Syslog
             if (AllSent)
                 return tcs.SucceededTask(() => asyncLogEvent.Continuation(null));
 
-            PrepareMessage();
+            try
+            {
+                PrepareMessage();
 
-            messageTransmitter
-                .SendMessageAsync(buffer, token)
-                .ContinueWith(t =>
-                {
-                    if (t.IsCanceled)
-                        return tcs.CanceledTask();
-                    if (t.Exception != null)
-                        return tcs.FailedTask(t.Exception, exception => asyncLogEvent.Continuation(exception.GetBaseException()));
-                    return SendAsync(token, tcs);
-                }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
-                .Unwrap();
+                messageTransmitter
+                    .SendMessageAsync(buffer, token)
+                    .ContinueWith(t =>
+                    {
+                        if (t.IsCanceled)
+                            return tcs.CanceledTask();
+                        if (t.Exception != null)
+                            return tcs.FailedTask(t.Exception, exception => asyncLogEvent.Continuation(exception.GetBaseException()));
+                        return SendAsync(token, tcs);
+                    }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
+                    .Unwrap();
 
-            return tcs.Task;
+                return tcs.Task;
+            }
+            catch (Exception exception)
+            {
+                return tcs.FailedTask(exception);
+            }
         }
 
         private bool AllSent => currentMessage == logEntries.Length;
