@@ -60,6 +60,9 @@ namespace NLog.Targets.Syslog.MessageSend
             DisposeTcpClientAndItsInnerStream();
 
             tcp = new TcpClient();
+            tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse, true);
+            tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, false);
+            tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, new LingerOption(true, 0));
             tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
 
             return Task.FromResult<object>(null);
@@ -102,6 +105,7 @@ namespace NLog.Targets.Syslog.MessageSend
 
             var octetCount = message.Length;
             var prefix = new ASCIIEncoding().GetBytes($"{octetCount} ");
+
             return Task.Factory.FromAsync(stream.BeginWrite, stream.EndWrite, prefix, 0, prefix.Length, null);
         }
 
