@@ -105,7 +105,6 @@ namespace NLog.Targets.Syslog.MessageSend
 
             var octetCount = message.Length;
             var prefix = new ASCIIEncoding().GetBytes($"{octetCount} ");
-
             return Task.Factory.SafeFromAsync(stream.BeginWrite, stream.EndWrite, prefix, 0, prefix.Length, null);
         }
 
