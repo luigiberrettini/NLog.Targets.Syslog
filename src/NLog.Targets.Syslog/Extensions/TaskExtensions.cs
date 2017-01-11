@@ -24,5 +24,17 @@ namespace NLog.Targets.Syslog.Extensions
                 }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
                 .Unwrap();
         }
+
+        public static Task SafeFromAsync<TArg1, TArg2, TArg3>(this TaskFactory taskFactory, Func<TArg1, TArg2, TArg3, AsyncCallback, object, IAsyncResult> beginMethod, Action<IAsyncResult> endMethod, TArg1 arg1, TArg2 arg2, TArg3 arg3, object state)
+        {
+            try
+            {
+                return taskFactory.FromAsync(beginMethod, endMethod, arg1, arg2, arg3, state);
+            }
+            catch (Exception exception)
+            {
+                return new TaskCompletionSource<object>().FailedTask(exception);
+            }
+        }
     }
 }
