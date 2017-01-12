@@ -1,3 +1,5 @@
+[![NuGet](https://img.shields.io/nuget/v/NLog.Targets.Syslog.svg)]()
+
 Syslog target for NLog
 ======================
 **I'm looking for one or more people to take over maintenance of this project from me. Get in touch if you would like to!**
@@ -38,7 +40,7 @@ Below is a sample NLog.config file:
   </rules>
 </nlog>
 ```
-The package is also available through NuGet. Simply search for "NLog.Targets.Syslog".
+The package is also available through the [NuGet Package NLog.Targets.Syslog](https://www.nuget.org/packages/NLog.Targets.Syslog/).
 
 
 ### Options
