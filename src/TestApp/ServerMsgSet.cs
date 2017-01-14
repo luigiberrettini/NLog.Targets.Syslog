@@ -48,9 +48,9 @@ namespace TestApp
             if (framing == FramingMethod.NonTransparent)
                 return true;
 
-            var splitted = Regex.Split(message, "(\\d{1,11}) (.*)").Where(x => x != string.Empty).ToArray();
+            var splitted = Regex.Split(message, "(\\d{1,11}) (<\\d{3}>)").Where(x => x != string.Empty).ToArray();
             var octetCount = splitted[0];
-            var octets = splitted.Length < 2 ? null : encoding.GetBytes(splitted[1]);
+            var octets = splitted.Length < 3 ? null : encoding.GetBytes(splitted[1] + splitted[2]);
             return octetCount == octets?.Length.ToString();
         }
 
