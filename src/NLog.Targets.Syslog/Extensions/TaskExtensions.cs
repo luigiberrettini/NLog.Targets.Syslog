@@ -50,7 +50,7 @@ namespace NLog.Targets.Syslog.Extensions
             var tcs = new TaskCompletionSource<object>();
             try
             {
-                beginMethod(arg1, arg2, arg3, Callback(endMethod, tcs), null);
+                beginMethod(arg1, arg2, arg3, Callback(endMethod, tcs), state);
             }
             catch (Exception exception)
             {
