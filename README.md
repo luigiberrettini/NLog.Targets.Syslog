@@ -1,4 +1,4 @@
-[![NuGet](https://img.shields.io/nuget/v/NLog.Targets.Syslog.svg)]()
+[![NuGet](https://img.shields.io/nuget/v/NLog.Targets.Syslog.svg)](https://www.nuget.org/packages/NLog.Targets.Syslog/)
 
 Syslog target for NLog
 ======================
