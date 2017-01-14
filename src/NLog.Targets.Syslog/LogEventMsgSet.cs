@@ -57,7 +57,11 @@ namespace NLog.Targets.Syslog
                         if (t.IsCanceled)
                             return tcs.CanceledTask();
                         if (t.Exception != null)
-                            return tcs.FailedTask(t.Exception, exception => asyncLogEvent.Continuation(exception.GetBaseException()));
+                        {
+                            asyncLogEvent.Continuation(t.Exception.GetBaseException());
+                            tcs.SetException(t.Exception);
+                            return Task.FromResult<object>(null);
+                        }
                         return SendAsync(token, tcs);
                     }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
                     .Unwrap();

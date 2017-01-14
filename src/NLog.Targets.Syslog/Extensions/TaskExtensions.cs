@@ -38,9 +38,8 @@ namespace NLog.Targets.Syslog.Extensions
             return tcs.Task;
         }
 
-        public static Task FailedTask(this TaskCompletionSource<object> tcs, Exception exception, Action<Exception> action = null)
+        public static Task FailedTask(this TaskCompletionSource<object> tcs, Exception exception)
         {
-            action?.Invoke(exception);
             tcs.SetException(exception);
             return tcs.Task;
         }
