@@ -1,12 +1,12 @@
-version: 1.0.{build}
+version: 3.0.2.{build}
 configuration: Release
 platform: Any CPU
 before_build:
-- cmd: nuget restore src/NLog.Targets.Syslog.sln -DisableParallelProcessing
+  - cmd: nuget restore src/NLog.Targets.Syslog.sln -DisableParallelProcessing
 build:
   project: src/NLog.Targets.Syslog.sln
   verbosity: minimal
 after_build:
-- cmd: nuget pack src/NLog.Targets.Syslog/NLog.Targets.Syslog.csproj -Prop Configuration=Release -Prop Platform=AnyCPU
+  - cmd: nuget pack src/NLog.Targets.Syslog/NLog.Targets.Syslog.csproj -Prop Configuration=Release -Prop Platform=AnyCPU
 artifacts:
-- path: NLog.Targets.Syslog*.nupkg
+  - path: NLog.Targets.Syslog*.nupkg
