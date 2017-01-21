@@ -6,6 +6,10 @@ Syslog target for NLog
 
 It can be used with version 4.3.7 and later of NLog and allows to send logging messages to a Unix-style Syslog server.
 
+**Notice**
+
+Support is provided for the latest major version, but development will be based only on the latest version.
+
 
 
 ## Configuration
