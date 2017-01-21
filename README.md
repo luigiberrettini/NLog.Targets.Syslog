@@ -13,8 +13,8 @@ Support is provided for the latest major version, but development will be based 
 
 
 ## Configuration
-To use NLog Syslog, you simply wire it up as an extension in the NLog.config file and place the NLog.Targets.Syslog.dll in the same location as the NLog.dll and NLog.config files.
-Then use as you would any NLog target.
+To use NLog Syslog simply download the [NLog.Targets.Syslog NuGet package](https://www.nuget.org/packages/NLog.Targets.Syslog/), then use as you would any NLog target.
+
 Below is a sample NLog.config file:
 
 ```xml
@@ -42,7 +42,6 @@ Below is a sample NLog.config file:
   </rules>
 </nlog>
 ```
-The package is also available through the [NuGet Package NLog.Targets.Syslog](https://www.nuget.org/packages/NLog.Targets.Syslog/).
 
 
 ### Options
