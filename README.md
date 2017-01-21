@@ -15,6 +15,8 @@ Support is provided for the latest major version, but development will be based 
 ## Configuration
 To use NLog Syslog simply download the [NLog.Targets.Syslog NuGet package](https://www.nuget.org/packages/NLog.Targets.Syslog/), then use as you would any NLog target.
 
+Since this targets take advantage of [.NET Task Parallel Library](https://msdn.microsoft.com/en-us/library/dd460717.aspx) to work in an asynchronous and concurrent way, there is no need to use NLog **AsyncWrapper**.
+
 Below is a sample NLog.config file:
 
 ```xml
