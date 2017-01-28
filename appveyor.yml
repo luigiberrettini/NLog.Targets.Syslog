@@ -3,10 +3,12 @@ configuration: Release
 platform: Any CPU
 before_build:
   - cmd: nuget restore src/NLog.Targets.Syslog.sln -DisableParallelProcessing
+  - ps: Set-AppveyorBuildVariable -Name NGP_VER -Value (& "$env:APPVEYOR_BUILD_FOLDER\tools\get-version.ps1" -versionInfoFile "$env:APPVEYOR_BUILD_FOLDER\src\NLog.Targets.Syslog\Properties\AssemblyInfo.cs")
 build:
   project: src/NLog.Targets.Syslog.sln
   verbosity: minimal
 after_build:
   - cmd: nuget pack src/NLog.Targets.Syslog/NLog.Targets.Syslog.csproj -Prop Configuration=Release -Prop Platform=AnyCPU
+  - cmd: nuget pack src/NLog.Targets.Syslog/NLog.Targets.Syslog.Schema.nuspec -Prop version=%NGP_VER%
 artifacts:
   - path: NLog.Targets.Syslog*.nupkg
