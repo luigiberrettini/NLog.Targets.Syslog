@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xs:schema id="NLog.Targets.Syslog"
            elementFormDefault="qualified"
-           targetNamespace="https://graffen.github.io/NLog.Targets.Syslog/schema.xsd"
+           targetNamespace="http://www.nlog-project.org/schemas/NLog.Targets.Syslog.xsd"
            xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-           xmlns:sl="https://graffen.github.io/NLog.Targets.Syslog/schema.xsd"
+           xmlns:sl="http://www.nlog-project.org/schemas/NLog.Targets.Syslog.xsd"
            xmlns:nlog="http://www.nlog-project.org/schemas/NLog.xsd">
     <xs:import namespace="http://www.nlog-project.org/schemas/NLog.xsd" />
     <xs:complexType name="Syslog">
