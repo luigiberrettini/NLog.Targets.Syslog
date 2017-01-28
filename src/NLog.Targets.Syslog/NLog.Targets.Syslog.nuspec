@@ -1,23 +1,22 @@
 <?xml version="1.0"?>
-<package >
+<package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <metadata>
     <id>$id$</id>
-    <version>$version$</version>
-    <title>$title$</title>
-    <authors>$author$</authors>
-    <owners>$author$</owners>
-    <licenseUrl>https://github.com/graffen/NLog.Targets.Syslog/blob/master/License.txt</licenseUrl>
-    <projectUrl>https://github.com/graffen/NLog.Targets.Syslog</projectUrl>
-    <iconUrl>http://nlog-project.org/N.png</iconUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <title>NLog Syslog target</title>
+    <summary>NLog target to send messages to a Syslog servers</summary>
     <description>$description$</description>
+    <authors>Jesper Hess Nielsen, Luigi Berrettini and others</authors>
+    <owners>Jesper Hess Nielsen, Luigi Berrettini</owners>
     <copyright>Copyright © 2013 - present by Jesper Hess Nielsen, Luigi Berrettini and others: https://github.com/graffen/NLog.Targets.Syslog/graphs/contributors</copyright>
+    <version>$version$</version>
+    <releaseNotes>https://github.com/graffen/NLog.Targets.Syslog/releases/tag/v$version$</releaseNotes>
     <tags>NLog Syslog Log Logging</tags>
+    <iconUrl>http://nlog-project.org/N.png</iconUrl>
+    <projectUrl>https://github.com/graffen/NLog.Targets.Syslog</projectUrl>
+    <licenseUrl>https://github.com/graffen/NLog.Targets.Syslog/blob/master/License.txt</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
       <dependency id="NLog" version="4.3.7"/>
     </dependencies>
-    <releaseNotes>
-      See latest changes on github.
-    </releaseNotes>
   </metadata>
 </package>
