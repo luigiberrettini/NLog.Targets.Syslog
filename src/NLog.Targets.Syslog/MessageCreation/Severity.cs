@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+// Licensed under the BSD license
+// See the LICENSE file in the project root for more information
+
+using System.Collections.Generic;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {

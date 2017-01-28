@@ -1,4 +1,7 @@
-﻿using NLog;
+// Licensed under the BSD license
+// See the LICENSE file in the project root for more information
+
+using NLog;
 using NLog.Common;
 using System;
 using System.Configuration;

@@ -1,4 +1,7 @@
-﻿using System;
+// Licensed under the BSD license
+// See the LICENSE file in the project root for more information
+
+using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;

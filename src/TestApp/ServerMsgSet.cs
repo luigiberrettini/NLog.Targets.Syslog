@@ -1,4 +1,7 @@
-﻿using System.Linq;
+// Licensed under the BSD license
+// See the LICENSE file in the project root for more information
+
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using NLog.Targets.Syslog.Settings;
