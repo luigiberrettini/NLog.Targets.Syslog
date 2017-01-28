@@ -11,7 +11,7 @@
     <iconUrl>http://nlog-project.org/N.png</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <copyright>Copyright 2016 Jesper Hess Nielsen &lt;jesper@graffen.dk&gt;</copyright>
+    <copyright>Copyright © 2013 - present by Jesper Hess Nielsen, Luigi Berrettini and others: https://github.com/graffen/NLog.Targets.Syslog/graphs/contributors</copyright>
     <tags>NLog Syslog Log Logging</tags>
     <dependencies>
       <dependency id="NLog" version="4.3.7"/>
