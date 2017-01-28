@@ -1,6 +1,6 @@
 param ([Parameter(Mandatory=$true)][string]$versionInfoFile)
 
-$RegularExpression = [regex] 'AssemblyVersion\(\"(.*)\"\)'
+$RegularExpression = [regex] 'AssemblyInformationalVersion\(\"(.*)\"\)'
 $fileContent = Get-Content $versionInfoFile
 foreach($content in $fileContent)
 {
