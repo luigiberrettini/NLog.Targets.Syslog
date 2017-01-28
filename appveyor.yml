@@ -1,9 +1,10 @@
-version: 3.0.2.{build}
 configuration: Release
 platform: Any CPU
 before_build:
   - cmd: nuget restore src/NLog.Targets.Syslog.sln -DisableParallelProcessing
   - ps: Set-AppveyorBuildVariable -Name NGP_VER -Value (& "$env:APPVEYOR_BUILD_FOLDER\tools\get-version.ps1" -versionInfoFile "$env:APPVEYOR_BUILD_FOLDER\src\NLog.Targets.Syslog\Properties\AssemblyInfo.cs")
+  - ps: Update-AppveyorBuild -Version "$env:NGP_VER.$env:APPVEYOR_BUILD_NUMBER"
+  - ps: (Get-Content "$env:APPVEYOR_BUILD_FOLDER\src\NLog.Targets.Syslog\Properties\AssemblyInfo.cs") -replace '(AssemblyFileVersion\(\")([\.0-9]+)(\"\)])',"`${1}$env:APPVEYOR_BUILD_VERSION`${3}" | Set-Content "$env:APPVEYOR_BUILD_FOLDER\src\NLog.Targets.Syslog\Properties\AssemblyInfo.cs"
 build:
   project: src/NLog.Targets.Syslog.sln
   verbosity: minimal
