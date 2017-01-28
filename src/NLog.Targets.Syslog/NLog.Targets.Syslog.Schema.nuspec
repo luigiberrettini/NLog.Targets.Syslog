@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <metadata>
+    <id>NLog.Targets.Syslog.Schema</id>
+    <title>NLog Syslog target schema for Intellisense™</title>
+    <summary>Enables Intellisense™ for Syslog target settings in NLog.config</summary>
+    <description>XSD file to enable Intellisense™ when editing the Syslog target settings in NLog configuration files</description>
+    <authors>Jesper Hess Nielsen, Luigi Berrettini and others</authors>
+    <owners>Jesper Hess Nielsen, Luigi Berrettini</owners>
+    <copyright>Copyright © 2013 - present by Jesper Hess Nielsen, Luigi Berrettini and others: https://github.com/graffen/NLog.Targets.Syslog/graphs/contributors</copyright>
+    <version>$version$</version>
+    <releaseNotes>https://github.com/graffen/NLog.Targets.Syslog/releases/tag/v$version$</releaseNotes>
+    <tags>NLog Syslog Log Logging Intellisense xsd</tags>
+    <iconUrl>http://nlog-project.org/NConfig.png</iconUrl>
+    <projectUrl>https://github.com/graffen/NLog.Targets.Syslog</projectUrl>
+    <licenseUrl>https://github.com/graffen/NLog.Targets.Syslog/blob/master/License.txt</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+  </metadata>
+  <files>
+    <file src="NLog.Targets.Syslog.xsd" target="content" />
+  </files>
+</package>
