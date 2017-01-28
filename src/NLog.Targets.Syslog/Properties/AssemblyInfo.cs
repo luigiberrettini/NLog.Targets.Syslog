@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Jesper Hess Nielsen, Luigi Berrettini and others")]
 [assembly: AssemblyProduct("NLog.Targets.Syslog")]
-[assembly: AssemblyCopyright("Copyright © Jesper Hess Nielsen 2014")]
+[assembly: AssemblyCopyright("Copyright © 2013 - present by Jesper Hess Nielsen, Luigi Berrettini and others: https://github.com/graffen/NLog.Targets.Syslog/graphs/contributors")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
