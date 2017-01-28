@@ -1,4 +1,7 @@
-﻿using System.Reflection;
+// Licensed under the BSD license
+// See the LICENSE file in the project root for more information
+
+using System.Reflection;
 
 namespace NLog.Targets.Syslog.Extensions
 {

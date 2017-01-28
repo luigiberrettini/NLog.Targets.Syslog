@@ -12,6 +12,13 @@ Support is provided for the latest major version, but development will be based 
 
 
 
+## License
+NLog Syslog is open source software, licensed under the terms of BSD license.
+
+Please see the [LICENSE file](LICENSE) for further information.
+
+
+
 ## Configuration
 To use NLog Syslog simply download the [NLog.Targets.Syslog NuGet package](https://www.nuget.org/packages/NLog.Targets.Syslog/), then use as you would any NLog target.
 

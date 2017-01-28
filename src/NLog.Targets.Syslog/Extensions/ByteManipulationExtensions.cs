@@ -1,4 +1,7 @@
-﻿namespace NLog.Targets.Syslog.Extensions
+// Licensed under the BSD license
+// See the LICENSE file in the project root for more information
+
+namespace NLog.Targets.Syslog.Extensions
 {
     internal static class ByteManipulationExtensions
     {
