@@ -15,7 +15,7 @@ Support is provided for the latest major version, but development will be based 
 ## License
 NLog Syslog is open source software, licensed under the terms of BSD license.
 
-Please see the [license file](License.txt) for further information.
+Please see the [LICENSE file](LICENSE) for further information.
 
 
 
