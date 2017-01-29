@@ -35,8 +35,8 @@ namespace NLog.Targets.Syslog.Settings
             timeOffset = uintSize;
             intervalOffset = 2 * uintSize;
             structSize = 3 * uintSize;
-            OnOff = (uint)(keepAliveConfig.On ? 1 : 0);
-            Time = (uint)keepAliveConfig.Time;
+            OnOff = (uint)(keepAliveConfig.Enabled ? 1 : 0);
+            Time = (uint)keepAliveConfig.Timeout;
             Interval = (uint)keepAliveConfig.Interval;
         }
         
