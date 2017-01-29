@@ -7,8 +7,8 @@ namespace NLog.Targets.Syslog.Settings
     /// <remarks>The number of keep-alive probes (data retransmissions) is set to 10 and cannot be changed</remarks>
     public class KeepAliveConfig
     {
-        private const int DefaultTimeout = 500;
-        private const int DefaultInterval = 100;
+        private const int DefaultTimeout = 5000;
+        private const int DefaultInterval = 1000;
 
         /// <summary>Whether to use keep-alive or not</summary>
         public bool Enabled { get; set; }
