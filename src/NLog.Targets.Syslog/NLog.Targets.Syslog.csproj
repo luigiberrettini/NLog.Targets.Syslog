@@ -117,6 +117,8 @@
     <Compile Include="Policies\TruncateToComputedValuePolicy.cs" />
     <Compile Include="Policies\TruncateToKnownValuePolicy.cs" />
     <Compile Include="MessageSend\Udp.cs" />
+    <Compile Include="Settings\KeepAliveConfig.cs" />
+    <Compile Include="MessageSend\KeepAlive.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="NLog.Targets.Syslog.snk" />
