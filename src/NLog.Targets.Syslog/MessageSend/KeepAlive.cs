@@ -3,8 +3,9 @@
 
 using System;
 using System.Runtime.InteropServices;
+using NLog.Targets.Syslog.Settings;
 
-namespace NLog.Targets.Syslog.Settings
+namespace NLog.Targets.Syslog.MessageSend
 {
     // Win32 header file: Mstcpip.h
     //
@@ -16,36 +17,32 @@ namespace NLog.Targets.Syslog.Settings
     // };
     internal class KeepAlive
     {
-        private readonly int uintSize;
         private readonly int onOffOffset;
         private readonly int timeOffset;
         private readonly int intervalOffset;
         private readonly int structSize;
-
-        public uint OnOff { get; }
-
-        public uint Time { get; }
-
-        public uint Interval { get; }
+        private readonly uint onOff;
+        private readonly uint time;
+        private readonly uint interval;
 
         public KeepAlive(KeepAliveConfig keepAliveConfig)
         {
-            uintSize = Marshal.SizeOf(typeof(uint));
+            var uintSize = Marshal.SizeOf(typeof(uint));
             onOffOffset = 0;
             timeOffset = uintSize;
             intervalOffset = 2 * uintSize;
             structSize = 3 * uintSize;
-            OnOff = (uint)(keepAliveConfig.Enabled ? 1 : 0);
-            Time = (uint)keepAliveConfig.Timeout;
-            Interval = (uint)keepAliveConfig.Interval;
+            onOff = (uint)(keepAliveConfig.Enabled ? 1 : 0);
+            time = (uint)keepAliveConfig.Timeout;
+            interval = (uint)keepAliveConfig.Interval;
         }
-        
+
         public byte[] ToByteArray()
         {
-            byte[] keepAliveSettings = new byte[structSize];
-            BitConverter.GetBytes(OnOff).CopyTo(keepAliveSettings, onOffOffset);
-            BitConverter.GetBytes(Time).CopyTo(keepAliveSettings, timeOffset);
-            BitConverter.GetBytes(Interval).CopyTo(keepAliveSettings, intervalOffset);
+            var keepAliveSettings = new byte[structSize];
+            BitConverter.GetBytes(onOff).CopyTo(keepAliveSettings, onOffOffset);
+            BitConverter.GetBytes(time).CopyTo(keepAliveSettings, timeOffset);
+            BitConverter.GetBytes(interval).CopyTo(keepAliveSettings, intervalOffset);
             return keepAliveSettings;
         }
     }
