@@ -21,6 +21,7 @@ namespace NLog.Targets.Syslog.MessageSend
 
         private volatile bool neverConnected;
         private readonly TimeSpan recoveryTime;
+        private readonly KeepAlive keepAlive;
         private readonly bool useTls;
         private readonly int dataChunkSize;
         private readonly FramingMethod framing;
@@ -32,6 +33,7 @@ namespace NLog.Targets.Syslog.MessageSend
         {
             neverConnected = true;
             recoveryTime = TimeSpan.FromMilliseconds(tcpConfig.ReconnectInterval);
+            keepAlive = new KeepAlive(tcpConfig.KeepAlive);
             useTls = tcpConfig.UseTls;
             framing = tcpConfig.Framing;
             dataChunkSize = tcpConfig.DataChunkSize;
@@ -66,7 +68,8 @@ namespace NLog.Targets.Syslog.MessageSend
             tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse, true);
             tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, false);
             tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, new LingerOption(true, 0));
-            tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+            // Call WSAIoctl via IOControl
+            tcp.Client.IOControl(IOControlCode.KeepAliveValues, keepAlive.ToByteArray(), null);
 
             return Task.FromResult<object>(null);
         }

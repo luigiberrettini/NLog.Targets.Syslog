@@ -28,6 +28,9 @@ namespace NLog.Targets.Syslog.Settings
             set { recoveryTime = TimeSpan.FromMilliseconds(value); }
         }
 
+        /// <summary>KeepAlive configuration</summary>
+        public KeepAliveConfig KeepAlive { get; set; }
+
         /// <summary>Whether to use TLS or not (TLS 1.2 only)</summary>
         public bool UseTls { get; set; }
 
@@ -48,6 +51,7 @@ namespace NLog.Targets.Syslog.Settings
             Server = Localhost;
             Port = DefaultPort;
             ReconnectInterval = DefaultReconnectInterval;
+            KeepAlive = new KeepAliveConfig();
             UseTls = true;
             Framing = FramingMethod.OctetCounting;
             DataChunkSize = DefaultBufferSize;
