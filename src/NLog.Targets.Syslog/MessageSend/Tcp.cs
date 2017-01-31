@@ -22,6 +22,7 @@ namespace NLog.Targets.Syslog.MessageSend
         private volatile bool neverConnected;
         private readonly TimeSpan recoveryTime;
         private readonly KeepAlive keepAlive;
+        private readonly int connectionCheckTimeout;
         private readonly bool useTls;
         private readonly int dataChunkSize;
         private readonly FramingMethod framing;
@@ -34,6 +35,7 @@ namespace NLog.Targets.Syslog.MessageSend
             neverConnected = true;
             recoveryTime = TimeSpan.FromMilliseconds(tcpConfig.ReconnectInterval);
             keepAlive = new KeepAlive(tcpConfig.KeepAlive);
+            connectionCheckTimeout = tcpConfig.ConnectionCheckTimeout;
             useTls = tcpConfig.UseTls;
             framing = tcpConfig.Framing;
             dataChunkSize = tcpConfig.DataChunkSize;
@@ -44,7 +46,7 @@ namespace NLog.Targets.Syslog.MessageSend
             if (token.IsCancellationRequested)
                 return Task.FromResult<object>(null);
 
-            if (tcp?.Connected == true)
+            if (tcp?.Connected == true && IsSocketConnected())
                 return WriteAsync(message, token);
 
             var delay = neverConnected ? ZeroSecondsTimeSpan : recoveryTime;
@@ -57,6 +59,14 @@ namespace NLog.Targets.Syslog.MessageSend
                 .Unwrap()
                 .Then(_ => WriteAsync(message, token), token)
                 .Unwrap();
+        }
+
+        private bool IsSocketConnected()
+        {
+            if (connectionCheckTimeout <= 0)
+                return true;
+
+            return  tcp.Client.Poll(connectionCheckTimeout, SelectMode.SelectRead) && tcp.Client.Available == 0;
         }
 
         private Task InitTcpClient()

@@ -11,6 +11,7 @@ namespace NLog.Targets.Syslog.Settings
         private const string Localhost = "localhost";
         private const int DefaultPort = 514;
         private const int DefaultReconnectInterval = 500;
+        private const int DefaultConnectionCheckTimeout = 500000;
         private const int DefaultBufferSize = 4096;
         private FramingMethod framing;
         private TimeSpan recoveryTime;
@@ -30,6 +31,9 @@ namespace NLog.Targets.Syslog.Settings
 
         /// <summary>KeepAlive configuration</summary>
         public KeepAliveConfig KeepAlive { get; set; }
+
+        /// <summary>The time, in microseconds, to wait for a response when checking the connection status</summary>
+        public int ConnectionCheckTimeout { get; set; }
 
         /// <summary>Whether to use TLS or not (TLS 1.2 only)</summary>
         public bool UseTls { get; set; }
@@ -52,6 +56,7 @@ namespace NLog.Targets.Syslog.Settings
             Port = DefaultPort;
             ReconnectInterval = DefaultReconnectInterval;
             KeepAlive = new KeepAliveConfig();
+            ConnectionCheckTimeout = DefaultConnectionCheckTimeout;
             UseTls = true;
             Framing = FramingMethod.OctetCounting;
             DataChunkSize = DefaultBufferSize;
