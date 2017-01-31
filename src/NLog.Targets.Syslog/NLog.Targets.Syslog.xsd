@@ -120,6 +120,7 @@
                                         <xs:choice minOccurs="0" maxOccurs="unbounded">
                                             <xs:element name="server" type="xs:string" minOccurs="1" maxOccurs="1" />
                                             <xs:element name="port" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                                            <xs:element name="reconnectInterval" type="xs:integer" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="keepAlive" minOccurs="0" maxOccurs="1">
                                                 <xs:complexType>
                                                     <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -132,7 +133,7 @@
                                                     <xs:attribute name="interval" type="xs:integer" />
                                                 </xs:complexType>
                                             </xs:element>
-                                            <xs:element name="reconnectInterval" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                                            <xs:element name="connectionCheckTimeout" type="xs:integer" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="useTls" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="framing" type="xs:string" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="dataChunkSize" type="xs:integer" minOccurs="0" maxOccurs="1" />

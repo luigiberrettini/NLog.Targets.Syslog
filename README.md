@@ -123,6 +123,7 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
     * `enabled` - whether to use keep-alive or not (default: `true`)
     * `timeout` - the timeout, in milliseconds, with no activity until the first keep-alive packet is sent (default: `100`)
     * `interval` - the interval, in milliseconds, between when successive keep-alive packets are sent if no acknowledgement is received (default: `100`)
+  * `connectionCheckTimeout` - the time, in microseconds, to wait for a response when checking the connection status (default: `100`; `0` means the only check performed is `TcpClient.IsConnected`)
   * `useTls` - `false` or `true` (default: `true`)
   * `framing` - `nonTransparent` or `octectCounting` (default: `octectCounting`)
   * `dataChunkSize` - the size of chunks, in bytes, in which data is split to be sent over the wire (default: `4096`)
