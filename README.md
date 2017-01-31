@@ -119,6 +119,10 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
   * `server` - IP or hostname of the Syslog server (default: `127.0.0.1`)
   * `port` - port the Syslog server is listening on (default: `514`)
   * `reconnectInterval` - the time interval, in milliseconds, after which a connection is retried (default: `500`)
+  * `keepAlive` - settings related to keep-alive:
+    * `enabled` - whether to use keep-alive or not (default: `true`)
+    * `timeout` - the timeout, in milliseconds, with no activity until the first keep-alive packet is sent (default: `100`)
+    * `interval` - the interval, in milliseconds, between when successive keep-alive packets are sent if no acknowledgement is received (default: `100`)
   * `useTls` - `false` or `true` (default: `true`)
   * `framing` - `nonTransparent` or `octectCounting` (default: `octectCounting`)
   * `dataChunkSize` - the size of chunks, in bytes, in which data is split to be sent over the wire (default: `4096`)
