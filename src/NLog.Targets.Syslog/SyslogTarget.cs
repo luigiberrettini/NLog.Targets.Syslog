@@ -53,8 +53,10 @@ namespace NLog.Targets.Syslog
         /// <remarks>Write(LogEventInfo) is called only by Write(AsyncLogEventInfo/AsyncLogEventInfo[]): no need to override it</remarks>
         protected override void Write(AsyncLogEventInfo asyncLogEvent)
         {
-            MergeEventProperties(asyncLogEvent.LogEvent);
-            var asyncLoggerId = asyncLogEvent.LogEvent.SequenceID % Enforcement.MessageProcessors;
+            var logEvent = asyncLogEvent.LogEvent;
+            MergeEventProperties(logEvent);
+            PrecalculateVolatileLayouts(logEvent);
+            var asyncLoggerId = logEvent.SequenceID % Enforcement.MessageProcessors;
             asyncLoggers[asyncLoggerId].Log(asyncLogEvent);
         }
 
