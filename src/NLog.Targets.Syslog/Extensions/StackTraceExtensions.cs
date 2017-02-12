@@ -21,9 +21,9 @@ namespace NLog.Targets.Syslog.Extensions
                 .First(NotNLog);
         }
 
-        private static bool NotNLog(Assembly x)
+        private static bool NotNLog(Assembly assembly)
         {
-            return x.GetName().Name != NLogAssemblyName;
+            return assembly.Name() != NLogAssemblyName;
         }
     }
 }
