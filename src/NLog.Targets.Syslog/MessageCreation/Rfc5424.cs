@@ -10,8 +10,6 @@ namespace NLog.Targets.Syslog.MessageCreation
 {
     internal class Rfc5424 : MessageBuilder
     {
-        private const string DefaultVersion = "1";
-        private const string NilValue = "-";
         private const string TimestampFormat = "{0:yyyy-MM-ddTHH:mm:ss.ffffffK}";
         private static readonly byte[] SpaceBytes = { 0x20 };
 
@@ -30,11 +28,11 @@ namespace NLog.Targets.Syslog.MessageCreation
 
         public Rfc5424(Facility facility, Rfc5424Config rfc5424Config, EnforcementConfig enforcementConfig) : base(facility, enforcementConfig)
         {
-            version = DefaultVersion;
+            version = rfc5424Config.Version;
             hostnameLayout = rfc5424Config.Hostname;
             appNameLayout = rfc5424Config.AppName;
-            procIdLayout = NilValue;
-            msgIdLayout = NilValue;
+            procIdLayout = rfc5424Config.ProcId;
+            msgIdLayout = rfc5424Config.MsgId;
             structuredData = new StructuredData(rfc5424Config.StructuredData, enforcementConfig);
             disableBom = rfc5424Config.DisableBom;
             hostnamePolicySet = new FqdnHostnamePolicySet(enforcementConfig, rfc5424Config.DefaultHostname);
