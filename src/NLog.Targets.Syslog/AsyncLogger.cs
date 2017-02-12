@@ -85,7 +85,7 @@ namespace NLog.Targets.Syslog
                         if (t.Exception != null) // t.IsFaulted is true
                             InternalLogger.Warn(t.Exception.GetBaseException(), "Task faulted");
                         else
-                            InternalLogger.Debug($"Successfully sent message '{logEventMsgSet}'");
+                            InternalLogger.Debug(() => $"Successfully sent message '{logEventMsgSet}'");
                         return ProcessQueueAsync(messageBuilder, tcs);
                     }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
                     .Unwrap();
@@ -101,7 +101,7 @@ namespace NLog.Targets.Syslog
         private void Enqueue(AsyncLogEventInfo asyncLogEventInfo, int delay)
         {
             queue.TryAdd(asyncLogEventInfo, delay, token);
-            InternalLogger.Debug($"Enqueued '{asyncLogEventInfo.ToFormattedMessage()}'");
+            InternalLogger.Debug(() => $"Enqueued '{asyncLogEventInfo.ToFormattedMessage()}'");
         }
 
         public void Dispose()

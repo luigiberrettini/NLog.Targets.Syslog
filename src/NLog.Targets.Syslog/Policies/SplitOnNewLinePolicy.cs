@@ -25,7 +25,7 @@ namespace NLog.Targets.Syslog.Policies
         public string[] Apply(string s)
         {
             var split = s.Split(LineSeps, StringSplitOptions.RemoveEmptyEntries);
-            InternalLogger.Trace($"Split '{s}' on new line");
+            InternalLogger.Trace(() => $"Split '{s}' on new line");
             return split;
         }
     }

@@ -16,7 +16,7 @@
     <licenseUrl>https://github.com/graffen/NLog.Targets.Syslog/blob/master/License.txt</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
-      <dependency id="NLog" version="4.3.7"/>
+      <dependency id="NLog" version="4.4.2"/>
     </dependencies>
   </metadata>
 </package>

@@ -28,7 +28,7 @@ namespace NLog.Targets.Syslog.Policies
                 return s;
 
             var truncated = s.Substring(0, maxLength);
-            InternalLogger.Trace($"Truncated '{s}' to {maxLength} characters: '{truncated}'");
+            InternalLogger.Trace(() => $"Truncated '{s}' to {maxLength} characters: '{truncated}'");
             return truncated;
         }
     }
