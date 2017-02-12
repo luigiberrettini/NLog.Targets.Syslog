@@ -18,12 +18,12 @@ namespace NLog.Targets.Syslog.Extensions
                 ?.Select(x => x.GetMethod().DeclaringType?.Assembly)
                 .Where(x => x != null)
                 .SkipWhile(NotNLog)
-                .First(NotNLog);
+                .FirstOrDefault(NotNLog);
         }
 
-        private static bool NotNLog(Assembly x)
+        private static bool NotNLog(Assembly assembly)
         {
-            return x.GetName().Name != NLogAssemblyName;
+            return assembly.Name() != NLogAssemblyName;
         }
     }
 }
