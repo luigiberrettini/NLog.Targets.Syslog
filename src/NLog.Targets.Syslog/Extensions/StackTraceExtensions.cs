@@ -16,14 +16,12 @@ namespace NLog.Targets.Syslog.Extensions
             return stackTrace
                 .GetFrames()
                 ?.Select(x => x.GetMethod().DeclaringType?.Assembly)
-                .Where(x => x != null)
-                .SkipWhile(NotNLog)
                 .First(NotNLog);
         }
 
         private static bool NotNLog(Assembly x)
         {
-            return x.GetName().Name != NLogAssemblyName;
+            return x != null && !x.GetName().Name.Contains(NLogAssemblyName);
         }
     }
 }
