@@ -66,6 +66,9 @@ namespace NLog.Targets.Syslog.Settings
             set { SetProperty(ref useTls, value); }
         }
 
+        /// <summary>ClientCertificate configuration</summary>
+        public ClientCertificateConfig ClientCertificate { get; set; }
+
         /// <summary>Which framing method to use</summary>
         /// <remarks>If <see cref="UseTls">is true</see> get will always return OctetCounting (RFC 5425)</remarks>
         public FramingMethod Framing
@@ -94,6 +97,7 @@ namespace NLog.Targets.Syslog.Settings
             useTls = true;
             framing = FramingMethod.OctetCounting;
             dataChunkSize = DefaultBufferSize;
+            ClientCertificate = new ClientCertificateConfig();
         }
 
         public void Dispose()
