@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using NLog.Targets.Syslog.Extensions;
 using NLog.Targets.Syslog.Settings;
+using System.Security.Cryptography.X509Certificates;
 
 namespace NLog.Targets.Syslog.MessageSend
 {
@@ -66,8 +67,7 @@ namespace NLog.Targets.Syslog.MessageSend
             if (connectionCheckTimeout <= 0)
                 return true;
 
-            var isDisconnected = tcp.Client.Poll(connectionCheckTimeout, SelectMode.SelectRead) && tcp.Client.Available == 0;
-            return !isDisconnected;
+            return  tcp.Client.Poll(connectionCheckTimeout, SelectMode.SelectWrite) && tcp.Client.Available == 0;
         }
 
         private Task InitTcpClient()
@@ -99,9 +99,13 @@ namespace NLog.Targets.Syslog.MessageSend
             if (!useTls)
                 return tcpStream;
 
+            var store = new X509Store(StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly);
+
             // Do not dispose TcpClient inner stream when disposing SslStream (TcpClient disposes it)
             var sslStream = new SslStream(tcpStream, true);
-            sslStream.AuthenticateAsClient(Server, null, SslProtocols.Tls12, false);
+            sslStream.AuthenticateAsClient(Server, store.Certificates, SslProtocols.Tls12, false);
+            store.Close();
             return sslStream;
         }
 
