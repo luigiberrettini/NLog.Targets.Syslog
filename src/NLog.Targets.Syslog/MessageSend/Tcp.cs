@@ -31,6 +31,9 @@ namespace NLog.Targets.Syslog.MessageSend
         private Stream stream;
         private volatile bool disposed;
 
+        private string clientCertSubjectName = null;
+        private X509Store clientCertStore = null;
+
         public Tcp(TcpConfig tcpConfig) : base(tcpConfig.Server, tcpConfig.Port)
         {
             neverConnected = true;
@@ -40,6 +43,15 @@ namespace NLog.Targets.Syslog.MessageSend
             useTls = tcpConfig.UseTls;
             framing = tcpConfig.Framing;
             dataChunkSize = tcpConfig.DataChunkSize;
+
+            if (tcpConfig.ClientCertificate.Enabled)
+            {
+                clientCertSubjectName = tcpConfig.ClientCertificate.SubjectName;
+
+                var storeName = (StoreName)Enum.Parse(typeof(StoreName), tcpConfig.ClientCertificate.StoreName);
+                var storeLocation = (StoreLocation)Enum.Parse(typeof(StoreLocation), tcpConfig.ClientCertificate.StoreLocation);
+                clientCertStore = new X509Store(storeName, storeLocation);
+            }
         }
 
         public override Task SendMessageAsync(ByteArray message, CancellationToken token)
@@ -99,13 +111,23 @@ namespace NLog.Targets.Syslog.MessageSend
             if (!useTls)
                 return tcpStream;
 
-            var store = new X509Store(StoreLocation.CurrentUser);
-            store.Open(OpenFlags.ReadOnly);
+            X509Certificate2Collection clientCerts = null;
+            if (clientCertStore != null)
+            {
+                clientCertStore.Open(OpenFlags.ReadOnly);
+                clientCerts = clientCertStore.Certificates;
+
+                if (clientCertSubjectName != null)
+                    clientCerts = clientCerts.Find(X509FindType.FindBySubjectName, clientCertSubjectName, false);
+            }
 
             // Do not dispose TcpClient inner stream when disposing SslStream (TcpClient disposes it)
             var sslStream = new SslStream(tcpStream, true);
-            sslStream.AuthenticateAsClient(Server, store.Certificates, SslProtocols.Tls12, false);
-            store.Close();
+            sslStream.AuthenticateAsClient(Server, clientCerts, SslProtocols.Tls12, false);
+
+            if (clientCertStore != null)
+                clientCertStore.Close();
+
             return sslStream;
         }
 
