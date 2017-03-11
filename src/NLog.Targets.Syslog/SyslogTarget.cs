@@ -14,7 +14,6 @@ namespace NLog.Targets.Syslog
     [Target("Syslog")]
     public class SyslogTarget : TargetWithLayout
     {
-        private volatile bool inited;
         private MessageBuilder messageBuilder;
         private AsyncLogger[] asyncLoggers;
 
@@ -40,12 +39,11 @@ namespace NLog.Targets.Syslog
         {
             base.InitializeTarget();
 
-            if (inited)
+            if (IsInitialized)
                 DisposeDependencies();
 
             messageBuilder = MessageBuilder.FromConfig(MessageCreation, Enforcement);
             asyncLoggers = Enforcement.MessageProcessors.Select(i => new AsyncLogger(Layout, Enforcement, messageBuilder, MessageSend)).ToArray();
-            inited = true;
         }
 
         /// <summary>Writes a single event</summary>
