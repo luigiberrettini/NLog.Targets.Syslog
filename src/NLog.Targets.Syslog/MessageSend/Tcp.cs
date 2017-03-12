@@ -12,7 +12,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using NLog.Targets.Syslog.Extensions;
 using NLog.Targets.Syslog.Settings;
-using System.Security.Cryptography.X509Certificates;
 
 namespace NLog.Targets.Syslog.MessageSend
 {
@@ -26,7 +25,7 @@ namespace NLog.Targets.Syslog.MessageSend
         private readonly KeepAlive keepAlive;
         private readonly int connectionCheckTimeout;
         private readonly bool useTls;
-        private readonly Func<X509Certificate2Collection> getClientCertificates;
+        private readonly Func<X509Certificate2Collection> retrieveClientCertificates;
         private readonly int dataChunkSize;
         private readonly FramingMethod framing;
         private TcpClient tcp;
@@ -40,7 +39,7 @@ namespace NLog.Targets.Syslog.MessageSend
             keepAlive = new KeepAlive(tcpConfig.KeepAlive);
             connectionCheckTimeout = tcpConfig.ConnectionCheckTimeout;
             useTls = tcpConfig.Tls.Enabled;
-            getClientCertificates = tcpConfig.Tls.RetrieveClientCertificates;
+            retrieveClientCertificates = tcpConfig.Tls.RetrieveClientCertificates;
             framing = tcpConfig.Framing;
             dataChunkSize = tcpConfig.DataChunkSize;
         }
@@ -70,7 +69,8 @@ namespace NLog.Targets.Syslog.MessageSend
             if (connectionCheckTimeout <= 0)
                 return true;
 
-            return tcp.Client.Poll(connectionCheckTimeout, SelectMode.SelectRead) && tcp.Client.Available == 0;
+            var isDisconnected = tcp.Client.Poll(connectionCheckTimeout, SelectMode.SelectRead) && tcp.Client.Available == 0;
+            return !isDisconnected;
         }
 
         private Task InitTcpClient()
@@ -104,7 +104,7 @@ namespace NLog.Targets.Syslog.MessageSend
 
             // Do not dispose TcpClient inner stream when disposing SslStream (TcpClient disposes it)
             var sslStream = new SslStream(tcpStream, true);
-            sslStream.AuthenticateAsClient(Server, getClientCertificates(), SslProtocols.Tls12, false);
+            sslStream.AuthenticateAsClient(Server, retrieveClientCertificates(), SslProtocols.Tls12, false);
 
             return sslStream;
         }
@@ -165,4 +165,5 @@ namespace NLog.Targets.Syslog.MessageSend
             tcp?.Close();
         }
     }
+>>>>>>> Rename getClientCertificates to retrieveClientCertificates
 }
