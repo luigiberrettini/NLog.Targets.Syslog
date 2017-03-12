@@ -114,19 +114,24 @@ namespace NLog.Targets.Syslog.MessageSend
             X509Certificate2Collection clientCerts = null;
             if (clientCertStore != null)
             {
-                clientCertStore.Open(OpenFlags.ReadOnly);
-                clientCerts = clientCertStore.Certificates;
+                try
+                {
+                    clientCertStore.Open(OpenFlags.ReadOnly);
+                    clientCerts = clientCertStore.Certificates;
 
-                if (clientCertSubjectName != null)
-                    clientCerts = clientCerts.Find(X509FindType.FindBySubjectName, clientCertSubjectName, false);
+                    if (clientCertSubjectName != null)
+                        clientCerts = clientCerts.Find(X509FindType.FindBySubjectName, clientCertSubjectName, false);
+                }
+                finally
+                {
+                    clientCertStore.Close();
+                }
+                
             }
 
             // Do not dispose TcpClient inner stream when disposing SslStream (TcpClient disposes it)
             var sslStream = new SslStream(tcpStream, true);
             sslStream.AuthenticateAsClient(Server, clientCerts, SslProtocols.Tls12, false);
-
-            if (clientCertStore != null)
-                clientCertStore.Close();
 
             return sslStream;
         }
