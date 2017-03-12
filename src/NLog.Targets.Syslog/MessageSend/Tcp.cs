@@ -79,7 +79,7 @@ namespace NLog.Targets.Syslog.MessageSend
             if (connectionCheckTimeout <= 0)
                 return true;
 
-            return  tcp.Client.Poll(connectionCheckTimeout, SelectMode.SelectWrite) && tcp.Client.Available == 0;
+            return  tcp.Client.Poll(connectionCheckTimeout, SelectMode.SelectRead) && tcp.Client.Available == 0;
         }
 
         private Task InitTcpClient()
