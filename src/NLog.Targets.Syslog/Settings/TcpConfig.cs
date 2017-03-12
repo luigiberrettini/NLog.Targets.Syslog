@@ -59,21 +59,14 @@ namespace NLog.Targets.Syslog.Settings
             set { SetProperty(ref connectionCheckTimeout, value); }
         }
 
-        /// <summary>Whether to use TLS or not (TLS 1.2 only)</summary>
-        public bool UseTls
-        {
-            get { return useTls; }
-            set { SetProperty(ref useTls, value); }
-        }
-
-        /// <summary>ClientCertificate configuration</summary>
-        public ClientCertificateConfig ClientCertificate { get; set; }
+        /// <summary>Tls configuration</summary>
+        public TlsConfig Tls { get; set; }
 
         /// <summary>Which framing method to use</summary>
         /// <remarks>If <see cref="UseTls">is true</see> get will always return OctetCounting (RFC 5425)</remarks>
         public FramingMethod Framing
         {
-            get { return UseTls ? FramingMethod.OctetCounting : framing; }
+            get { return Tls.Enabled ? FramingMethod.OctetCounting : framing; }
             set { SetProperty(ref framing, value); }
         }
 
@@ -94,10 +87,9 @@ namespace NLog.Targets.Syslog.Settings
             keepAlivePropsChanged = (sender, args) => OnPropertyChanged(nameof(KeepAlive));
             keepAlive.PropertyChanged += keepAlivePropsChanged;
             connectionCheckTimeout = DefaultConnectionCheckTimeout;
-            useTls = true;
+            Tls = new TlsConfig();
             framing = FramingMethod.OctetCounting;
             dataChunkSize = DefaultBufferSize;
-            ClientCertificate = new ClientCertificateConfig();
         }
 
         public void Dispose()

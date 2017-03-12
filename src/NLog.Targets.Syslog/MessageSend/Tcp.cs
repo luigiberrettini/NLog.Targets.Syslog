@@ -6,6 +6,7 @@ using System.IO;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,14 +26,12 @@ namespace NLog.Targets.Syslog.MessageSend
         private readonly KeepAlive keepAlive;
         private readonly int connectionCheckTimeout;
         private readonly bool useTls;
+        private readonly Func<X509Certificate2Collection> getClientCertificates;
         private readonly int dataChunkSize;
         private readonly FramingMethod framing;
         private TcpClient tcp;
         private Stream stream;
         private volatile bool disposed;
-
-        private string clientCertSubjectName = null;
-        private X509Store clientCertStore = null;
 
         public Tcp(TcpConfig tcpConfig) : base(tcpConfig.Server, tcpConfig.Port)
         {
@@ -40,18 +39,10 @@ namespace NLog.Targets.Syslog.MessageSend
             recoveryTime = TimeSpan.FromMilliseconds(tcpConfig.ReconnectInterval);
             keepAlive = new KeepAlive(tcpConfig.KeepAlive);
             connectionCheckTimeout = tcpConfig.ConnectionCheckTimeout;
-            useTls = tcpConfig.UseTls;
+            useTls = tcpConfig.Tls.Enabled;
+            getClientCertificates = tcpConfig.Tls.RetrieveClientCertificates;
             framing = tcpConfig.Framing;
             dataChunkSize = tcpConfig.DataChunkSize;
-
-            if (tcpConfig.ClientCertificate.Enabled)
-            {
-                clientCertSubjectName = tcpConfig.ClientCertificate.SubjectName;
-
-                var storeName = (StoreName)Enum.Parse(typeof(StoreName), tcpConfig.ClientCertificate.StoreName);
-                var storeLocation = (StoreLocation)Enum.Parse(typeof(StoreLocation), tcpConfig.ClientCertificate.StoreLocation);
-                clientCertStore = new X509Store(storeName, storeLocation);
-            }
         }
 
         public override Task SendMessageAsync(ByteArray message, CancellationToken token)
@@ -79,7 +70,7 @@ namespace NLog.Targets.Syslog.MessageSend
             if (connectionCheckTimeout <= 0)
                 return true;
 
-            return  tcp.Client.Poll(connectionCheckTimeout, SelectMode.SelectRead) && tcp.Client.Available == 0;
+            return tcp.Client.Poll(connectionCheckTimeout, SelectMode.SelectRead) && tcp.Client.Available == 0;
         }
 
         private Task InitTcpClient()
@@ -111,27 +102,9 @@ namespace NLog.Targets.Syslog.MessageSend
             if (!useTls)
                 return tcpStream;
 
-            X509Certificate2Collection clientCerts = null;
-            if (clientCertStore != null)
-            {
-                try
-                {
-                    clientCertStore.Open(OpenFlags.ReadOnly);
-                    clientCerts = clientCertStore.Certificates;
-
-                    if (clientCertSubjectName != null)
-                        clientCerts = clientCerts.Find(X509FindType.FindBySubjectName, clientCertSubjectName, false);
-                }
-                finally
-                {
-                    clientCertStore.Close();
-                }
-                
-            }
-
             // Do not dispose TcpClient inner stream when disposing SslStream (TcpClient disposes it)
             var sslStream = new SslStream(tcpStream, true);
-            sslStream.AuthenticateAsClient(Server, clientCerts, SslProtocols.Tls12, false);
+            sslStream.AuthenticateAsClient(Server, getClientCertificates(), SslProtocols.Tls12, false);
 
             return sslStream;
         }
