@@ -55,8 +55,7 @@ Below is a sample NLog.config file:
 
 
 ### Options
-This NLog target supports the standard NLog [layout](https://github.com/NLog/NLog/wiki/Layouts)
-directive to modify the log message body (Syslog packet elements are not affected).
+This NLog target supports the standard NLog [layout](https://github.com/NLog/NLog/wiki/Layouts) directive to modify the log message body (Syslog packet elements are not affected).
 
 It provides default values for all settings which can be overridden by means of the XML configuration, as shown above.
 A more detailed example is included in the [test application](./src/TestApp/NLog.config).
@@ -65,8 +64,7 @@ A more detailed example is included in the [test application](./src/TestApp/NLog
 #### Enforcement element
 * `throttling` - settings related to message throttling:
   * `limit` - the number of log entries, waiting to be processed, that triggers throttling (default: `0`)
-  * `strategy` - `None` / `DiscardOnFixedTimeout` / `DiscardOnPercentageTimeout` / `Discard` / `DeferForFixedTime` / `DeferForPercentageTime` / `Block`
- (default: `None`)
+  * `strategy` - `None` / `DiscardOnFixedTimeout` / `DiscardOnPercentageTimeout` / `Discard` / `DeferForFixedTime` / `DeferForPercentageTime` / `Block` (default: `None`)
   * `delay` - the milliseconds/percentage delay for a `DiscardOnFixedTimeout` / `DiscardOnPercentageTimeout` / `Defer` throttling strategy (default: `0`)
 * `messageProcessors` - the amount of parallel message processors (default: `1`; `0` means `Environment.ProcessorCount`)
 * `splitOnNewLine` - whether or not to split each log entry by newlines and send each line separately (default: `false`)
@@ -79,17 +77,18 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
 
 |                       |  MUST be supported  |  SHOULD be supported  |  MUST NOT exceed
 | :-------------------: | :-----------------: | :-------------------: | :--------------------------------------------------:
-|  RFC 3164 (UDP)       |  1024 B             |  1024 B               |  1024 B                                             
-|  RFC 6587 (TCP)       |  1024 B             |  1024 B               |  1024 B                                             
-|  RFC 5424 (TCP/UDP)   |   480 B             |  2048 B               |  -                                                  
-|  RFC 5426 (UDP/IPv4)  |   480 B             |  2048 B               |  65535      - 60 -  8 B <sup>1</sup>                
-|  RFC 5426 (UDP/IPv6)  |  1180 B             |  2048 B               |  65535      - 40 -  8 B <sup>1</sup>                
-|  RFC 5426 (UDP/IPv6)  |  1180 B             |  2048 B               |  (2^32 - 1) - 40 -  8 B <sup>1</sup> <sup>2</sup>   
-|  RFC 5425 (TLS/IPv4)  |  2048 B             |  8192 B               |  65535      - 60 - 60 B <sup>1</sup>                
-|  RFC 5425 (TLS/IPv6)  |  2048 B             |  8192 B               |  65535      - 40 - 60 B <sup>1</sup>                
-|  RFC 5425 (TLS/IPv6)  |  2048 B             |  8192 B               |  (2^32 - 1) - 40 - 60 B <sup>1</sup> <sup>2</sup>   
+|  RFC 3164 (UDP)       |  1024 B             |  1024 B               |  1024 B
+|  RFC 6587 (TCP)       |  1024 B             |  1024 B               |  1024 B
+|  RFC 5424 (TCP/UDP)   |   480 B             |  2048 B               |  -
+|  RFC 5426 (UDP/IPv4)  |   480 B             |  2048 B               |  65535      - 60 -  8 B <sup>1</sup>
+|  RFC 5426 (UDP/IPv6)  |  1180 B             |  2048 B               |  65535      - 40 -  8 B <sup>1</sup>
+|  RFC 5426 (UDP/IPv6)  |  1180 B             |  2048 B               |  (2^32 - 1) - 40 -  8 B <sup>1</sup> <sup>2</sup>
+|  RFC 5425 (TLS/IPv4)  |  2048 B             |  8192 B               |  65535      - 60 - 60 B <sup>1</sup>
+|  RFC 5425 (TLS/IPv6)  |  2048 B             |  8192 B               |  65535      - 40 - 60 B <sup>1</sup>
+|  RFC 5425 (TLS/IPv6)  |  2048 B             |  8192 B               |  (2^32 - 1) - 40 - 60 B <sup>1</sup> <sup>2</sup>
 
-<sup>1</sup> IP payload - max IP header - max protocol header \
+<sup>1</sup> IP payload - max IP header - max protocol header
+
 <sup>2</sup> Using jumbograms (limited by Int32.MaxValue = 2147483647, i.e. the maximum size for an array)
 
 
@@ -104,11 +103,8 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
   * `appName` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the APPNAME field of the HEADER part (default: the name of the assembly that is creating the message)
   * `procId` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the PROCID field of the HEADER part (default: `-`)
   * `msgId` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the MSGID field of the HEADER part (default: `-`)
-  * `structuredData` - the STRUCTURED-DATA part containing the SD-ELEMENTs each composed by an SD-ID ([Layout](http://github.com/NLog/NLog/wiki/Layouts))
-    and optional SD-PARAM fields, i.e. the PARAM-NAME ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) and
-    PARAM-VALUE ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) fields (default: `-`).<br />
-    The fromEventProperties attribute allows to use [log event properties data](http://github.com/NLog/NLog/wiki/EventProperties-Layout-Renderer)
-    enabling different STRUCTURED-DATA for each log message
+  * `structuredData` - the STRUCTURED-DATA part containing the SD-ELEMENTs each composed by an SD-ID ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) and optional SD-PARAM fields, i.e. the PARAM-NAME ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) and PARAM-VALUE ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) fields (default: `-`).<br />
+    The fromEventProperties attribute allows to use [log event properties data](http://github.com/NLog/NLog/wiki/EventProperties-Layout-Renderer) enabling different STRUCTURED-DATA for each log message
   * `disableBom` - `true` or `false` to handle RSyslog [issue 284](http://github.com/rsyslog/rsyslog/issues/284) (default: `false`)
 
 #### Message send element
@@ -125,13 +121,13 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
     * `timeout` - the timeout, in milliseconds, with no activity until the first keep-alive packet is sent (default: `100`)
     * `interval` - the interval, in milliseconds, between when successive keep-alive packets are sent if no acknowledgement is received (default: `100`)
   * `connectionCheckTimeout` - the time, in microseconds, to wait for a response when checking the connection status (default: `100`; `0` means the only check performed is `TcpClient.IsConnected`)
-  * `tls` - settings for TLS
+  * `tls` - settings related to TLS:
     * `enabled` - whether to use TLS or not (TLS 1.2 only) (default `false`)
     * `useClientCertificates` - whether to use client certificates or not (default `false`)
-    * `certificateStoreLocation` - store location, a value from the [StoreLocation](https://msdn.microsoft.com/en-us/library/system.security.cryptography.x509certificates.storelocation(v=vs.110).aspx) enum (default `CurrentUser`)
-    * `certificateStoreName` - store name, a value from the [StoreName](https://msdn.microsoft.com/en-us/library/system.security.cryptography.x509certificates.storename(v=vs.110).aspx) enum (default `My`)
-    * `certificateFilterByType` - the type of value given by `certificateFilterByValue`, a value from the [X509FindType](https://msdn.microsoft.com/en-us/library/system.security.cryptography.x509certificates.x509findtype(v=vs.110).aspx) enum (default `FindBySubjectName`)
-    * `certificateFilterByValue` - the search value
+    * `certificateStoreLocation` - the X.509 certificate store [location](https://msdn.microsoft.com/en-us/library/system.security.cryptography.x509certificates.storelocation.aspx) (default `CurrentUser`)
+    * `certificateStoreName` - the X.509 certificate store [name](https://msdn.microsoft.com/en-us/library/system.security.cryptography.x509certificates.storename.aspx) (default `My`)
+    * `certificateFilterType` - the [type of filter](https://msdn.microsoft.com/en-us/library/system.security.cryptography.x509certificates.x509findtype.aspx) to apply to the certificate collection (default `FindBySubjectName`)
+    * `certificateFilterValue` - the value against which to filter the certificate collection
   * `framing` - `nonTransparent` or `octectCounting` (default: `octectCounting`)
   * `dataChunkSize` - the size of chunks, in bytes, in which data is split to be sent over the wire (default: `4096`)
 
@@ -279,7 +275,7 @@ A Syslog message is at least 1 and at most 1024 characters long and the only all
 SYSLOG MESSAGE = PRI HEADER SPACE MSG
 
 PRI = < PRIVAL >
-    PRIVAL = FACILITY * 8 + SEVERITY 
+    PRIVAL = FACILITY * 8 + SEVERITY
         FACILITY
             A number between 0 and 23
         SEVERITY
@@ -340,7 +336,7 @@ HEADER = PRI VERSION SPACE TIMESTAMP SPACE HOSTNAME SPACE APPNAME SPACE PROCID S
             The FQDN or IPv4 address or IPv6 address or hostname of the sender machine
         APPNAME
             NILVALUE or 1 to 48 PRINTUSASCII
-            The device or application sending the Syslog message 
+            The device or application sending the Syslog message
         PROCID
             NILVALUE or 1 to 128 PRINTUSASCII
             A change indicates a discontinuity in Syslog reporting

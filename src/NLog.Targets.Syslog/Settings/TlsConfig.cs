@@ -14,10 +14,10 @@ namespace NLog.Targets.Syslog.Settings
         /// <summary>Whether to use client certificates or not</summary>
         public bool UseClientCertificates { get; set; }
 
-        /// <summary>The location of the X.509 certificate store</summary>
+        /// <summary>The X.509 certificate store location</summary>
         public StoreLocation CertificateStoreLocation { get; set; }
 
-        /// <summary>The name of the X.509 certificate store</summary>
+        /// <summary>The X.509 certificate store name</summary>
         public StoreName CertificateStoreName { get; set; }
 
         /// <summary>The type of filter to apply to the certificate collection</summary>
