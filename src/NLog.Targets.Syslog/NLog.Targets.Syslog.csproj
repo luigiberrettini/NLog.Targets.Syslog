@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Extensions\AssemblyExtensions.cs" />
+    <Compile Include="Settings\NotifyPropertyChanged.cs" />
     <Compile Include="Settings\UniversalAssembly.cs" />
     <Compile Include="Extensions\AsyncLogEventInfoExtensions.cs" />
     <Compile Include="AsyncLogger.cs" />

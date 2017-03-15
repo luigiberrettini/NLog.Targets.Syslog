@@ -1,12 +1,13 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
-using System;
-using System.Linq;
 using NLog.Common;
 using NLog.Targets.Syslog.Extensions;
 using NLog.Targets.Syslog.MessageCreation;
 using NLog.Targets.Syslog.Settings;
+using System;
+using System.ComponentModel;
+using System.Linq;
 
 namespace NLog.Targets.Syslog
 {
@@ -38,7 +39,14 @@ namespace NLog.Targets.Syslog
         protected override void InitializeTarget()
         {
             base.InitializeTarget();
+            Enforcement.PropertyChanged += Init;
+            MessageCreation.PropertyChanged += Init;
+            MessageSend.PropertyChanged += Init;
+            Init();
+        }
 
+        private void Init(object sender = null, PropertyChangedEventArgs eventArgs = null)
+        {
             if (IsInitialized)
                 DisposeDependencies();
 
@@ -61,7 +69,12 @@ namespace NLog.Targets.Syslog
         protected override void Dispose(bool disposing)
         {
             if (disposing)
+            {
+                Enforcement.PropertyChanged -= Init;
+                MessageCreation.PropertyChanged -= Init;
+                MessageSend.PropertyChanged -= Init;
                 DisposeDependencies();
+            }
             base.Dispose(disposing);
         }
 
