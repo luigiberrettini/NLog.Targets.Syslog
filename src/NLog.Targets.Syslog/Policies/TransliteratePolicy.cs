@@ -1,6 +1,7 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
+using System;
 using NLog.Common;
 using NLog.Targets.Syslog.Settings;
 
@@ -26,7 +27,7 @@ namespace NLog.Targets.Syslog.Policies
                 return s;
 
             var unidecoded = s.Unidecode();
-            InternalLogger.Trace(() => $"Transliterated '{s}' to '{unidecoded}'");
+            InternalLogger.Trace("Transliterated '{0}' to '{1}'", s, unidecoded);
             return unidecoded;
         }
     }

@@ -1,6 +1,7 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
+using System;
 using NLog.Common;
 using NLog.Targets.Syslog.Extensions;
 using NLog.Targets.Syslog.Settings;
@@ -34,7 +35,7 @@ namespace NLog.Targets.Syslog.Policies
 
             var computedMaxLength = MaxLengthToAvoidCharCorruption(bytes, maxLength);
             bytes.Resize(computedMaxLength);
-            InternalLogger.Trace(() => $"Truncated byte array to {computedMaxLength} bytes (truncateMessageTo {messageMaxLength})");
+            InternalLogger.Trace("Truncated byte array to {0} bytes (truncateMessageTo {1})", computedMaxLength, messageMaxLength);
         }
 
         private long MaxLengthToAvoidCharCorruption(ByteArray bytes, long updatedMaxLength)

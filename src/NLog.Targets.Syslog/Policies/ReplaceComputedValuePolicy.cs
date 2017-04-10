@@ -1,6 +1,7 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
+using System;
 using NLog.Common;
 using System.Text.RegularExpressions;
 using NLog.Targets.Syslog.Settings;
@@ -29,7 +30,7 @@ namespace NLog.Targets.Syslog.Policies
                 return s;
 
             var replaced = Regex.Replace(s, searchFor, replaceWith);
-            InternalLogger.Trace(() => $"Replaced '{searchFor}' (if found) with '{replaceWith}' given computed value '{s}': '{replaced}'");
+            InternalLogger.Trace("Replaced '{0}' (if found) with '{1}' given computed value '{2}': '{3}'", searchFor, replaceWith, s, replaced);
             return replaced;
         }
     }

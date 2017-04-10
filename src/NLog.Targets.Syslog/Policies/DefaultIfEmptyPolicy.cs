@@ -1,6 +1,7 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
+using System;
 using NLog.Common;
 
 namespace NLog.Targets.Syslog.Policies
@@ -24,7 +25,7 @@ namespace NLog.Targets.Syslog.Policies
             if (s.Length != 0)
                 return s;
 
-            InternalLogger.Trace(() => $"Applied default value '{defaultValue}'");
+            InternalLogger.Trace("Applied default value '{0}'", defaultValue);
             return defaultValue;
         }
     }
