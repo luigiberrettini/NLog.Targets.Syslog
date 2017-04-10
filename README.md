@@ -29,21 +29,22 @@ Below is a sample NLog.config file:
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:sl="http://www.nlog-project.org/schemas/NLog.Targets.Syslog.xsd">
   <targets>
-    <target type="Syslog" name="cee-udp">
-      <layout type="SimpleLayout" text="@cee: {&quot;message&quot;: &quot;${message}&quot;}" />
-      <messageCreation>
-        <facility>Local4</facility>
-        <rfc>Rfc5424</rfc>
-        <rfc5424>
-          <hostname type="SimpleLayout" text="${machinename}" />
-          <appName type="SimpleLayout" text="DAEMON.MyAppName" />
-          <procId type="SimpleLayout" text="${processid}" />
-          <msgId type="SimpleLayout" text="${threadid}" />
-          <disableBom>true</disableBom>
-        </rfc5424>
-      </messageCreation>
+    <target xsi:type="Syslog" name="cee-udp">
+      <sl:layout xsi:type="SimpleLayout" text="@cee: {&quot;message&quot;: &quot;${message}&quot;}" />
+      <sl:messageCreation>
+        <sl:facility>Local4</facility>
+        <sl:rfc>Rfc5424</rfc>
+        <sl:rfc5424>
+          <sl:hostname xsi:type="SimpleLayout" text="${machinename}" />
+          <sl:appName xsi:type="SimpleLayout" text="DAEMON.MyAppName" />
+          <sl:procId xsi:type="SimpleLayout" text="${processid}" />
+          <sl:msgId xsi:type="SimpleLayout" text="${threadid}" />
+          <sl:disableBom>true</sl:disableBom>
+        </sl:rfc5424>
+      </sl:messageCreation>
     </target>
   </targets>
   <rules>
