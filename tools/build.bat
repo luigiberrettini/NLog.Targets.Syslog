@@ -5,8 +5,12 @@ set scriptDir=%scriptDir:~0,-1%
 set rootDir=%scriptDir%\..
 
 set NuGetExe="%scriptDir%\NuGet.exe"
-set MSBuildExe="%ProgramFiles%\MSBuild\14.0\Bin\MsBuild.exe"
-if exist "%ProgramFiles(x86)%\MSBuild\14.0\Bin\MsBuild.exe" set MSBuildExe="%ProgramFiles(x86)%\MSBuild\14.0\Bin\MsBuild.exe"
+
+set MSBuildPath=%ProgramFiles%\MSBuild\14.0\Bin
+if exist "%ProgramFiles(x86)%\MSBuild\14.0\Bin\MsBuild.exe" set MSBuildPath=%ProgramFiles(x86)%\MSBuild\14.0\Bin
+if exist "%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MsBuild.exe" set MSBuildPath=%ProgramFiles(x86)%\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin
+set MSBuildExe="%MSBuildPath%\MSBuild.exe"
+set MSBuildPath="%MSBuildPath%"
 
 set softwareName=NLog.Targets.Syslog
 set schemaName=%softwareName%.Schema
@@ -34,7 +38,7 @@ if not exist %packagesDir% (
     set Configuration=Release
     set Platform=AnyCPU
     echo Restoring dependency packages...
-    %NuGetExe% restore %solutionFile% -verbosity quiet -msbuildversion 14 -noninteractive
+    %NuGetExe% restore %solutionFile% -verbosity quiet -msBuildPath %MSBuildPath% -noninteractive
     echo.
 )
 
@@ -42,12 +46,16 @@ echo Building...
 %MSBuildExe% %solutionFile% /t:Build /p:Configuration=Release /property:"Platform=Any CPU" /v:minimal /nologo
 echo.
 
+echo Retrieving packages version
+for /f %%i in ('PowerShell -File %scriptDir%\get-version.ps1 -versionInfoFile %versionInfoFile%') do set packageVersion=%%i
+echo %packageVersion%
+echo.
+
 echo Creating %softwareName% NuGet package...
-%NuGetExe% pack %projectFile% -msbuildversion 14 -outputdirectory %deployDir% -properties Configuration=Release -properties Platform=AnyCPU -properties version=%packageVersion%
+%NuGetExe% pack %projectFile% -msBuildPath %MSBuildPath% -outputdirectory %deployDir% -properties Configuration=Release -properties Platform=AnyCPU -properties version=%packageVersion%
 echo.
 
 echo Creating %schemaName% NuGet package...
-for /f %%i in ('PowerShell -File %scriptDir%\get-version.ps1 -versionInfoFile %versionInfoFile%') do set packageVersion=%%i
 %NuGetExe% pack %schemaNuSpecFile% -outputdirectory %deployDir% -properties version=%packageVersion%
 
 if %publish%=="publish" (
