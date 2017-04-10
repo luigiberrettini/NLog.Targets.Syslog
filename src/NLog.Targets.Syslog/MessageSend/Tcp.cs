@@ -66,7 +66,8 @@ namespace NLog.Targets.Syslog.MessageSend
             if (connectionCheckTimeout <= 0)
                 return true;
 
-            return  tcp.Client.Poll(connectionCheckTimeout, SelectMode.SelectRead) && tcp.Client.Available == 0;
+            var isDisconnected = tcp.Client.Poll(connectionCheckTimeout, SelectMode.SelectRead) && tcp.Client.Available == 0;
+            return !isDisconnected;
         }
 
         private Task InitTcpClient()
