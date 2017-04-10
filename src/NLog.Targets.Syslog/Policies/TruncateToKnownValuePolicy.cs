@@ -1,6 +1,7 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
+using System;
 using NLog.Common;
 using NLog.Targets.Syslog.Settings;
 
@@ -28,7 +29,7 @@ namespace NLog.Targets.Syslog.Policies
                 return s;
 
             var truncated = s.Substring(0, maxLength);
-            InternalLogger.Trace(() => $"Truncated '{s}' to {maxLength} characters: '{truncated}'");
+            InternalLogger.Trace("Truncated '{0}' to {1} characters: '{2}'", s, maxLength, truncated);
             return truncated;
         }
     }

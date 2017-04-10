@@ -85,7 +85,7 @@ namespace NLog.Targets.Syslog
                         if (t.Exception != null) // t.IsFaulted is true
                             InternalLogger.Warn(t.Exception.GetBaseException(), "Task faulted");
                         else
-                            InternalLogger.Debug(() => $"Successfully sent message '{logEventMsgSet}'");
+                            InternalLogger.Debug("Successfully sent message '{0}'", logEventMsgSet);
                         return ProcessQueueAsync(messageBuilder, tcs);
                     }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
                     .Unwrap();

@@ -75,7 +75,7 @@ namespace NLog.Targets.Syslog
             }
             catch (Exception ex)
             {
-                InternalLogger.Warn(ex, $"{GetType().Name} dispose error");
+                InternalLogger.Warn(ex, "{0} dispose error", GetType().Name);
             }
         }
     }
