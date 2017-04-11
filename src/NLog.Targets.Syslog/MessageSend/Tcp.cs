@@ -165,5 +165,4 @@ namespace NLog.Targets.Syslog.MessageSend
             tcp?.Close();
         }
     }
->>>>>>> Rename getClientCertificates to retrieveClientCertificates
 }
