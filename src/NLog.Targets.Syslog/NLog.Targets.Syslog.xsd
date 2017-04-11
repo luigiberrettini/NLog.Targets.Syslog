@@ -134,14 +134,30 @@
                                                 </xs:complexType>
                                             </xs:element>
                                             <xs:element name="connectionCheckTimeout" type="xs:integer" minOccurs="0" maxOccurs="1" />
-                                            <xs:element name="useTls" type="xs:boolean" minOccurs="0" maxOccurs="1" />
+                                            <xs:element name="tls" minOccurs="0" maxOccurs="1">
+                                                <xs:complexType>
+                                                    <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                                        <xs:element name="enabled" type="xs:boolean" minOccurs="0" maxOccurs="1" />
+                                                        <xs:element name="useClientCertificates" type="xs:boolean" minOccurs="0" maxOccurs="1" />
+                                                        <xs:element name="certificateStoreLocation" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                                        <xs:element name="certificateStoreName" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                                        <xs:element name="certificateFilterType" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                                        <xs:element name="certificateFilterValue" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                                    </xs:choice>
+                                                    <xs:attribute name="enabled" type="xs:boolean" />
+                                                    <xs:attribute name="useClientCertificates" type="xs:boolean" />
+                                                    <xs:attribute name="certificateStoreLocation" type="xs:string" />
+                                                    <xs:attribute name="certificateStoreName" type="xs:string" />
+                                                    <xs:attribute name="certificateFilterType" type="xs:string" />
+                                                    <xs:attribute name="certificateFilterValue" type="xs:string" />
+                                                </xs:complexType>
+                                            </xs:element>
                                             <xs:element name="framing" type="xs:string" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="dataChunkSize" type="xs:integer" minOccurs="0" maxOccurs="1" />
                                         </xs:choice>
                                         <xs:attribute name="server" type="xs:string" />
                                         <xs:attribute name="port" type="xs:integer" />
                                         <xs:attribute name="reconnectInterval" type="xs:integer" />
-                                        <xs:attribute name="useTls" type="xs:boolean" />
                                         <xs:attribute name="framing" type="xs:string" />
                                         <xs:attribute name="dataChunkSize" type="xs:integer" />
                                     </xs:complexType>

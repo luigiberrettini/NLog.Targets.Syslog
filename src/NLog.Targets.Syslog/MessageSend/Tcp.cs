@@ -6,6 +6,7 @@ using System.IO;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,6 +25,7 @@ namespace NLog.Targets.Syslog.MessageSend
         private readonly KeepAlive keepAlive;
         private readonly int connectionCheckTimeout;
         private readonly bool useTls;
+        private readonly Func<X509Certificate2Collection> retrieveClientCertificates;
         private readonly int dataChunkSize;
         private readonly FramingMethod framing;
         private TcpClient tcp;
@@ -36,7 +38,8 @@ namespace NLog.Targets.Syslog.MessageSend
             recoveryTime = TimeSpan.FromMilliseconds(tcpConfig.ReconnectInterval);
             keepAlive = new KeepAlive(tcpConfig.KeepAlive);
             connectionCheckTimeout = tcpConfig.ConnectionCheckTimeout;
-            useTls = tcpConfig.UseTls;
+            useTls = tcpConfig.Tls.Enabled;
+            retrieveClientCertificates = tcpConfig.Tls.RetrieveClientCertificates;
             framing = tcpConfig.Framing;
             dataChunkSize = tcpConfig.DataChunkSize;
         }
@@ -101,7 +104,8 @@ namespace NLog.Targets.Syslog.MessageSend
 
             // Do not dispose TcpClient inner stream when disposing SslStream (TcpClient disposes it)
             var sslStream = new SslStream(tcpStream, true);
-            sslStream.AuthenticateAsClient(Server, null, SslProtocols.Tls12, false);
+            sslStream.AuthenticateAsClient(Server, retrieveClientCertificates(), SslProtocols.Tls12, false);
+
             return sslStream;
         }
 
