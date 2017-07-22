@@ -8,7 +8,7 @@
            xmlns:nlog="http://www.nlog-project.org/schemas/NLog.xsd">
     <xs:import namespace="http://www.nlog-project.org/schemas/NLog.xsd" />
     <xs:annotation>
-        <xs:documentation>NLog Syslog target schema for Intellisense™ 4.0.0</xs:documentation>
+        <xs:documentation>NLog Syslog target schema for Intellisense™ 4.0.1</xs:documentation>
     </xs:annotation>
     <xs:complexType name="Syslog">
         <xs:complexContent>
