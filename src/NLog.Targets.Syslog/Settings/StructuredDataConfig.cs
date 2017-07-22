@@ -44,6 +44,7 @@ namespace NLog.Targets.Syslog.Settings
             sdElements.CollectionChanged += sdElementsCollectionChanged;
         }
 
+        /// <summary>Disposes the instance</summary>
         public void Dispose()
         {
             sdElements.ForEach(x =>

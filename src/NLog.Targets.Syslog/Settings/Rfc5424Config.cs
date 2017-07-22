@@ -91,6 +91,7 @@ namespace NLog.Targets.Syslog.Settings
             disableBom = false;
         }
 
+        /// <summary>Disposes the instance</summary>
         public void Dispose()
         {
             structuredData.PropertyChanged -= structuredDataPropsChanged;

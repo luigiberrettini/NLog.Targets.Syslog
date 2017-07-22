@@ -6,6 +6,7 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace NLog.Targets.Syslog.Settings
 {
+    /// <summary>TLS configuration</summary>
     public class TlsConfig : NotifyPropertyChanged
     {
         private bool enabled;
@@ -58,6 +59,7 @@ namespace NLog.Targets.Syslog.Settings
             set { SetProperty(ref certificateFilterValue, value); }
         }
 
+        /// <summary>Builds a new instance of the TlsConfig class</summary>
         public TlsConfig()
         {
             enabled = false;

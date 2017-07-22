@@ -76,6 +76,7 @@ namespace NLog.Targets.Syslog.Settings
             messageProcessors = 1;
         }
 
+        /// <summary>Disposes the instance</summary>
         public void Dispose()
         {
             throttling.PropertyChanged -= throttlingPropsChanged;

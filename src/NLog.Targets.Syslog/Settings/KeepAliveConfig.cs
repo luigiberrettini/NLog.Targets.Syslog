@@ -36,6 +36,7 @@ namespace NLog.Targets.Syslog.Settings
             set { SetProperty(ref interval, value); }
         }
 
+        /// <summary>Builds a new instance of the KeepAliveConfig class</summary>
         public KeepAliveConfig()
         {
             enabled = true;

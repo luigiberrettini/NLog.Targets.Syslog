@@ -99,6 +99,7 @@ namespace NLog.Targets.Syslog.Settings
             dataChunkSize = DefaultBufferSize;
         }
 
+        /// <summary>Disposes the instance</summary>
         public void Dispose()
         {
             keepAlive.PropertyChanged -= keepAlivePropsChanged;

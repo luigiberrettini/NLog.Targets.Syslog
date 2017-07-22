@@ -66,6 +66,7 @@ namespace NLog.Targets.Syslog
             asyncLoggers[asyncLoggerId].Log(asyncLogEvent);
         }
 
+        /// <summary>Disposes the instance</summary>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
