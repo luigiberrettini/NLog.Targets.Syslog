@@ -57,6 +57,7 @@ namespace NLog.Targets.Syslog.Settings
             rfc5424.PropertyChanged += rfc5424PropsChanged;
         }
 
+        /// <summary>Disposes the instance</summary>
         public void Dispose()
         {
             rfc3164.PropertyChanged -= rfc3164PropsChanged;

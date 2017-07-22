@@ -48,6 +48,7 @@ namespace NLog.Targets.Syslog.Settings
             tcp.PropertyChanged += tcpPropsChanged;
         }
 
+        /// <summary>Disposes the instance</summary>
         public void Dispose()
         {
             udp.PropertyChanged -= udpPropsChanged;

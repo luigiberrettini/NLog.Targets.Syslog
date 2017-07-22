@@ -30,7 +30,7 @@ namespace NLog.Targets.Syslog.Settings
             }
         }
 
-        /// <summary>The throttling strategy to employ</summary>
+        /// <summary>The throttling strategy to apply to incoming log entries</summary>
         public ThrottlingStrategy Strategy
         {
             get { return strategy; }

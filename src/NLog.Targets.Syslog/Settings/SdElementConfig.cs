@@ -43,6 +43,7 @@ namespace NLog.Targets.Syslog.Settings
             sdParams.CollectionChanged += sdParamsCollectionChanged;
         }
 
+        /// <summary>Disposes the instance</summary>
         public void Dispose()
         {
             sdParams.ForEach(x => x.PropertyChanged -= sdParamPropsChanged);
