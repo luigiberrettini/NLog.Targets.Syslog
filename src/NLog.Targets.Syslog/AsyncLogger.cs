@@ -39,7 +39,7 @@ namespace NLog.Targets.Syslog
 
         public void Log(AsyncLogEventInfo asyncLogEvent)
         {
-            throttling.Apply(queue.Count, delay => Enqueue(asyncLogEvent, delay));
+            throttling.Apply(queue.Count, timeout => Enqueue(asyncLogEvent, timeout));
         }
 
         private BlockingCollection<AsyncLogEventInfo> NewBlockingCollection()
@@ -98,9 +98,9 @@ namespace NLog.Targets.Syslog
             }
         }
 
-        private void Enqueue(AsyncLogEventInfo asyncLogEventInfo, int delay)
+        private void Enqueue(AsyncLogEventInfo asyncLogEventInfo, int timeout)
         {
-            queue.TryAdd(asyncLogEventInfo, delay, token);
+            queue.TryAdd(asyncLogEventInfo, timeout, token);
             InternalLogger.Debug(() => $"Enqueued '{asyncLogEventInfo.ToFormattedMessage()}'");
         }
 
