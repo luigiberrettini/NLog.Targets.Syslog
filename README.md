@@ -68,10 +68,10 @@ A more detailed example is included in the [test application](./src/TestApp/NLog
   * `delay` - the milliseconds/percentage delay for a `DiscardOnFixedTimeout` / `DiscardOnPercentageTimeout` / `Defer` throttling strategy (default: `0`)
 * `messageProcessors` - the amount of parallel message processors (default: `1`; `0` means `Environment.ProcessorCount`)
 * `splitOnNewLine` - whether or not to split each log entry by newlines and send each line separately (default: `false`)
-* `transliterate` - `false` or `true` to trasliterate strings from Unicode to ASCII when the RFC allows only ASCII characters for a fields (default: `false`)
+* `transliterate` - `false` or `true` to transliterate strings from Unicode to ASCII when the RFC allows only ASCII characters for a field (default: `false`)
 * `replaceInvalidCharacters` - `false` or `true` to replace invalid values usually with a question mark (default: `false`)
 * `truncateFieldsToMaxLength` - `false` or `true` to truncate fields to the length specified in the RFC (default: `false`)
-* `truncateMessageTo` - a number specifying the max lenght allowed for the whole message (default: `0` i.e. do not truncate)
+* `truncateMessageTo` - a number specifying the max length allowed for the whole message (default: `0` i.e. do not truncate)
 
 The maximum length of a message is detailed in many RFCs that can be summarized as follow:
 
