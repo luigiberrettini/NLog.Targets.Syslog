@@ -13,7 +13,7 @@
     <tags>NLog Syslog Log Logging</tags>
     <iconUrl>http://nlog-project.org/N.png</iconUrl>
     <projectUrl>https://github.com/graffen/NLog.Targets.Syslog</projectUrl>
-    <licenseUrl>https://github.com/graffen/NLog.Targets.Syslog/blob/master/License.txt</licenseUrl>
+    <licenseUrl>https://github.com/graffen/NLog.Targets.Syslog/blob/master/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <dependencies>
       <dependency id="NLog" version="4.4.2"/>
