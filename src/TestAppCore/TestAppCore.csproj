@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\TestApp\ServerMsgSet.cs" Link="ServerMsgSet.cs" />
+    <Compile Include="..\TestApp\ServerSocket.cs" Link="ServerSocket.cs" />
+    <Compile Include="..\TestApp\StateObject.cs" Link="StateObject.cs" />
+    <Compile Include="..\TestApp\SyslogServer.cs" Link="SyslogServer.cs" />
+    <Compile Include="..\TestApp\TcpServer.cs" Link="TcpServer.cs" />
+    <Compile Include="..\TestApp\TcpState.cs" Link="TcpState.cs" />
+    <Compile Include="..\TestApp\UdpServer.cs" Link="UdpServer.cs" />
+    <Compile Include="..\TestApp\UdpState.cs" Link="UdpState.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\TestApp\NLog.config" Link="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NLog.Targets.Syslog\NLog.Targets.Syslog.csproj">
+      <Private>true</Private>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
