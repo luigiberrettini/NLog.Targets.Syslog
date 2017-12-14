@@ -11,6 +11,8 @@ using System.ComponentModel;
 
 namespace NLog.Targets.Syslog.Settings
 {
+    /// <inheritdoc cref="NotifyPropertyChanged" />
+    /// <inheritdoc cref="IDisposable" />
     /// <summary>Syslog STRUCTURED-DATA part configuration</summary>
     public class StructuredDataConfig : NotifyPropertyChanged, IDisposable
     {
@@ -22,16 +24,16 @@ namespace NLog.Targets.Syslog.Settings
         /// <summary>Allows to use log event properties data enabling different STRUCTURED-DATA for each log message</summary>
         public Layout FromEventProperties
         {
-            get { return fromEventProperties; }
-            set { SetProperty(ref fromEventProperties, value); }
+            get => fromEventProperties;
+            set => SetProperty(ref fromEventProperties, value);
         }
 
         /// <summary>The SD-ELEMENTs contained in the STRUCTURED-DATA part</summary>
         [ArrayParameter(typeof(SdElementConfig), "SdElement")]
         public ObservableCollection<SdElementConfig> SdElements
         {
-            get { return sdElements; }
-            set { SetProperty(ref sdElements, value); }
+            get => sdElements;
+            set => SetProperty(ref sdElements, value);
         }
 
         /// <summary>Builds a new instance of the StructuredData class</summary>
@@ -44,6 +46,7 @@ namespace NLog.Targets.Syslog.Settings
             sdElements.CollectionChanged += sdElementsCollectionChanged;
         }
 
+        /// <inheritdoc />
         /// <summary>Disposes the instance</summary>
         public void Dispose()
         {
