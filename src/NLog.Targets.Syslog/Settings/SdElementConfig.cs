@@ -10,6 +10,8 @@ using System.ComponentModel;
 
 namespace NLog.Targets.Syslog.Settings
 {
+    /// <inheritdoc cref="NotifyPropertyChanged" />
+    /// <inheritdoc cref="IDisposable" />
     /// <summary>Syslog SD-ELEMENT field configuration</summary>
     public class SdElementConfig : NotifyPropertyChanged, IDisposable
     {
@@ -21,16 +23,16 @@ namespace NLog.Targets.Syslog.Settings
         /// <summary>The SD-ID field of an SD-ELEMENT field in the STRUCTURED-DATA part</summary>
         public SdIdConfig SdId
         {
-            get { return sdId; }
-            set { SetProperty(ref sdId, value); }
+            get => sdId;
+            set => SetProperty(ref sdId, value);
         }
 
         /// <summary>The SD-PARAM fields belonging to an SD-ELEMENT field in the STRUCTURED-DATA part</summary>
         [ArrayParameter(typeof(SdParamConfig), "SdParam")]
         public ObservableCollection<SdParamConfig> SdParams
         {
-            get { return sdParams; }
-            set { SetProperty(ref sdParams, value); }
+            get => sdParams;
+            set => SetProperty(ref sdParams, value);
         }
 
         /// <summary>Builds a new instance of the SdElement class</summary>
@@ -43,6 +45,7 @@ namespace NLog.Targets.Syslog.Settings
             sdParams.CollectionChanged += sdParamsCollectionChanged;
         }
 
+        /// <inheritdoc />
         /// <summary>Disposes the instance</summary>
         public void Dispose()
         {

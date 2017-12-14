@@ -3,6 +3,7 @@
 
 namespace NLog.Targets.Syslog.Settings
 {
+    /// <inheritdoc />
     /// <summary>UDP configuration</summary>
     public class UdpConfig : NotifyPropertyChanged
     {
@@ -14,15 +15,15 @@ namespace NLog.Targets.Syslog.Settings
         /// <summary>The IP address or hostname of the Syslog server</summary>
         public string Server
         {
-            get { return server; }
-            set { SetProperty(ref server, value); }
+            get => server;
+            set => SetProperty(ref server, value);
         }
 
         /// <summary>The port number the Syslog server is listening on</summary>
         public int Port
         {
-            get { return port; }
-            set { SetProperty(ref port, value); }
+            get => port;
+            set => SetProperty(ref port, value);
         }
 
         /// <summary>Builds a new instance of the UdpProtocolConfig class</summary>

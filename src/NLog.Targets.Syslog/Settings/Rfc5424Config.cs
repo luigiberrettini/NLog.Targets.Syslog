@@ -10,6 +10,8 @@ using System.Net.NetworkInformation;
 
 namespace NLog.Targets.Syslog.Settings
 {
+    /// <inheritdoc cref="NotifyPropertyChanged" />
+    /// <inheritdoc cref="IDisposable" />
     /// <summary>RFC 5424 configuration</summary>
     public class Rfc5424Config : NotifyPropertyChanged, IDisposable
     {
@@ -32,8 +34,8 @@ namespace NLog.Targets.Syslog.Settings
         /// <summary>The HOSTNAME field of the HEADER part</summary>
         public Layout Hostname
         {
-            get { return hostname; }
-            set { SetProperty(ref hostname, value); }
+            get => hostname;
+            set => SetProperty(ref hostname, value);
         }
 
         /// <summary>The default APPNAME if no value is provided</summary>
@@ -42,37 +44,37 @@ namespace NLog.Targets.Syslog.Settings
         /// <summary>The APPNAME field of the HEADER part</summary>
         public Layout AppName
         {
-            get { return appName; }
-            set { SetProperty(ref appName, value); }
+            get => appName;
+            set => SetProperty(ref appName, value);
         }
 
         /// <summary>The PROCID field of the HEADER part</summary>
         public Layout ProcId
         {
-            get { return procId; }
-            set { SetProperty(ref procId, value); }
+            get => procId;
+            set => SetProperty(ref procId, value);
         }
 
         /// <summary>The MSGID field of the HEADER part</summary>
         public Layout MsgId
         {
-            get { return msgId; }
-            set { SetProperty(ref msgId, value); }
+            get => msgId;
+            set => SetProperty(ref msgId, value);
         }
 
         /// <summary>The STRUCTURED-DATA part</summary>
         public StructuredDataConfig StructuredData
         {
-            get { return structuredData; }
-            set { SetProperty(ref structuredData, value); }
+            get => structuredData;
+            set => SetProperty(ref structuredData, value);
         }
 
         /// <summary>Whether to remove or not BOM in the MSG part</summary>
         /// <see href="https://github.com/rsyslog/rsyslog/issues/284">RSyslog issue #284</see>
         public bool DisableBom
         {
-            get { return disableBom; }
-            set { SetProperty(ref disableBom, value); }
+            get => disableBom;
+            set => SetProperty(ref disableBom, value);
         }
 
         /// <summary>Builds a new instance of the Rfc5424 class</summary>
@@ -91,6 +93,7 @@ namespace NLog.Targets.Syslog.Settings
             disableBom = false;
         }
 
+        /// <inheritdoc />
         /// <summary>Disposes the instance</summary>
         public void Dispose()
         {
@@ -103,7 +106,7 @@ namespace NLog.Targets.Syslog.Settings
             var hostname = Dns.GetHostName();
             var domainName = IPGlobalProperties.GetIPGlobalProperties().DomainName;
             var domainAsSuffix = $".{domainName}";
-            return hostname.EndsWith(domainAsSuffix) ? hostname : $"{hostname}{domainAsSuffix}";
+            return hostname.EndsWith(domainAsSuffix, StringComparison.InvariantCulture) ? hostname : $"{hostname}{domainAsSuffix}";
         }
     }
 }
