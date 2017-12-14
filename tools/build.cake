@@ -111,6 +111,8 @@ Task("Pack")
             var csprojVersion = document.DocumentElement["PropertyGroup"]["Version"].InnerText.Split(new [] { '-' }, 2, StringSplitOptions.RemoveEmptyEntries);
             var versionPrefix = providedVersion.Length == 0 ? csprojVersion[0].Split('.') : providedVersion[0].Split('.');
             var versionSuffix = (providedVersion.Length == 0 ? csprojVersion[1] : providedVersion[1]).Replace("commitHash", commitHash);
+            if (versionSuffix.Length > 0)
+                versionSuffix = "-" + versionSuffix;
 
             // AssemblyVersion
             // 1.0.0
