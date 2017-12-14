@@ -7,6 +7,7 @@ using System.Net;
 
 namespace NLog.Targets.Syslog.Settings
 {
+    /// <inheritdoc />
     /// <summary>RFC 3164 configuration</summary>
     public class Rfc3164Config : NotifyPropertyChanged
     {
@@ -16,15 +17,15 @@ namespace NLog.Targets.Syslog.Settings
         /// <summary>The HOSTNAME field of the HEADER part</summary>
         public Layout Hostname
         {
-            get { return hostname; }
-            set { SetProperty(ref hostname, value); }
+            get => hostname;
+            set => SetProperty(ref hostname, value);
         }
 
         /// <summary>The TAG field of the MSG part</summary>
         public Layout Tag
         {
-            get { return tag; }
-            set { SetProperty(ref tag, value); }
+            get => tag;
+            set => SetProperty(ref tag, value);
         }
 
         /// <summary>Builds a new instance of the Rfc3164 class</summary>

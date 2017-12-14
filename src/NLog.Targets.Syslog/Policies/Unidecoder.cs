@@ -237,8 +237,7 @@ namespace NLog.Targets.Syslog.Policies
 
             var high = c >> 8;
             var low = c & 0xff;
-            string[] transliterations;
-            return Characters.TryGetValue(high, out transliterations) ? transliterations[low] : "";
+            return Characters.TryGetValue(high, out var transliterations) ? transliterations[low] : "";
         }
     }
 }

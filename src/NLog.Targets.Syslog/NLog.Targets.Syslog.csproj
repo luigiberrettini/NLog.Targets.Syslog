@@ -1,143 +1,67 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>8.0.30703</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{D888EE7E-4394-4FB1-9B37-29513FF8A91A}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
     <RootNamespace>NLog.Targets.Syslog</RootNamespace>
-    <AssemblyName>NLog.Targets.Syslog</AssemblyName>
-    <TargetFrameworkVersion>v4.6.2</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-    <DocumentationFile>bin\Debug\NLog.Targets.Syslog.xml</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>full</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-    <DebugSymbols>true</DebugSymbols>
-    <DocumentationFile>bin\Release\NLog.Targets.Syslog.xml</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+    <OutputType>Library</OutputType>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <SignAssembly>true</SignAssembly>
-  </PropertyGroup>
-  <PropertyGroup>
     <AssemblyOriginatorKeyFile>NLog.Targets.Syslog.snk</AssemblyOriginatorKeyFile>
+    <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
+
+    <Product>NLog.Targets.Syslog</Product>
+    <Copyright>Copyright © 2013 - present by Jesper Hess Nielsen, Luigi Berrettini and others: https://github.com/graffen/NLog.Targets.Syslog/graphs/contributors</Copyright>
+    <AssemblyTitle>NLog Syslog target</AssemblyTitle>
+    <AssemblyName>NLog.Targets.Syslog</AssemblyName>
+    <AssemblyVersion>0.0.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>
+    <InformationalVersion>0.1.0-alpha-01-commitHash</InformationalVersion>
+    <NeutralLanguage>en</NeutralLanguage>
+
+    <Company>Jesper Hess Nielsen, Luigi Berrettini</Company>
+    <Authors>Jesper Hess Nielsen, Luigi Berrettini</Authors>
+    <PackageId>NLog.Targets.Syslog</PackageId>
+    <Title>NLog.Targets.Syslog</Title>
+    <Description>Custom target for NLog to send logging messages to a Syslog server</Description>
+    <PackageTags>NLog Syslog Log Logging</PackageTags>
+    <Version>0.1.0-alpha-01-commitHash</Version>
+    <PackageLicenseUrl>https://github.com/graffen/NLog.Targets.Syslog/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/graffen/NLog.Targets.Syslog</PackageProjectUrl>
+    <PackageIconUrl>http://nlog-project.org/N.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/graffen/NLog.Targets.Syslog</RepositoryUrl>
+    <PackageReleaseNotes>https://github.com/graffen/NLog.Targets.Syslog/releases/tag/v0.1.0-alpha-01-commitHash</PackageReleaseNotes>
+    <RepositoryType>Git</RepositoryType>
   </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
-      <HintPath>..\packages\NLog.4.4.2\lib\net45\NLog.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netstandard2.0\NLog.Targets.Syslog.xml</DocumentationFile>
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard2.0\NLog.Targets.Syslog.xml</DocumentationFile>
+    <DebugType>portable</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)'=='net45'">
+    <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='net45'">
     <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <PackageReference Include="NLog" Version="4.4.12" />
+ </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
+    <PackageReference Include="NLog" Version="4.5.0-rc01" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Extensions\AssemblyExtensions.cs" />
-    <Compile Include="Settings\NotifyPropertyChanged.cs" />
-    <Compile Include="Settings\TlsConfig.cs" />
-    <Compile Include="Settings\UniversalAssembly.cs" />
-    <Compile Include="Extensions\AsyncLogEventInfoExtensions.cs" />
-    <Compile Include="AsyncLogger.cs" />
-    <Compile Include="ByteArray.cs" />
-    <Compile Include="Extensions\NumberExtensions.cs" />
-    <Compile Include="Extensions\StackTraceExtensions.cs" />
-    <Compile Include="Settings\MessageTransmitterConfig.cs" />
-    <Compile Include="Settings\TcpConfig.cs" />
-    <Compile Include="Settings\ThrottlingConfig.cs" />
-    <Compile Include="Settings\UdpConfig.cs" />
-    <Compile Include="LogEventMsgSet.cs" />
-    <Compile Include="Extensions\TaskExtensions.cs" />
-    <Compile Include="Settings\MessageBuilderConfig.cs" />
-    <Compile Include="Settings\Rfc3164Config.cs" />
-    <Compile Include="Settings\Rfc5424Config.cs" />
-    <Compile Include="Settings\SdElementConfig.cs" />
-    <Compile Include="Settings\SdIdConfig.cs" />
-    <Compile Include="Settings\SdParamConfig.cs" />
-    <Compile Include="Settings\StructuredDataConfig.cs" />
-    <Compile Include="Policies\Throttling.cs" />
-    <Compile Include="Settings\ThrottlingStrategy.cs" />
-    <Compile Include="Policies\AppNamePolicySet.cs" />
-    <Compile Include="Extensions\ByteManipulationExtensions.cs" />
-    <Compile Include="Policies\DefaultIfEmptyPolicy.cs" />
-    <Compile Include="Policies\AsciiMessagePolicy.cs" />
-    <Compile Include="MessageCreation\EncodingSet.cs" />
-    <Compile Include="Settings\EnforcementConfig.cs" />
-    <Compile Include="Policies\FqdnHostnamePolicySet.cs" />
-    <Compile Include="Settings\FramingMethod.cs" />
-    <Compile Include="Policies\IBasicPolicy.cs" />
-    <Compile Include="MessageCreation\MessageBuilder.cs" />
-    <Compile Include="Extensions\EnumerableExtensions.cs" />
-    <Compile Include="Policies\MsgIdPolicySet.cs" />
-    <Compile Include="Policies\Utf8MessagePolicy.cs" />
-    <Compile Include="Policies\ParamNamePolicySet.cs" />
-    <Compile Include="Policies\ParamValuePolicySet.cs" />
-    <Compile Include="Policies\PlainContentPolicySet.cs" />
-    <Compile Include="Policies\PlainHostnamePolicySet.cs" />
-    <Compile Include="Policies\PolicySet.cs" />
-    <Compile Include="Policies\ProcIdPolicySet.cs" />
-    <Compile Include="Settings\ProtocolType.cs" />
-    <Compile Include="Policies\ReplaceComputedValuePolicy.cs" />
-    <Compile Include="Policies\ReplaceKnownValuePolicy.cs" />
-    <Compile Include="MessageCreation\Rfc3164.cs" />
-    <Compile Include="MessageCreation\Rfc5424.cs" />
-    <Compile Include="Policies\InternalLogDuplicatesPolicy.cs" />
-    <Compile Include="MessageCreation\SdElement.cs" />
-    <Compile Include="MessageCreation\SdId.cs" />
-    <Compile Include="Policies\SdIdPolicySet.cs" />
-    <Compile Include="MessageCreation\SdIdToInvalidParamNamePattern.cs" />
-    <Compile Include="MessageCreation\SdParam.cs" />
-    <Compile Include="Policies\SplitOnNewLinePolicy.cs" />
-    <Compile Include="MessageCreation\StructuredData.cs" />
-    <Compile Include="Policies\Unidecoder.cs" />
-    <Compile Include="SyslogTarget.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Settings\RfcNumber.cs" />
-    <Compile Include="Settings\Facility.cs" />
-    <Compile Include="MessageCreation\Severity.cs" />
-    <Compile Include="Policies\TagPolicySet.cs" />
-    <Compile Include="MessageSend\Tcp.cs" />
-    <Compile Include="MessageSend\MessageTransmitter.cs" />
-    <Compile Include="Policies\TransliteratePolicy.cs" />
-    <Compile Include="Policies\TruncateToComputedValuePolicy.cs" />
-    <Compile Include="Policies\TruncateToKnownValuePolicy.cs" />
-    <Compile Include="MessageSend\Udp.cs" />
-    <Compile Include="Settings\KeepAliveConfig.cs" />
-    <Compile Include="MessageSend\KeepAlive.cs" />
-  </ItemGroup>
+
   <ItemGroup>
     <None Include="NLog.Targets.Syslog.snk" />
-    <None Include="NLog.Targets.Syslog.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="packages.config" />
+    <None Include="NLog.Targets.Syslog.xsd" SubType="Designer" />
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

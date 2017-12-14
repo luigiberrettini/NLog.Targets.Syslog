@@ -46,7 +46,8 @@ namespace NLog.Targets.Syslog
             if (token.IsCancellationRequested)
                 return tcs.CanceledTask();
 
-            if (AllSent)
+            var allSent = currentMessage == logEntries.Length;
+            if (allSent)
                 return tcs.SucceededTask(() => asyncLogEvent.Continuation(null));
 
             try
@@ -77,9 +78,10 @@ namespace NLog.Targets.Syslog
             }
         }
 
-        private bool AllSent => currentMessage == logEntries.Length;
-
-        private void PrepareMessage() => messageBuilder.PrepareMessage(buffer, asyncLogEvent.LogEvent, logEntries[currentMessage++]);
+        private void PrepareMessage()
+        {
+            messageBuilder.PrepareMessage(buffer, asyncLogEvent.LogEvent, logEntries[currentMessage++]);
+        }
 
         public override string ToString()
         {

@@ -1,5 +1,6 @@
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace NLog.Targets.Syslog.Settings
@@ -14,9 +15,7 @@ namespace NLog.Targets.Syslog.Settings
         protected bool SetProperty<T>(ref T oldValue, T newValue, [CallerMemberName] string propertyName = null)
         {
             if (Equals(oldValue, newValue))
-            {
                 return false;
-            }
 
             oldValue = newValue;
             OnPropertyChanged(propertyName);
@@ -34,13 +33,17 @@ namespace NLog.Targets.Syslog.Settings
         {
             return (sender, eventArgs) =>
             {
-                if (eventArgs.NewItems != null)
-                    foreach (INotifyPropertyChanged item in eventArgs.NewItems)
-                        item.PropertyChanged += onElemPropsChanged;
+                eventArgs
+                    .NewItems?
+                    .Cast<INotifyPropertyChanged>()
+                    .ToList()
+                    .ForEach(item => item.PropertyChanged += onElemPropsChanged);
 
-                if (eventArgs.OldItems != null)
-                    foreach (INotifyPropertyChanged item in eventArgs.OldItems)
-                        item.PropertyChanged -= onElemPropsChanged;
+                eventArgs
+                    .OldItems?
+                    .Cast<INotifyPropertyChanged>()
+                    .ToList()
+                    .ForEach(item => item.PropertyChanged -= onElemPropsChanged);
             };
         }
     }
