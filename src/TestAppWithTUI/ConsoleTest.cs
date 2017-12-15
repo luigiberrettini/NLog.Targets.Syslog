@@ -101,11 +101,11 @@ namespace TestAppWithTui
             tcpStreamWriter = new StreamWriter(tcpFileStream);
         }
 
-        private void OnReceivedString(ProtocolType protocolType, string receivedString)
+        private void OnReceivedString(int protocolType, string receivedString)
         {
             Trace.WriteLine(receivedString);
 
-            var file = protocolType == ProtocolType.Udp ? udpStreamWriter : tcpStreamWriter;
+            var file = protocolType == SyslogServer.UdpProtocolHashCode ? udpStreamWriter : tcpStreamWriter;
             file.WriteLine(receivedString);
             file.Flush();
         }

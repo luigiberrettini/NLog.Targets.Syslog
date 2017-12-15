@@ -4,7 +4,6 @@
 using System;
 using System.Net;
 using System.Threading.Tasks;
-using NLog.Targets.Syslog.Settings;
 
 namespace FakeSyslogServer
 {
@@ -16,6 +15,16 @@ namespace FakeSyslogServer
         private readonly TcpServer tcpServer;
         private volatile bool stopped;
 
+        public static int UdpProtocolHashCode { get; }
+
+        public static int TcpProtocolHashCode { get; }
+
+        static SyslogServer()
+        {
+            UdpProtocolHashCode = "UDP".GetHashCode();
+            TcpProtocolHashCode = "TCP".GetHashCode();
+        }
+
         public SyslogServer(IPEndPoint udpEndPoint, IPEndPoint tcpEndPoint)
         {
             this.udpEndPoint = udpEndPoint;
@@ -25,7 +34,7 @@ namespace FakeSyslogServer
             stopped = true;
         }
 
-        public void Start(Action<ProtocolType, string> receivedStringAction, Action<Task> exceptionAction)
+        public void Start(Action<int, string> receivedStringAction, Action<Task> exceptionAction)
         {
             if (!stopped)
                 return;
@@ -33,7 +42,7 @@ namespace FakeSyslogServer
             stopped = false;
 
             Task.Factory
-                .StartNew(() => udpServer.StartListening(udpEndPoint, str => receivedStringAction(ProtocolType.Udp, str)))
+                .StartNew(() => udpServer.StartListening(udpEndPoint, str => receivedStringAction(UdpProtocolHashCode, str)))
                 .ContinueWith(t =>
                  {
                      if (t.Exception != null)
@@ -41,7 +50,7 @@ namespace FakeSyslogServer
                  });
 
             Task.Factory
-                .StartNew(() => tcpServer.StartListening(tcpEndPoint, str => receivedStringAction(ProtocolType.Tcp, str)))
+                .StartNew(() => tcpServer.StartListening(tcpEndPoint, str => receivedStringAction(TcpProtocolHashCode, str)))
                 .ContinueWith(t =>
                 {
                     if (t.Exception != null)
