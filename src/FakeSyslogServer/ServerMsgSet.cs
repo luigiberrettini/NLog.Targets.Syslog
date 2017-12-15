@@ -4,7 +4,6 @@
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using NLog.Targets.Syslog.Settings;
 
 namespace FakeSyslogServer
 {
@@ -23,32 +22,22 @@ namespace FakeSyslogServer
 
         public byte[] LastMessageBytes => encoding.GetBytes(LastMessage);
 
-        public static ServerMsgSet FromStringAndFraming(string s, FramingMethod? framing)
+        public static ServerMsgSet FromStringAndFraming(string s, int? framing)
         {
             var msgSet = new ServerMsgSet();
-            switch (framing)
-            {
-                case FramingMethod.NonTransparent:
-                {
-                    return FromStringNonTransparent(s, msgSet);
-                }
-                case FramingMethod.OctetCounting:
-                {
-                    return FromStringOctetCounting(s, msgSet);
-                }
-                default:
-                {
-                    return null;
-                }
-            }
+            if (framing == TcpState.NonTransparentHashCode)
+                return FromStringNonTransparent(s, msgSet);
+            if (framing == TcpState.OctetCountingHashCode)
+                return FromStringOctetCounting(s, msgSet);
+            return null;
         }
 
-        public bool IsValid(string message, FramingMethod? framing)
+        public bool IsValid(string message, int? framing)
         {
             if (framing == null)
                 return false;
 
-            if (framing == FramingMethod.NonTransparent)
+            if (framing == TcpState.NonTransparentHashCode)
                 return true;
 
             var splitted = Regex.Split(message, "(\\d{1,11}) (<\\d{3}>)").Where(x => x != string.Empty).ToArray();
@@ -80,7 +69,7 @@ namespace FakeSyslogServer
                 .Select(x => x.value + (matches.Length <= x.index + 1 ? string.Empty : matches[x.index + 1].value))
                 .ToArray();
 
-            serverMsgSet.LastIsPartial = !serverMsgSet.IsValid(serverMsgSet.LastMessage, FramingMethod.OctetCounting);
+            serverMsgSet.LastIsPartial = !serverMsgSet.IsValid(serverMsgSet.LastMessage, TcpState.OctetCountingHashCode);
 
             return serverMsgSet;
         }

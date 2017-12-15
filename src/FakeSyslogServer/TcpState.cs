@@ -4,14 +4,23 @@
 using System;
 using System.IO;
 using System.Net.Sockets;
-using NLog.Targets.Syslog.Settings;
 
 namespace FakeSyslogServer
 {
     internal class TcpState : StateObject
     {
         private volatile bool firstReceive;
-        private FramingMethod? framing;
+        private int? framing;
+
+        public static int OctetCountingHashCode { get; }
+
+        public static int NonTransparentHashCode { get; }
+
+        static TcpState()
+        {
+            OctetCountingHashCode = "OctetCounting".GetHashCode();
+            NonTransparentHashCode = "NonTransparentCounting".GetHashCode();
+        }
 
         public TcpState(Socket receiveSocket) : base(receiveSocket)
         {
@@ -59,9 +68,9 @@ namespace FakeSyslogServer
             var firstChar = Convert.ToChar(firstByte);
 
             if (char.IsDigit(firstChar))
-                framing = FramingMethod.OctetCounting;
+                framing = OctetCountingHashCode;
             else if (firstChar == '<')
-                framing = FramingMethod.NonTransparent;
+                framing = NonTransparentHashCode;
         }
     }
 }

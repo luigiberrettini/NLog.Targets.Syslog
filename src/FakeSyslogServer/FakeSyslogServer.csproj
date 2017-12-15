@@ -16,7 +16,11 @@
     <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\NLog.Targets.Syslog\NLog.Targets.Syslog.csproj" />
+  <ItemGroup Condition="'$(TargetFramework)'=='net45'">
+    <PackageReference Include="NLog" Version="4.4.12" />
+ </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
+    <PackageReference Include="NLog" Version="4.5.0-rc02" />
   </ItemGroup>
 </Project>

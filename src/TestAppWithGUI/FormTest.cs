@@ -12,7 +12,7 @@ namespace TestAppWithGui
 {
     public partial class FormTest : Form
     {
-        private readonly Action<ProtocolType, string> receivedStringAction;
+        private readonly Action<int, string> receivedStringAction;
         private readonly Action<Task> exceptionAction;
         private readonly TestAppHelper testAppHelper;
 
@@ -48,11 +48,11 @@ namespace TestAppWithGui
             Task.Delay(500).ContinueWith(_ => Invoke(enableButton));
         }
 
-        private Action<ProtocolType, string> OnReceivedStringAction()
+        private Action<int, string> OnReceivedStringAction()
         {
-            Action<ProtocolType, string> appendStringAction = (protocolType, recString) =>
+            Action<int, string> appendStringAction = (protocolType, recString) =>
             {
-                var textBox = protocolType == ProtocolType.Udp ? udpTextBox : tcpTextBox;
+                var textBox = protocolType == SyslogServer.UdpProtocolHashCode ? udpTextBox : tcpTextBox;
                 textBox.AppendText(recString);
                 textBox.AppendText(Environment.NewLine);
             };
