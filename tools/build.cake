@@ -3,7 +3,7 @@ var toolsDir = Argument<string>("toolsDir");
 var target = Argument<string>("target", "Test");
 var buildConfiguration = Argument<string>("buildConfiguration", "Release");
 var buildVerbosity = (DotNetCoreVerbosity)Enum.Parse(typeof(DotNetCoreVerbosity), Argument<string>("buildVerbosity", "Minimal"));
-var softwareVersion = target.ToLower() == "nugetpush" ? Argument<string>("softwareVersion") : Argument<string>("softwareVersion", string.Empty);
+var softwareVersion = target.ToLower() == "nugetpack" || target.ToLower() == "nugetpush" ? Argument<string>("softwareVersion") : Argument<string>("softwareVersion", string.Empty);
 var buildNumber = Argument<int>("buildNumber", 0);
 var commitHash = Argument<string>("commitHash");
 var nuGetApiKey = Argument<string>("nuGetApiKey", string.Empty);
@@ -11,11 +11,66 @@ var nuGetApiKey = Argument<string>("nuGetApiKey", string.Empty);
 var srcDirInfo = new DirectoryInfo(srcDir);
 var artifactsFolder = System.IO.Path.Combine(toolsDir, "artifacts");
 var childDirInfos = srcDirInfo.GetDirectories();
-var toBuildFolders = childDirInfos
+var toBuildDirInfo = childDirInfos
     .Where(x => x.GetFiles("*.csproj").Length > 0 && x.GetFiles("*.cs").Length > 0)
+    .ToList();
+var toBuildFolders = toBuildDirInfo
     .Select(x => x.FullName)
     .ToList();
 
+var perProjectMsBuildSettings = new Dictionary<string, DotNetCoreMSBuildSettings>();
+
+Task("MSBuildSettings")
+    .Does(() =>
+    {
+        var providedVersion = softwareVersion.Split(new [] { '-' }, 2, StringSplitOptions.RemoveEmptyEntries);
+        if (providedVersion.Length == 1)
+            providedVersion = new [] { providedVersion[0], ""};
+
+        var csprojFiles = childDirInfos
+            .SelectMany(x => x.GetFiles("*.csproj"))
+            .Select(x => x.FullName)
+            .ToList();
+
+        foreach (var project in csprojFiles)
+        {
+            var content = System.IO.File.ReadAllText(project);
+            var document = new System.Xml.XmlDocument();
+            document.LoadXml(content);
+            var csprojProps = document.DocumentElement["PropertyGroup"];
+            var csprojVersion = (csprojProps["InformationalVersion"] ?? csprojProps["Version"]).InnerText.Split(new [] { '-' }, 2, StringSplitOptions.RemoveEmptyEntries);
+            var versionPrefix = providedVersion.Length == 0 ? csprojVersion[0].Split('.') : providedVersion[0].Split('.');
+            var versionSuffix = (providedVersion.Length == 0 ? csprojVersion[1] : providedVersion[1]).Replace("commitHash", commitHash);
+            if (versionSuffix.Length > 0)
+                versionSuffix = "-" + versionSuffix;
+
+            // AssemblyVersion
+            // 1.0.0.0
+            //
+            // AssemblyFileVersion
+            // 1.2.3.<BUILD_NUMBER>
+            //
+            // AssemblyInformationalVersion
+            // 1.2.3(-alpha-commitHash)
+            var assemblyVersion = String.Format("{0}.{1}.{1}.{1}", versionPrefix[0], 0);
+            var assemblyFileVersion = String.Format("{0}.{1}.{2}.{3}", versionPrefix[0], versionPrefix[1], versionPrefix[2], buildNumber);
+            var assemblyInformationalVersion = String.Format("{0}.{1}.{2}{3}", versionPrefix[0], versionPrefix[1], versionPrefix[2], versionSuffix);
+            var packageReleaseNotesUrl = String.Format("{0}{1}", "https://github.com/graffen/NLog.Targets.Syslog/releases/tag/v", assemblyInformationalVersion);
+
+            Information("Project: {0}", project);
+            Information("AssemblyVersion: {0}", assemblyVersion);
+            Information("AssemblyFileVersion: {0}", assemblyFileVersion);
+            Information("AssemblyInformationalVersion/NuGet package version: {0}", assemblyInformationalVersion);
+            Information("Package release notes URL: {0}{1}", packageReleaseNotesUrl, Environment.NewLine);
+
+            perProjectMsBuildSettings[project] = new DotNetCoreMSBuildSettings { NoLogo = true }
+                .WithProperty("AssemblyVersion", assemblyVersion)
+                .WithProperty("FileVersion", assemblyFileVersion)
+                .WithProperty("InformationalVersion", assemblyInformationalVersion)
+                .WithProperty("Version", assemblyInformationalVersion)
+                .WithProperty("PackageReleaseNotes", packageReleaseNotesUrl);
+        }
+    });
 
 Task("Clean")
     .Does(() =>
@@ -50,19 +105,23 @@ Task("Clean")
     });
 
 Task("Build")
+    .IsDependentOn("MSBuildSettings")
     .Does(() =>
     {
-        var buildSettings = new DotNetCoreBuildSettings
-        {
-            MSBuildSettings = new DotNetCoreMSBuildSettings { NoLogo = true },
-            Configuration = buildConfiguration,
-            Verbosity = buildVerbosity
-        };
+        var toBuildProjects = toBuildDirInfo
+            .SelectMany(x => x.GetFiles("*.csproj"))
+            .Select(x => x.FullName)
+            .ToList();
 
-        foreach (var folder in toBuildFolders)
+        foreach (var projectToBuild in toBuildProjects)
         {
-            Information(folder);
-            DotNetCoreBuild(folder, buildSettings);
+            var buildSettings = new DotNetCoreBuildSettings
+            {
+                MSBuildSettings = perProjectMsBuildSettings[projectToBuild],
+                Configuration = buildConfiguration,
+                Verbosity = buildVerbosity
+            };
+            DotNetCoreBuild(projectToBuild, buildSettings);
         }
     });
 
@@ -75,6 +134,7 @@ Task("Test")
     .Does(() =>
     {
         var testFolders = toBuildFolders.Where(x => x.Contains("Tests"));
+
         foreach (var folder in testFolders)
         {
             Information(folder);
@@ -99,48 +159,11 @@ Task("Pack")
             .SelectMany(x => x.GetFiles("*.csproj"))
             .Select(x => x.FullName);
 
-        var providedVersion = softwareVersion.Split(new [] { '-' }, 2, StringSplitOptions.RemoveEmptyEntries);
-        if (providedVersion.Length == 1)
-            providedVersion = new [] { providedVersion[0], ""};
-        
         foreach (var projectToPack in toPackProjects)
         {
-            var content = System.IO.File.ReadAllText(projectToPack);
-            var document = new System.Xml.XmlDocument();
-            document.LoadXml(content);
-            var csprojVersion = document.DocumentElement["PropertyGroup"]["Version"].InnerText.Split(new [] { '-' }, 2, StringSplitOptions.RemoveEmptyEntries);
-            var versionPrefix = providedVersion.Length == 0 ? csprojVersion[0].Split('.') : providedVersion[0].Split('.');
-            var versionSuffix = (providedVersion.Length == 0 ? csprojVersion[1] : providedVersion[1]).Replace("commitHash", commitHash);
-            if (versionSuffix.Length > 0)
-                versionSuffix = "-" + versionSuffix;
-
-            // AssemblyVersion
-            // 1.0.0
-            //
-            // AssemblyFileVersion
-            // 1.2.3.<BUILD_NUMBER>
-            //
-            // AssemblyInformationalVersion
-            // 1.2.3(-alpha-commitHash)
-            var assemblyVersion = String.Format("{0}.{1}.{1}.{1}", versionPrefix[0], 0);
-            var assemblyFileVersion = String.Format("{0}.{1}.{2}.{3}", versionPrefix[0], versionPrefix[1], versionPrefix[2], buildNumber);
-            var assemblyInformationalVersion = String.Format("{0}.{1}.{2}{3}", versionPrefix[0], versionPrefix[1], versionPrefix[2], versionSuffix);
-            var packageReleaseNotesUrl = String.Format("{0}{1}", "https://github.com/graffen/NLog.Targets.Syslog/releases/tag/v", assemblyInformationalVersion);
-
-            Information("Project: {0}", projectToPack);
-            Information("AssemblyVersion: {0}", assemblyVersion);
-            Information("AssemblyFileVersion: {0}", assemblyFileVersion);
-            Information("AssemblyInformationalVersion/NuGet package version: {0}", assemblyInformationalVersion);
-            Information("Package release notes URL: {0}", packageReleaseNotesUrl);
-
             var packSettings = new DotNetCorePackSettings
             {
-                MSBuildSettings = new DotNetCoreMSBuildSettings { NoLogo = true }
-                    .WithProperty("AssemblyVersion", assemblyVersion)
-                    .WithProperty("FileVersion", assemblyFileVersion)
-                    .WithProperty("InformationalVersion", assemblyInformationalVersion)
-                    .WithProperty("Version", assemblyInformationalVersion)
-                    .WithProperty("PackageReleaseNotes", packageReleaseNotesUrl),
+                MSBuildSettings = perProjectMsBuildSettings[projectToPack],
                 Configuration = buildConfiguration,
                 Verbosity = buildVerbosity,
                 NoBuild = true,
