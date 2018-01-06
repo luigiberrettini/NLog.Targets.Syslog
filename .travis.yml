@@ -26,6 +26,6 @@ script:
         mostRecentTag='v1.0.0'
     fi
     mostRecentVersion=$(echo "$mostRecentTag" | cut -c 2-)
-    FrameworkPathOverride=$MONO_BASE_PATH/4.5-api/ $(pwd)/tools/build.sh '--target=Test' "--softwareVersion=$mostRecentVersion" "--buildNumber=$TRAVIS_BUILD_NUMBER"
+    FrameworkPathOverride=$MONO_BASE_PATH/4.5.2-api/ $(pwd)/tools/build.sh '--target=Test' "--softwareVersion=$mostRecentVersion" "--buildNumber=$TRAVIS_BUILD_NUMBER"
 notifications:
   email: false
