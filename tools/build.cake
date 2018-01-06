@@ -1,5 +1,6 @@
+var gitRemote = Argument<string>("gitRemote");
 var srcDir = Argument<string>("srcDir");
-var toolsDir = Argument<string>("toolsDir");
+var artifactsDir = Argument<string>("artifactsDir");
 var target = Argument<string>("target", "Test");
 var buildConfiguration = Argument<string>("buildConfiguration", "Release");
 var buildVerbosity = (DotNetCoreVerbosity)Enum.Parse(typeof(DotNetCoreVerbosity), Argument<string>("buildVerbosity", "Minimal"));
@@ -9,7 +10,6 @@ var commitHash = Argument<string>("commitHash");
 var nuGetApiKey = Argument<string>("nuGetApiKey", string.Empty);
 
 var srcDirInfo = new DirectoryInfo(srcDir);
-var artifactsFolder = System.IO.Path.Combine(toolsDir, "artifacts");
 var childDirInfos = srcDirInfo.GetDirectories();
 var toBuildDirInfo = childDirInfos
     .Where(x => x.GetFiles("*.csproj").Length > 0 && x.GetFiles("*.cs").Length > 0)
@@ -55,7 +55,7 @@ Task("MSBuildSettings")
             var assemblyVersion = String.Format("{0}.{1}.{1}.{1}", versionPrefix[0], 0);
             var assemblyFileVersion = String.Format("{0}.{1}.{2}.{3}", versionPrefix[0], versionPrefix[1], versionPrefix[2], buildNumber);
             var assemblyInformationalVersion = String.Format("{0}.{1}.{2}{3}", versionPrefix[0], versionPrefix[1], versionPrefix[2], versionSuffix);
-            var packageReleaseNotesUrl = String.Format("{0}{1}", "https://github.com/graffen/NLog.Targets.Syslog/releases/tag/v", assemblyInformationalVersion);
+            var packageReleaseNotesUrl = String.Format("{0}/releases/tag/v{1}", gitRemote, assemblyInformationalVersion);
 
             Information("Project: {0}", project);
             Information("AssemblyVersion: {0}", assemblyVersion);
@@ -81,8 +81,8 @@ Task("Clean")
             Force = true
         };
 
-        if (DirectoryExists(artifactsFolder))
-            DeleteDirectory(artifactsFolder, deleteDirectorySettings);
+        if (DirectoryExists(artifactsDir))
+            DeleteDirectory(artifactsDir, deleteDirectorySettings);
 
         var cleanSettings = new DotNetCoreCleanSettings
         {
@@ -147,7 +147,7 @@ Task("Pack")
     .IsDependentOn("Test")
     .Does(() =>
     {
-        CreateDirectory(artifactsFolder);
+        CreateDirectory(artifactsDir);
 
         var solutionFileName = srcDirInfo
             .GetFiles("*.sln")
@@ -167,7 +167,7 @@ Task("Pack")
                 Configuration = buildConfiguration,
                 Verbosity = buildVerbosity,
                 NoBuild = true,
-                OutputDirectory = artifactsFolder
+                OutputDirectory = artifactsDir
             };
             DotNetCorePack(projectToPack, packSettings);
         }
@@ -178,7 +178,7 @@ Task("NuGetPush")
     .IsDependentOn("Pack")
     .Does(() =>
     {
-        var packageSearchPattern = System.IO.Path.Combine(artifactsFolder, "*.nupkg");
+        var packageSearchPattern = System.IO.Path.Combine(artifactsDir, "*.nupkg");
         var nuGetPushSettings = new DotNetCoreNuGetPushSettings { Source = "https://www.nuget.org/api/v2/package", ApiKey = nuGetApiKey };
         DotNetCoreNuGetPush(packageSearchPattern, nuGetPushSettings);
     });
