@@ -112,6 +112,8 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
 * `udp` - settings related to UDP:
   * `server` - IP or hostname of the Syslog server (default: `127.0.0.1`)
   * `port` - port the Syslog server is listening on (default: `514`)
+  * `reconnectInterval` - the time interval, in milliseconds, after which a connection is retried (default: `500`)
+  * `connectionCheckTimeout` - the time, in microseconds, to wait for a response when checking the UDP socket connection status (default: `100`; `0` means the only check performed is `UdpClient and inner socket != null`)
 * `tcp` - settings related to TCP:
   * `server` - IP or hostname of the Syslog server (default: `127.0.0.1`)
   * `port` - port the Syslog server is listening on (default: `514`)

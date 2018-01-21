@@ -60,6 +60,7 @@
     <Compile Include="AsyncLogger.cs" />
     <Compile Include="ByteArray.cs" />
     <Compile Include="Extensions\NumberExtensions.cs" />
+    <Compile Include="Extensions\SocketExtensions.cs" />
     <Compile Include="Extensions\StackTraceExtensions.cs" />
     <Compile Include="Settings\MessageTransmitterConfig.cs" />
     <Compile Include="Settings\TcpConfig.cs" />
