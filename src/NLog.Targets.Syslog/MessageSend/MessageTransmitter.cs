@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using NLog.Targets.Syslog.Extensions;
 using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageSend
@@ -14,12 +15,19 @@ namespace NLog.Targets.Syslog.MessageSend
     internal abstract class MessageTransmitter
     {
         private static readonly Dictionary<ProtocolType, Func<MessageTransmitterConfig, MessageTransmitter>> TransmitterFactory;
+        protected static readonly TimeSpan ZeroSecondsTimeSpan = TimeSpan.FromSeconds(0);
+
+        private volatile bool neverConnected;
+        private readonly TimeSpan recoveryTime;
+        protected volatile bool disposed;
 
         protected string Server { get; }
 
         protected string IpAddress { get; }
 
         protected int Port { get; }
+
+        protected abstract bool Ready { get; }
 
         static MessageTransmitter()
         {
@@ -35,15 +43,44 @@ namespace NLog.Targets.Syslog.MessageSend
             return TransmitterFactory[messageTransmitterConfig.Protocol](messageTransmitterConfig);
         }
 
-        protected MessageTransmitter(string server, int port)
+        protected MessageTransmitter(string server, int port, int reconnectInterval)
         {
+            neverConnected = true;
+            recoveryTime = TimeSpan.FromMilliseconds(reconnectInterval);
             Server = server;
             IpAddress = Dns.GetHostAddresses(server).FirstOrDefault()?.ToString();
             Port = port;
         }
 
-        public abstract Task SendMessageAsync(ByteArray message, CancellationToken token);
+        public Task SendMessageAsync(ByteArray message, CancellationToken token)
+        {
+            if (token.IsCancellationRequested)
+                return Task.FromResult<object>(null);
 
-        public abstract void Dispose();
+            if (Ready)
+                return SendAsync(message, token);
+
+            var delay = neverConnected ? ZeroSecondsTimeSpan : recoveryTime;
+            neverConnected = false;
+            return Task.Delay(delay, token)
+                .Then(_ => Setup(), token)
+                .Unwrap()
+                .Then(_ => SendAsync(message, token), token)
+                .Unwrap();
+        }
+
+        public void Dispose()
+        {
+            if (disposed)
+                return;
+            disposed = true;
+            TearDown();
+        }
+
+        protected abstract Task Setup();
+
+        protected abstract Task SendAsync(ByteArray message, CancellationToken token);
+
+        protected abstract void TearDown();
     }
 }

@@ -17,66 +17,35 @@ namespace NLog.Targets.Syslog.MessageSend
 {
     internal class Tcp : MessageTransmitter
     {
-        private static readonly TimeSpan ZeroSecondsTimeSpan = TimeSpan.FromSeconds(0);
         private static readonly byte[] LineFeedBytes = { 0x0A };
 
-        private volatile bool neverConnected;
-        private readonly TimeSpan recoveryTime;
-        private readonly KeepAlive keepAlive;
         private readonly int connectionCheckTimeout;
+        private readonly KeepAlive keepAlive;
         private readonly bool useTls;
         private readonly Func<X509Certificate2Collection> retrieveClientCertificates;
         private readonly int dataChunkSize;
         private readonly FramingMethod framing;
         private TcpClient tcp;
         private Stream stream;
-        private volatile bool disposed;
 
-        public Tcp(TcpConfig tcpConfig) : base(tcpConfig.Server, tcpConfig.Port)
+        protected override bool Ready
         {
-            neverConnected = true;
-            recoveryTime = TimeSpan.FromMilliseconds(tcpConfig.ReconnectInterval);
-            keepAlive = new KeepAlive(tcpConfig.KeepAlive);
+            get { return tcp?.Connected == true && tcp.Client.IsConnected(connectionCheckTimeout) == true; }
+        }
+
+        public Tcp(TcpConfig tcpConfig) : base(tcpConfig.Server, tcpConfig.Port, tcpConfig.ReconnectInterval)
+        {
             connectionCheckTimeout = tcpConfig.ConnectionCheckTimeout;
+            keepAlive = new KeepAlive(tcpConfig.KeepAlive);
             useTls = tcpConfig.Tls.Enabled;
             retrieveClientCertificates = tcpConfig.Tls.RetrieveClientCertificates;
             framing = tcpConfig.Framing;
             dataChunkSize = tcpConfig.DataChunkSize;
         }
 
-        public override Task SendMessageAsync(ByteArray message, CancellationToken token)
+        protected override Task Setup()
         {
-            if (token.IsCancellationRequested)
-                return Task.FromResult<object>(null);
-
-            if (tcp?.Connected == true && IsSocketConnected())
-                return WriteAsync(message, token);
-
-            var delay = neverConnected ? ZeroSecondsTimeSpan : recoveryTime;
-            neverConnected = false;
-
-            return Task.Delay(delay, token)
-                .Then(_ => InitTcpClient(), token)
-                .Unwrap()
-                .Then(_ => ConnectAsync(), token)
-                .Unwrap()
-                .Then(_ => WriteAsync(message, token), token)
-                .Unwrap();
-        }
-
-        private bool IsSocketConnected()
-        {
-            if (connectionCheckTimeout <= 0)
-                return true;
-
-            var isDisconnected = tcp.Client.Poll(connectionCheckTimeout, SelectMode.SelectRead) && tcp.Client.Available == 0;
-            return !isDisconnected;
-        }
-
-        private Task InitTcpClient()
-        {
-            DisposeSslStreamNotTcpClientInnerStream();
-            DisposeTcpClientAndItsInnerStream();
+            TearDown();
 
             tcp = new TcpClient();
             tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse, true);
@@ -85,14 +54,25 @@ namespace NLog.Targets.Syslog.MessageSend
             // Call WSAIoctl via IOControl
             tcp.Client.IOControl(IOControlCode.KeepAliveValues, keepAlive.ToByteArray(), null);
 
-            return Task.FromResult<object>(null);
-        }
-
-        private Task ConnectAsync()
-        {
             return tcp
                 .ConnectAsync(IpAddress, Port)
                 .Then(_ => stream = SslDecorate(tcp), CancellationToken.None);
+        }
+
+        protected override Task SendAsync(ByteArray message, CancellationToken token)
+        {
+            if (token.IsCancellationRequested)
+                return Task.FromResult<object>(null);
+
+            return FramingTask(message)
+                .Then(_ => WriteAsync(0, message, token), token)
+                .Unwrap();
+        }
+
+        protected override void TearDown()
+        {
+            DisposeSslStreamNotTcpClientInnerStream();
+            DisposeTcpClientAndItsInnerStream();
         }
 
         private Stream SslDecorate(TcpClient tcpClient)
@@ -107,13 +87,6 @@ namespace NLog.Targets.Syslog.MessageSend
             sslStream.AuthenticateAsClient(Server, retrieveClientCertificates(), SslProtocols.Tls12, false);
 
             return sslStream;
-        }
-
-        private Task WriteAsync(ByteArray message, CancellationToken token)
-        {
-            return FramingTask(message)
-                .Then(_ => WriteAsync(0, message, token), token)
-                .Unwrap();
         }
 
         private Task FramingTask(ByteArray message)
@@ -142,16 +115,6 @@ namespace NLog.Targets.Syslog.MessageSend
                 .SafeFromAsync(stream.BeginWrite, stream.EndWrite, (byte[])data, offset, count, null)
                 .Then(task => isLastWrite ? task : WriteAsync(offset + dataChunkSize, data, token), token)
                 .Unwrap();
-        }
-
-        public override void Dispose()
-        {
-            if (disposed)
-                return;
-            disposed = true;
-
-            DisposeSslStreamNotTcpClientInnerStream();
-            DisposeTcpClientAndItsInnerStream();
         }
 
         private void DisposeSslStreamNotTcpClientInnerStream()
