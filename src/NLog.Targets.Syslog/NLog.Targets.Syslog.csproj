@@ -53,11 +53,11 @@
   <ItemGroup Condition="'$(TargetFramework)'=='net452'">
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <PackageReference Include="NLog" Version="4.4.12" />
+    <PackageReference Include="NLog" Version="4.5.2" />
  </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
-    <PackageReference Include="NLog" Version="4.5.0-rc03" />
+    <PackageReference Include="NLog" Version="4.5.2" />
   </ItemGroup>
 
   <ItemGroup>
