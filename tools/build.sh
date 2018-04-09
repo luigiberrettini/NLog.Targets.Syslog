@@ -39,10 +39,10 @@ function getPackageAssemblyPath {
         local packageVersionSearchUrl="https://api-v2v3search-0.nuget.org/autocomplete?id=$packageName"
         local packageVersion=$(curl --silent $packageVersionSearchUrl | jq .data[-1] | sed -e 's/^"//' -e 's/"$//')
     fi
-    findPackageAssembly assemblyPath $buildScriptPackagesDir $packageName $packageVersion $assemblyName
+    findPackageAssembly assemblyPath $packagesDir $packageName $packageVersion $assemblyName
     if [ ! -f "$assemblyPath" ]; then
-        installPackage $buildScriptPackagesDir $packageName $packageVersion
-        findPackageAssembly assemblyPath $buildScriptPackagesDir $packageName $packageVersion $assemblyName
+        installPackage $packagesDir $packageName $packageVersion
+        findPackageAssembly assemblyPath $packagesDir $packageName $packageVersion $assemblyName
         if [ ! -f "$assemblyPath" ]; then
             echo "Cannot find '$assemblyName' in directory '$packagesDir' for package '$packageName' of version '$packageVersion'"
             exit 1
