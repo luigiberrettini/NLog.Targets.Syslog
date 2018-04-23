@@ -23,7 +23,7 @@ namespace NLog.Targets.Syslog.MessageSend
 
         protected string Server { get; }
 
-        protected string IpAddress { get; }
+        protected string IpAddress => Dns.GetHostAddresses(Server).FirstOrDefault()?.ToString();
 
         protected int Port { get; }
 
@@ -48,7 +48,6 @@ namespace NLog.Targets.Syslog.MessageSend
             neverConnected = true;
             recoveryTime = TimeSpan.FromMilliseconds(reconnectInterval);
             Server = server;
-            IpAddress = Dns.GetHostAddresses(server).FirstOrDefault()?.ToString();
             Port = port;
         }
 
