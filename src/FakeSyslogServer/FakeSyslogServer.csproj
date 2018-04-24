@@ -7,7 +7,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     
     <Product>FakeSyslogServer</Product>
-    <Copyright>Copyright © 2013 - present by Jesper Hess Nielsen, Luigi Berrettini and others: https://github.com/graffen/NLog.Targets.Syslog/graphs/contributors</Copyright>
+    <Copyright>Copyright © 2013 - present by Luigi Berrettini and others: https://github.com/luigiberrettini/NLog.Targets.Syslog/graphs/contributors</Copyright>
     <AssemblyTitle>Fake Syslog server</AssemblyTitle>
     <AssemblyName>FakeSyslogServer</AssemblyName>
     <AssemblyVersion>0.0.0.0</AssemblyVersion>

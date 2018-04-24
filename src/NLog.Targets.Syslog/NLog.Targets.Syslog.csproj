@@ -12,7 +12,7 @@
     <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
 
     <Product>NLog.Targets.Syslog</Product>
-    <Copyright>Copyright © 2013 - present by Jesper Hess Nielsen, Luigi Berrettini and others: https://github.com/graffen/NLog.Targets.Syslog/graphs/contributors</Copyright>
+    <Copyright>Copyright © 2013 - present by Luigi Berrettini and others: https://github.com/luigiberrettini/NLog.Targets.Syslog/graphs/contributors</Copyright>
     <AssemblyTitle>NLog Syslog target</AssemblyTitle>
     <AssemblyName>NLog.Targets.Syslog</AssemblyName>
     <AssemblyVersion>0.0.0.0</AssemblyVersion>
@@ -20,18 +20,18 @@
     <InformationalVersion>0.1.0-alpha-01-commitHash</InformationalVersion>
     <NeutralLanguage>en</NeutralLanguage>
 
-    <Company>Jesper Hess Nielsen, Luigi Berrettini</Company>
-    <Authors>Jesper Hess Nielsen, Luigi Berrettini</Authors>
+    <Company>Luigi Berrettini</Company>
+    <Authors>Luigi Berrettini</Authors>
     <PackageId>NLog.Targets.Syslog</PackageId>
     <Title>NLog.Targets.Syslog</Title>
     <Description>Custom target for NLog to send logging messages to a Syslog server</Description>
     <PackageTags>NLog Syslog Log Logging</PackageTags>
     <Version>0.1.0-alpha-01-commitHash</Version>
-    <PackageLicenseUrl>https://github.com/graffen/NLog.Targets.Syslog/blob/master/LICENSE</PackageLicenseUrl>
-    <PackageProjectUrl>https://github.com/graffen/NLog.Targets.Syslog</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/luigiberrettini/NLog.Targets.Syslog/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/luigiberrettini/NLog.Targets.Syslog</PackageProjectUrl>
     <PackageIconUrl>http://nlog-project.org/N.png</PackageIconUrl>
-    <RepositoryUrl>https://github.com/graffen/NLog.Targets.Syslog</RepositoryUrl>
-    <PackageReleaseNotes>https://github.com/graffen/NLog.Targets.Syslog/releases/tag/v0.1.0-alpha-01-commitHash</PackageReleaseNotes>
+    <RepositoryUrl>https://github.com/luigiberrettini/NLog.Targets.Syslog</RepositoryUrl>
+    <PackageReleaseNotes>https://github.com/luigiberrettini/NLog.Targets.Syslog/releases/tag/v0.1.0-alpha-01-commitHash</PackageReleaseNotes>
     <RepositoryType>Git</RepositoryType>
   </PropertyGroup>
 
