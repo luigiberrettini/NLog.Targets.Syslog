@@ -113,7 +113,7 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
   * `server` - IP or hostname of the Syslog server (default: `127.0.0.1`)
   * `port` - port the Syslog server is listening on (default: `514`)
   * `reconnectInterval` - the time interval, in milliseconds, after which a connection is retried (default: `500`)
-  * `connectionCheckTimeout` - the time, in microseconds, to wait for a response when checking the UDP socket connection status (default: `100`; `0` means the only check performed is `UdpClient and inner socket != null`)
+  * `connectionCheckTimeout` - the time, in microseconds, to wait for a response when checking the UDP socket connection status (default: `500000`; `0` means the only check performed is `UdpClient and inner socket != null`)
 * `tcp` - settings related to TCP:
   * `server` - IP or hostname of the Syslog server (default: `127.0.0.1`)
   * `port` - port the Syslog server is listening on (default: `514`)
@@ -122,7 +122,7 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
     * `enabled` - whether to use keep-alive or not (default: `true`)
     * `timeout` - the timeout, in milliseconds, with no activity until the first keep-alive packet is sent (default: `100`)
     * `interval` - the interval, in milliseconds, between when successive keep-alive packets are sent if no acknowledgement is received (default: `100`)
-  * `connectionCheckTimeout` - the time, in microseconds, to wait for a response when checking the connection status (default: `100`; `0` means the only check performed is `TcpClient.IsConnected`)
+  * `connectionCheckTimeout` - the time, in microseconds, to wait for a response when checking the connection status (default: `500000`; `0` means the only check performed is `TcpClient.IsConnected`)
   * `tls` - settings related to TLS:
     * `enabled` - whether to use TLS or not (TLS 1.2 only) (default `false`)
     * `useClientCertificates` - whether to use client certificates or not (default `false`)
