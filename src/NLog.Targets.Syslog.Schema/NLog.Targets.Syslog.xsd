@@ -129,11 +129,13 @@
                                                 <xs:complexType>
                                                     <xs:choice minOccurs="0" maxOccurs="unbounded">
                                                         <xs:element name="enabled" type="xs:boolean" minOccurs="0" maxOccurs="1" />
-                                                        <xs:element name="timeout" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                                                        <xs:element name="retryCount" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                                                        <xs:element name="time" type="xs:integer" minOccurs="0" maxOccurs="1" />
                                                         <xs:element name="interval" type="xs:integer" minOccurs="0" maxOccurs="1" />
                                                     </xs:choice>
                                                     <xs:attribute name="enabled" type="xs:boolean" />
-                                                    <xs:attribute name="timeout" type="xs:integer" />
+                                                    <xs:attribute name="retryCount" type="xs:integer" />
+                                                    <xs:attribute name="time" type="xs:integer" />
                                                     <xs:attribute name="interval" type="xs:integer" />
                                                 </xs:complexType>
                                             </xs:element>
