@@ -9,7 +9,7 @@
     <RuntimeIdentifier>win-x86</RuntimeIdentifier>
 
     <Product>TestAppWithGUI</Product>
-    <Copyright>Copyright © 2013 - present by Jesper Hess Nielsen, Luigi Berrettini and others: https://github.com/graffen/NLog.Targets.Syslog/graphs/contributors</Copyright>
+    <Copyright>Copyright © 2013 - present by Luigi Berrettini and others: https://github.com/luigiberrettini/NLog.Targets.Syslog/graphs/contributors</Copyright>
     <AssemblyTitle>NLog Syslog target test app with GUI</AssemblyTitle>
     <AssemblyName>TestAppWithGUI</AssemblyName>
     <AssemblyVersion>0.0.0.0</AssemblyVersion>
