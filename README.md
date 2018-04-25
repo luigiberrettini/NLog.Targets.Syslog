@@ -120,8 +120,9 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
   * `reconnectInterval` - the time interval, in milliseconds, after which a connection is retried (default: `500`)
   * `keepAlive` - settings related to keep-alive:
     * `enabled` - whether to use keep-alive or not (default: `true`)
-    * `timeout` - the timeout, in milliseconds, with no activity until the first keep-alive packet is sent (default: `100`)
-    * `interval` - the interval, in milliseconds, between when successive keep-alive packets are sent if no acknowledgement is received (default: `100`)
+    * `retryCount` - the number of unacknowledged keep-alive probes to send before considering the connection dead and terminating it (default: `10`)
+    * `time` - the number of seconds a connection will remain idle before the first keep-alive probe is sent (default: `5`)
+    * `interval` - the number of seconds a connection will wait for a keep-alive acknowledgement before sending another keepalive probe (default: `1`)
   * `connectionCheckTimeout` - the time, in microseconds, to wait for a response when checking the connection status (default: `500000`; `0` means the only check performed is `TcpClient.IsConnected`)
   * `tls` - settings related to TLS:
     * `enabled` - whether to use TLS or not (TLS 1.2 only) (default `false`)

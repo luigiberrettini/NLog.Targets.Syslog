@@ -15,7 +15,7 @@ namespace NLog.Targets.Syslog.MessageSend
     //     ULONG keepalivetime;
     //     ULONG keepaliveinterval;
     // };
-    internal class KeepAlive
+    internal class IOControlKeepAliveValues
     {
         private readonly int onOffOffset;
         private readonly int timeOffset;
@@ -25,7 +25,7 @@ namespace NLog.Targets.Syslog.MessageSend
         private readonly uint time;
         private readonly uint interval;
 
-        public KeepAlive(KeepAliveConfig keepAliveConfig)
+        public IOControlKeepAliveValues(KeepAliveConfig keepAliveConfig)
         {
             var uintSize = Marshal.SizeOf(typeof(uint));
             onOffOffset = 0;
@@ -33,7 +33,7 @@ namespace NLog.Targets.Syslog.MessageSend
             intervalOffset = 2 * uintSize;
             structSize = 3 * uintSize;
             onOff = (uint)(keepAliveConfig.Enabled ? 1 : 0);
-            time = (uint)keepAliveConfig.Timeout;
+            time = (uint)keepAliveConfig.Time;
             interval = (uint)keepAliveConfig.Interval;
         }
 
