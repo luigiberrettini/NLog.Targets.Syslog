@@ -1,7 +1,6 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
-using System;
 using NLog.Common;
 using NLog.Targets.Syslog.Settings;
 

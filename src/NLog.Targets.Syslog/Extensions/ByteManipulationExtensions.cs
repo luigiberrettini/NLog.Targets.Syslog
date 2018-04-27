@@ -9,7 +9,7 @@ namespace NLog.Targets.Syslog.Extensions
         {
             return i.IsLastIndex(bytes) ||
                    bytes[i].IsSingleByte() ||
-                   (bytes[i].IsContinuationByte() && bytes[i + 1].IsNonContinuationByte());
+                   bytes[i].IsContinuationByte() && bytes[i + 1].IsNonContinuationByte();
         }
 
         private static bool IsLastIndex(this int i, ByteArray bytes)

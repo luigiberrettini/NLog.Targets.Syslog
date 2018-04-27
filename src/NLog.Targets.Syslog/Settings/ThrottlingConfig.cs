@@ -3,6 +3,7 @@
 
 namespace NLog.Targets.Syslog.Settings
 {
+    /// <inheritdoc />
     /// <summary>Throttling configuration</summary>
     public class ThrottlingConfig : NotifyPropertyChanged
     {
@@ -13,10 +14,7 @@ namespace NLog.Targets.Syslog.Settings
         /// <summary>The number of log entries, waiting to be processed, that triggers throttling</summary>
         public int Limit
         {
-            get
-            {
-                return limit;
-            }
+            get => limit;
             set
             {
 
@@ -33,15 +31,15 @@ namespace NLog.Targets.Syslog.Settings
         /// <summary>The throttling strategy to apply to incoming log entries</summary>
         public ThrottlingStrategy Strategy
         {
-            get { return strategy; }
-            set { SetProperty(ref strategy, value); }
+            get => strategy;
+            set => SetProperty(ref strategy, value);
         }
 
         /// <summary>The milliseconds/percentage delay for a DiscardOnFixedTimeout/DiscardOnPercentageTimeout/Defer throttling strategy</summary>
         public decimal Delay
         {
-            get { return delay; }
-            set { SetProperty(ref delay, value < 0 ? 0 : value); }
+            get => delay;
+            set => SetProperty(ref delay, value < 0 ? 0 : value);
         }
 
         /// <summary>Builds a new instance of the Throttling class</summary>
