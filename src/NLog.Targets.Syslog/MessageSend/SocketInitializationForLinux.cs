@@ -37,9 +37,9 @@ namespace NLog.Targets.Syslog.MessageSend
 
         protected override void ApplyKeepAliveValues(KeepAliveConfig keepAliveConfig)
         {
-            Socket.SetSocketOption(SocketOptionLevel.Tcp, TcpKeepAliveRetryCount, keepAliveConfig.RetryCount);
-            Socket.SetSocketOption(SocketOptionLevel.Tcp, TcpKeepAliveTime, keepAliveConfig.Time);
-            Socket.SetSocketOption(SocketOptionLevel.Tcp, TcpKeepAliveInterval, keepAliveConfig.Interval);
+            Interop.SetSockOptSysCall(Socket, TcpKeepAliveRetryCount, keepAliveConfig.RetryCount);
+            Interop.SetSockOptSysCall(Socket, TcpKeepAliveTime, keepAliveConfig.Time);
+            Interop.SetSockOptSysCall(Socket, TcpKeepAliveInterval, keepAliveConfig.Interval);
         }
     }
 }
