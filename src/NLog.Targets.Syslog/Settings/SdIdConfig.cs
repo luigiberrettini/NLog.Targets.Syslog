@@ -5,14 +5,17 @@ using NLog.Layouts;
 
 namespace NLog.Targets.Syslog.Settings
 {
+    /// <inheritdoc />
     /// <summary>Syslog SD-ID field configuration</summary>
     public class SdIdConfig : SimpleLayout
     {
+        /// <inheritdoc />
         /// <summary>Builds a new instance of the SdId class</summary>
         public SdIdConfig() : this(string.Empty)
         {
         }
 
+        /// <inheritdoc />
         /// <summary>Builds a new instance of the SdId class</summary>
         /// <param name="text">The layout string to parse</param>
         public SdIdConfig(string text) : base(text)

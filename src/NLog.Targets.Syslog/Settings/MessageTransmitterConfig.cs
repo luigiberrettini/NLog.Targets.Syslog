@@ -6,6 +6,8 @@ using System.ComponentModel;
 
 namespace NLog.Targets.Syslog.Settings
 {
+    /// <inheritdoc cref="NotifyPropertyChanged" />
+    /// <inheritdoc cref="IDisposable" />
     /// <summary>Message transmission configuration</summary>
     public class MessageTransmitterConfig : NotifyPropertyChanged, IDisposable
     {
@@ -18,22 +20,22 @@ namespace NLog.Targets.Syslog.Settings
         /// <summary>The Syslog server protocol</summary>
         public ProtocolType Protocol
         {
-            get { return protocol; }
-            set { SetProperty(ref protocol, value); }
+            get => protocol;
+            set => SetProperty(ref protocol, value);
         }
 
         /// <summary>UDP related fields</summary>
         public UdpConfig Udp
         {
-            get { return udp; }
-            set { SetProperty(ref udp, value); }
+            get => udp;
+            set => SetProperty(ref udp, value);
         }
 
         /// <summary>TCP related fields</summary>
         public TcpConfig Tcp
         {
-            get { return tcp; }
-            set { SetProperty(ref tcp, value); }
+            get => tcp;
+            set => SetProperty(ref tcp, value);
         }
 
         /// <summary>Builds a new instance of the MessageTransmitterConfig class</summary>
@@ -48,6 +50,7 @@ namespace NLog.Targets.Syslog.Settings
             tcp.PropertyChanged += tcpPropsChanged;
         }
 
+        /// <inheritdoc />
         /// <summary>Disposes the instance</summary>
         public void Dispose()
         {

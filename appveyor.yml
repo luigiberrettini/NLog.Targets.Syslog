@@ -1,15 +1,23 @@
-configuration: Release
-platform: Any CPU
+version: BUILD {build}
+image: Visual Studio 2017
 before_build:
-  - cmd: nuget restore src/NLog.Targets.Syslog.sln -DisableParallelProcessing
-  - ps: Set-AppveyorBuildVariable -Name NGP_VER -Value (& "$env:APPVEYOR_BUILD_FOLDER\tools\get-version.ps1" -versionInfoFile "$env:APPVEYOR_BUILD_FOLDER\src\NLog.Targets.Syslog\Properties\AssemblyInfo.cs")
-  - ps: Update-AppveyorBuild -Version "$env:NGP_VER.$env:APPVEYOR_BUILD_NUMBER"
-  - ps: (Get-Content "$env:APPVEYOR_BUILD_FOLDER\src\NLog.Targets.Syslog\Properties\AssemblyInfo.cs") -replace '(AssemblyFileVersion\(\")([\.0-9]+)(\"\)])',"`${1}$env:APPVEYOR_BUILD_VERSION`${3}" | Set-Content "$env:APPVEYOR_BUILD_FOLDER\src\NLog.Targets.Syslog\Properties\AssemblyInfo.cs"
-build:
-  project: src/NLog.Targets.Syslog.sln
-  verbosity: minimal
+  - ps: |
+      $mostRecentTag = git describe --abbrev=0 --tags
+      $mostRecentVersion = $mostRecentTag.Substring(1)
+      $currentCommitHash = git rev-parse --short HEAD
+      Set-AppveyorBuildVariable -Name SW_VER -Value $mostRecentVersion
+      Update-AppveyorBuild -Version "Build $env:APPVEYOR_BUILD_NUMBER - Commit $currentCommitHash - Tag v$env:SW_VER"
+build_script:
+  - ps: |
+      $additionalArgs = if ($env:APPVEYOR_REPO_TAG -ne 'true') { "-buildNumber=$env:APPVEYOR_BUILD_NUMBER" }
+      .\tools\build.ps1 '-target=Pack' "-softwareVersion=$env:SW_VER" $additionalArgs
 after_build:
-  - cmd: nuget pack src/NLog.Targets.Syslog/NLog.Targets.Syslog.csproj -Prop Configuration=Release -Prop Platform=AnyCPU
-  - cmd: nuget pack src/NLog.Targets.Syslog/NLog.Targets.Syslog.Schema.nuspec -Prop version=%NGP_VER%
 artifacts:
-  - path: NLog.Targets.Syslog*.nupkg
+  - path: tools\artifacts\*.nupkg
+deploy:
+  provider: NuGet
+  api_key:
+      secure: GcyRYCPxp53YxLHBjdeBRQeGimm4CJDDMnZFNQ1gb03PDAsR6Mp7PMWKzc7vjPKP
+  skip_symbols: false
+  on:
+      appveyor_repo_tag: true

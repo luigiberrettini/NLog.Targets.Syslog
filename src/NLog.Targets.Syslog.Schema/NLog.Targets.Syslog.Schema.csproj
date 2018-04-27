@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
+
+    <Product>NLog.Targets.Syslog.Schema</Product>
+    <Copyright>Copyright © 2013 - present by Jesper Hess Nielsen, Luigi Berrettini and others: https://github.com/graffen/NLog.Targets.Syslog/graphs/contributors</Copyright>
+
+    <Company>Jesper Hess Nielsen, Luigi Berrettini</Company>
+    <Authors>Jesper Hess Nielsen, Luigi Berrettini</Authors>
+    <PackageId>NLog.Targets.Syslog.Schema</PackageId>
+    <Title>NLog Syslog target schema for Intellisense™</Title>
+    <Description>Enables Intellisense™ for Syslog target settings in NLog.config</Description>
+    <PackageTags>NLog Syslog Log Logging Intellisense xsd</PackageTags>
+    <Version>0.1.0-alpha-01-commitHash</Version>
+    <PackageLicenseUrl>https://github.com/graffen/NLog.Targets.Syslog/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/graffen/NLog.Targets.Syslog</PackageProjectUrl>
+    <PackageIconUrl>http://nlog-project.org/NConfig.png</PackageIconUrl>
+    <RepositoryUrl>https://github.com/graffen/NLog.Targets.Syslog</RepositoryUrl>
+    <PackageReleaseNotes>https://github.com/graffen/NLog.Targets.Syslog/releases/tag/v0.1.0-alpha-01-commitHash</PackageReleaseNotes>
+    <RepositoryType>Git</RepositoryType>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="NLog.Targets.Syslog.xsd" Pack="true" PackagePath="$(ContentTargetFolders)" />
+  </ItemGroup>
+</Project>
