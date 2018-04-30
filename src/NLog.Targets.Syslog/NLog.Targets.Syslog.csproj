@@ -5,6 +5,8 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
     <OutputType>Library</OutputType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <SignAssembly>true</SignAssembly>
@@ -54,6 +56,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <PackageReference Include="NLog" Version="4.5.2" />
+    <PackageReference Include="System.Runtime.InteropServices.RuntimeInformation" Version="4.3.0" />
  </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
