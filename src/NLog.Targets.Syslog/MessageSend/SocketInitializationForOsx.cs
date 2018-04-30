@@ -9,17 +9,20 @@ namespace NLog.Targets.Syslog.MessageSend
     internal class SocketInitializationForOsx : SocketInitialization
     {
         // SOCKET OPTION NAME CONSTANT
-        // https://opensource.apple.com/source/xnu/xnu-4570.31.3/bsd/netinet/tcp.h.auto.html
+        // https://opensource.apple.com/source/xnu/xnu-4570.41.2/bsd/sys/socket.h.auto.html
+        // #define    SO_REUSEPORT       0x0200                    /* allow local address & port reuse */
+        // https://opensource.apple.com/source/xnu/xnu-4570.41.2/bsd/netinet/tcp.h.auto.html
         // #define    TCP_KEEPCNT        0x102                     /* number of keepalives before close */
         // #define    TCP_KEEPALIVE      0x10                      /* idle time used when SO_KEEPALIVE is enabled */
         // #define    TCP_KEEPINTVL      0x101                     /* interval between keepalives */
 
         // SOCKET OPTION DEFAULT VALUE
-        // https://opensource.apple.com/source/xnu/xnu-4570.31.3/bsd/netinet/tcp_timer.h.auto.html
+        // https://opensource.apple.com/source/xnu/xnu-4570.41.2/bsd/netinet/tcp_timer.h.auto.html
         // #define    TCPTV_KEEPCNT      8                         /* max probes before drop */
         // #define    TCPTV_KEEP_IDLE    (120*60*TCP_RETRANSHZ)    /* time before probing */
         // #define    TCPTV_KEEPINTVL    (75*TCP_RETRANSHZ)        /* default probe interval */
 
+        private const SocketOptionName SocketReusePort = (SocketOptionName)0x0200;
         private const SocketOptionName TcpKeepAliveRetryCount = (SocketOptionName)0x102;
         private const SocketOptionName TcpKeepAliveTime = (SocketOptionName)0x10;
         private const SocketOptionName TcpKeepAliveInterval = (SocketOptionName)0x101;
@@ -28,18 +31,18 @@ namespace NLog.Targets.Syslog.MessageSend
         {
         }
 
-        public override void EnableExclusiveAddressUse()
+        public override void DisableAddressSharing()
         {
-            #if NETSTANDARD2_1
-            Socket.ExclusiveAddressUse = true;
-            #endif
+            // DEFAULT
+            // Interop.SetSockOptSysCall(Socket, SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, false);
+            // Interop.SetSockOptSysCall(Socket, SocketOptionLevel.Socket, SocketReusePort, 0);
         }
 
         protected override void ApplyKeepAliveValues(KeepAliveConfig keepAliveConfig)
         {
-            Interop.SetSockOptSysCall(Socket, TcpKeepAliveRetryCount, keepAliveConfig.RetryCount);
-            Interop.SetSockOptSysCall(Socket, TcpKeepAliveTime, keepAliveConfig.Time);
-            Interop.SetSockOptSysCall(Socket, TcpKeepAliveInterval, keepAliveConfig.Interval);
+            Interop.SetSockOptSysCall(Socket, SocketOptionLevel.Tcp, TcpKeepAliveRetryCount, keepAliveConfig.RetryCount);
+            Interop.SetSockOptSysCall(Socket, SocketOptionLevel.Tcp, TcpKeepAliveTime, keepAliveConfig.Time);
+            Interop.SetSockOptSysCall(Socket, SocketOptionLevel.Tcp, TcpKeepAliveInterval, keepAliveConfig.Interval);
         }
     }
 }

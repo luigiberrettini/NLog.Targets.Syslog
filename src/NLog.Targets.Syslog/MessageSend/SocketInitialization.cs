@@ -25,7 +25,7 @@ namespace NLog.Targets.Syslog.MessageSend
             Socket = socket;
         }
 
-        public abstract void EnableExclusiveAddressUse();
+        public abstract void DisableAddressSharing();
 
         public void DiscardPendingDataOnClose()
         {

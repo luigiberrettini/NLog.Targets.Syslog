@@ -23,10 +23,10 @@ namespace NLog.Targets.Syslog.MessageSend
         //  - 10 on Win Vista and later and value cannot be changed before Windows 10 version 1703
         // 2 hours
         // 1 second
-        
-        private const SocketOptionName TcpKeepAliveRetryCount = (SocketOptionName)0x10;   // TCP_KEEPCNT 
-        private const SocketOptionName TcpKeepAliveTime = (SocketOptionName)0x3;          // TCP_KEEPIDLE
-        private const SocketOptionName TcpKeepAliveInterval = (SocketOptionName)0x11;     // TCP_KEEPINTVL
+
+        private const SocketOptionName TcpKeepAliveRetryCount = (SocketOptionName)0x10;
+        private const SocketOptionName TcpKeepAliveTime = (SocketOptionName)0x3;
+        private const SocketOptionName TcpKeepAliveInterval = (SocketOptionName)0x11;
 
         private readonly bool isWin10V1703OrLater;
         private readonly bool isBelowWin10V1709;
@@ -38,9 +38,11 @@ namespace NLog.Targets.Syslog.MessageSend
             isBelowWin10V1709 = version.Major < 10 || version.Major == 10 && version.Build < 16299;
         }
 
-        public override void EnableExclusiveAddressUse()
+        public override void DisableAddressSharing()
         {
             Socket.ExclusiveAddressUse = true;
+            // DEFAULT
+            // Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, false);
         }
 
         protected override void ApplyKeepAliveValues(KeepAliveConfig keepAliveConfig)

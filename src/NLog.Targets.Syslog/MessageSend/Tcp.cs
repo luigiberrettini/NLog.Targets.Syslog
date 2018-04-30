@@ -49,7 +49,7 @@ namespace NLog.Targets.Syslog.MessageSend
 
             tcp = new TcpClient();
             var socketInitialization = SocketInitialization.ForCurrentOs(tcp.Client);
-            socketInitialization.EnableExclusiveAddressUse();
+            socketInitialization.DisableAddressSharing();
             socketInitialization.DiscardPendingDataOnClose();
             socketInitialization.SetKeepAlive(keepAliveConfig);
 
