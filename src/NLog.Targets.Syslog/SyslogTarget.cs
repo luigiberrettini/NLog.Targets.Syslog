@@ -60,7 +60,6 @@ namespace NLog.Targets.Syslog
         protected override void Write(AsyncLogEventInfo asyncLogEvent)
         {
             var logEvent = asyncLogEvent.LogEvent;
-            MergeEventProperties(logEvent);
             PrecalculateVolatileLayouts(logEvent);
             var asyncLoggerId = logEvent.SequenceID % Enforcement.MessageProcessors;
             asyncLoggers[asyncLoggerId].Log(asyncLogEvent);
