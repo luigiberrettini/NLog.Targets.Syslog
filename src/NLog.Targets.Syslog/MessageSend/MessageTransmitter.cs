@@ -23,7 +23,7 @@ namespace NLog.Targets.Syslog.MessageSend
 
         protected string Server { get; }
 
-        protected string IpAddress { get; }
+        protected string IpAddress => Dns.GetHostAddresses(Server).FirstOrDefault()?.ToString();
 
         protected int Port { get; }
 
@@ -48,7 +48,6 @@ namespace NLog.Targets.Syslog.MessageSend
             neverConnected = true;
             recoveryTime = TimeSpan.FromMilliseconds(reconnectInterval);
             Server = server;
-            IpAddress = Dns.GetHostAddresses(server).FirstOrDefault()?.ToString();
             Port = port;
         }
 
@@ -63,7 +62,7 @@ namespace NLog.Targets.Syslog.MessageSend
             var delay = neverConnected ? ZeroSecondsTimeSpan : recoveryTime;
             neverConnected = false;
             return Task.Delay(delay, token)
-                .Then(_ => Setup(), token)
+                .Then(_ => ReInit(), token)
                 .Unwrap()
                 .Then(_ => SendAsync(message, token), token)
                 .Unwrap();
@@ -74,13 +73,19 @@ namespace NLog.Targets.Syslog.MessageSend
             if (disposed)
                 return;
             disposed = true;
-            TearDown();
+            Terminate();
         }
 
-        protected abstract Task Setup();
+        protected abstract Task Init();
 
         protected abstract Task SendAsync(ByteArray message, CancellationToken token);
 
-        protected abstract void TearDown();
+        protected abstract void Terminate();
+
+        private Task ReInit()
+        {
+            Terminate();
+            return Init();
+        }
     }
 }

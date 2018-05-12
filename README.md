@@ -4,7 +4,7 @@ Syslog target for NLog
 ======================
 **NLog Syslog** is a custom target for **NLog**: [http://nlog-project.org](http://nlog-project.org/).
 
-It can be used with version 4.4.2 and later of NLog and allows to send logging messages to a Syslog server.
+It can be used with version 4.5.4 and later of NLog and allows to send logging messages to a Syslog server.
 
 **Notice**
 
@@ -68,10 +68,10 @@ A more detailed example is included in the [test application](./src/TestApp/NLog
   * `delay` - the milliseconds/percentage delay for a `DiscardOnFixedTimeout` / `DiscardOnPercentageTimeout` / `Defer` throttling strategy (default: `0`)
 * `messageProcessors` - the amount of parallel message processors (default: `1`; `0` means `Environment.ProcessorCount`)
 * `splitOnNewLine` - whether or not to split each log entry by newlines and send each line separately (default: `false`)
-* `transliterate` - `false` or `true` to trasliterate strings from Unicode to ASCII when the RFC allows only ASCII characters for a fields (default: `false`)
+* `transliterate` - `false` or `true` to transliterate strings from Unicode to ASCII when the RFC allows only ASCII characters for a field (default: `false`)
 * `replaceInvalidCharacters` - `false` or `true` to replace invalid values usually with a question mark (default: `false`)
 * `truncateFieldsToMaxLength` - `false` or `true` to truncate fields to the length specified in the RFC (default: `false`)
-* `truncateMessageTo` - a number specifying the max lenght allowed for the whole message (default: `0` i.e. do not truncate)
+* `truncateMessageTo` - a number specifying the max length allowed for the whole message (default: `0` i.e. do not truncate)
 
 The maximum length of a message is detailed in many RFCs that can be summarized as follow:
 
@@ -113,16 +113,17 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
   * `server` - IP or hostname of the Syslog server (default: `127.0.0.1`)
   * `port` - port the Syslog server is listening on (default: `514`)
   * `reconnectInterval` - the time interval, in milliseconds, after which a connection is retried (default: `500`)
-  * `connectionCheckTimeout` - the time, in microseconds, to wait for a response when checking the UDP socket connection status (default: `100`; `0` means the only check performed is `UdpClient and inner socket != null`)
+  * `connectionCheckTimeout` - the time, in microseconds, to wait for a response when checking the UDP socket connection status (default: `500000`; `0` means the only check performed is `UdpClient and inner socket != null`)
 * `tcp` - settings related to TCP:
   * `server` - IP or hostname of the Syslog server (default: `127.0.0.1`)
   * `port` - port the Syslog server is listening on (default: `514`)
   * `reconnectInterval` - the time interval, in milliseconds, after which a connection is retried (default: `500`)
   * `keepAlive` - settings related to keep-alive:
     * `enabled` - whether to use keep-alive or not (default: `true`)
-    * `timeout` - the timeout, in milliseconds, with no activity until the first keep-alive packet is sent (default: `100`)
-    * `interval` - the interval, in milliseconds, between when successive keep-alive packets are sent if no acknowledgement is received (default: `100`)
-  * `connectionCheckTimeout` - the time, in microseconds, to wait for a response when checking the connection status (default: `100`; `0` means the only check performed is `TcpClient.IsConnected`)
+    * `retryCount` - the number of unacknowledged keep-alive probes to send before considering the connection dead and terminating it (default: `10`)
+    * `time` - the number of seconds a connection will remain idle before the first keep-alive probe is sent (default: `5`)
+    * `interval` - the number of seconds a connection will wait for a keep-alive acknowledgement before sending another keepalive probe (default: `1`)
+  * `connectionCheckTimeout` - the time, in microseconds, to wait for a response when checking the connection status (default: `500000`; `0` means the only check performed is `TcpClient.IsConnected`)
   * `tls` - settings related to TLS:
     * `enabled` - whether to use TLS or not (TLS 1.2 only) (default `false`)
     * `useClientCertificates` - whether to use client certificates or not (default `false`)

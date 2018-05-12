@@ -31,8 +31,11 @@ namespace NLog.Targets.Syslog.MessageCreation
 
         public static void AppendBytes(ByteArray message, IEnumerable<SdParam> sdParams, LogEventInfo logEvent, string invalidNamesPattern, EncodingSet encodings)
         {
-            message.Append(SpaceBytes);
-            sdParams.ForEach(sdParam => sdParam.AppendBytes(message, logEvent, invalidNamesPattern, encodings));
+            sdParams.ForEach(sdParam =>
+            {
+                message.Append(SpaceBytes);
+                sdParam.AppendBytes(message, logEvent, invalidNamesPattern, encodings);
+            });
         }
 
         public static string ToString(IEnumerable<SdParam> sdParams)

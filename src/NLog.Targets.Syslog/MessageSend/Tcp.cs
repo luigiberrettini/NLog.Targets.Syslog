@@ -20,7 +20,7 @@ namespace NLog.Targets.Syslog.MessageSend
         private static readonly byte[] LineFeedBytes = { 0x0A };
 
         private readonly int connectionCheckTimeout;
-        private readonly KeepAlive keepAlive;
+        private readonly KeepAliveConfig keepAliveConfig;
         private readonly bool useTls;
         private readonly Func<X509Certificate2Collection> retrieveClientCertificates;
         private readonly int dataChunkSize;
@@ -36,23 +36,20 @@ namespace NLog.Targets.Syslog.MessageSend
         public Tcp(TcpConfig tcpConfig) : base(tcpConfig.Server, tcpConfig.Port, tcpConfig.ReconnectInterval)
         {
             connectionCheckTimeout = tcpConfig.ConnectionCheckTimeout;
-            keepAlive = new KeepAlive(tcpConfig.KeepAlive);
+            keepAliveConfig = tcpConfig.KeepAlive;
             useTls = tcpConfig.Tls.Enabled;
             retrieveClientCertificates = tcpConfig.Tls.RetrieveClientCertificates;
             framing = tcpConfig.Framing;
             dataChunkSize = tcpConfig.DataChunkSize;
         }
 
-        protected override Task Setup()
+        protected override Task Init()
         {
-            TearDown();
-
             tcp = new TcpClient();
-            tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse, true);
-            tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, false);
-            tcp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, new LingerOption(true, 0));
-            // Call WSAIoctl via IOControl
-            tcp.Client.IOControl(IOControlCode.KeepAliveValues, keepAlive.ToByteArray(), null);
+            var socketInitialization = SocketInitialization.ForCurrentOs(tcp.Client);
+            socketInitialization.DisableAddressSharing();
+            socketInitialization.DiscardPendingDataOnClose();
+            socketInitialization.SetKeepAlive(keepAliveConfig);
 
             return tcp
                 .ConnectAsync(IpAddress, Port)
@@ -69,7 +66,7 @@ namespace NLog.Targets.Syslog.MessageSend
                 .Unwrap();
         }
 
-        protected override void TearDown()
+        protected override void Terminate()
         {
             DisposeSslStreamNotTcpClientInnerStream();
             DisposeTcpClientAndItsInnerStream();
