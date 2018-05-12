@@ -25,9 +25,8 @@ namespace NLog.Targets.Syslog.MessageSend
             connectionCheckTimeout = udpConfig.ConnectionCheckTimeout;
         }
 
-        protected override Task Setup()
+        protected override Task Init()
         {
-            TearDown();
             udp = new UdpClient(IpAddress, Port);
             return Task.FromResult<object>(null);
         }
@@ -39,7 +38,7 @@ namespace NLog.Targets.Syslog.MessageSend
             return udp.SendAsync(message, message.Length);
         }
 
-        protected override void TearDown()
+        protected override void Terminate()
         {
             udp?.Close();
         }
