@@ -43,10 +43,8 @@ namespace NLog.Targets.Syslog.MessageSend
             dataChunkSize = tcpConfig.DataChunkSize;
         }
 
-        protected override Task Setup()
+        protected override Task Init()
         {
-            TearDown();
-
             tcp = new TcpClient();
             var socketInitialization = SocketInitialization.ForCurrentOs(tcp.Client);
             socketInitialization.DisableAddressSharing();
@@ -68,7 +66,7 @@ namespace NLog.Targets.Syslog.MessageSend
                 .Unwrap();
         }
 
-        protected override void TearDown()
+        protected override void Terminate()
         {
             DisposeSslStreamNotTcpClientInnerStream();
             DisposeTcpClientAndItsInnerStream();
