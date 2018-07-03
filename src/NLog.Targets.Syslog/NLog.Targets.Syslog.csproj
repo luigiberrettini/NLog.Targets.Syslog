@@ -65,6 +65,5 @@
 
   <ItemGroup>
     <None Include="NLog.Targets.Syslog.snk" />
-    <None Include="NLog.Targets.Syslog.xsd" SubType="Designer" />
   </ItemGroup>
 </Project>
