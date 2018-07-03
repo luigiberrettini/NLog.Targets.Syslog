@@ -59,16 +59,18 @@ namespace NLog.Targets.Syslog
                     .ContinueWith(t =>
                     {
                         if (t.IsCanceled)
-                            return tcs.CanceledTask();
+                        {
+                            tcs.SetCanceled();
+                            return;
+                        }
                         if (t.Exception != null)
                         {
                             asyncLogEvent.Continuation(t.Exception.GetBaseException());
                             tcs.SetException(t.Exception);
-                            return Task.FromResult<object>(null);
+                            return;
                         }
-                        return SendAsync(token, tcs);
-                    }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
-                    .Unwrap();
+                        SendAsync(token, tcs);
+                    }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current);
 
                 return tcs.Task;
             }

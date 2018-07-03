@@ -34,7 +34,7 @@ namespace NLog.Targets.Syslog
             queue = NewBlockingCollection();
             buffer = new ByteArray(enforcementConfig.TruncateMessageTo);
             messageTransmitter = MessageTransmitter.FromConfig(messageTransmitterConfig);
-            Task.Factory.StartNew(() => ProcessQueueAsync(messageBuilder));
+            Task.Run(() => ProcessQueueAsync(messageBuilder));
         }
 
         public void Log(AsyncLogEventInfo asyncLogEvent)
@@ -51,15 +51,14 @@ namespace NLog.Targets.Syslog
                 new BlockingCollection<AsyncLogEventInfo>();
         }
 
-        private Task ProcessQueueAsync(MessageBuilder messageBuilder)
+        private void ProcessQueueAsync(MessageBuilder messageBuilder)
         {
-            return ProcessQueueAsync(messageBuilder, new TaskCompletionSource<object>())
+            ProcessQueueAsync(messageBuilder, new TaskCompletionSource<object>())
                 .ContinueWith(t =>
                 {
                     InternalLogger.Warn(t.Exception?.GetBaseException(), "ProcessQueueAsync faulted within try");
-                    return ProcessQueueAsync(messageBuilder);
-                }, token, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Current)
-                .Unwrap();
+                    ProcessQueueAsync(messageBuilder);
+                }, token, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Current);
         }
 
         private Task ProcessQueueAsync(MessageBuilder messageBuilder, TaskCompletionSource<object> tcs)
@@ -80,15 +79,15 @@ namespace NLog.Targets.Syslog
                         if (t.IsCanceled)
                         {
                             InternalLogger.Debug("Task canceled");
-                            return tcs.CanceledTask();
+                            tcs.SetCanceled();
+                            return;
                         }
                         if (t.Exception != null) // t.IsFaulted is true
                             InternalLogger.Warn(t.Exception.GetBaseException(), "Task faulted");
                         else
                             InternalLogger.Debug("Successfully sent message '{0}'", logEventMsgSet);
-                        return ProcessQueueAsync(messageBuilder, tcs);
-                    }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
-                    .Unwrap();
+                        ProcessQueueAsync(messageBuilder, tcs);
+                    }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current);
 
                 return tcs.Task;
             }

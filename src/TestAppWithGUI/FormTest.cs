@@ -6,7 +6,6 @@ using System.Configuration;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using FakeSyslogServer;
-using NLog.Targets.Syslog.Settings;
 
 namespace TestAppWithGui
 {
