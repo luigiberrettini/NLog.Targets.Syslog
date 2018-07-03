@@ -4,6 +4,7 @@ VisualStudioVersion = 15.0.27004.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{37F84F7C-A60C-4FCE-A629-8D6829777961}"
 	ProjectSection(SolutionItems) = preProject
+		..\.travis.yml = ..\.travis.yml
 		..\appveyor.yml = ..\appveyor.yml
 		..\LICENSE = ..\LICENSE
 		..\README.md = ..\README.md
@@ -23,6 +24,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestAppWithGUI", "TestAppWithGUI\TestAppWithGUI.csproj", "{FEDBC211-287E-4D64-B111-594D1CB7C54B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestAppWithTUI", "TestAppWithTUI\TestAppWithTUI.csproj", "{1321F38E-8905-49B7-8D9A-4ECDD85253FF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NLog.Targets.Syslog.Schema", "NLog.Targets.Syslog.Schema\NLog.Targets.Syslog.Schema.csproj", "{7C0389AC-BC08-4C76-97CA-8FC405BDC53A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,6 +49,10 @@ Global
 		{1321F38E-8905-49B7-8D9A-4ECDD85253FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1321F38E-8905-49B7-8D9A-4ECDD85253FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1321F38E-8905-49B7-8D9A-4ECDD85253FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C0389AC-BC08-4C76-97CA-8FC405BDC53A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C0389AC-BC08-4C76-97CA-8FC405BDC53A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C0389AC-BC08-4C76-97CA-8FC405BDC53A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C0389AC-BC08-4C76-97CA-8FC405BDC53A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
