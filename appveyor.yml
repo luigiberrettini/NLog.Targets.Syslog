@@ -16,6 +16,7 @@ before_build:
       $currentCommitHash = git rev-parse --short HEAD
       Set-AppveyorBuildVariable -Name SW_VER -Value $mostRecentVersion
       Update-AppveyorBuild -Version "Build $env:APPVEYOR_BUILD_NUMBER - Commit $currentCommitHash - Tag v$env:SW_VER"
+skip_branch_with_pr: true
 build_script:
   - ps: |
       $additionalArgs = if ($env:APPVEYOR_REPO_TAG -ne 'true') { "--buildNumber=$env:APPVEYOR_BUILD_NUMBER" }
