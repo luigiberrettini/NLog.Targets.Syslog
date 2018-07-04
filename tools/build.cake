@@ -104,6 +104,25 @@ Task("Clean")
         }
     });
 
+Task("RestorePackages")
+    .Does(() =>
+    {
+        var toRestoreProjects = childDirInfos
+            .Except(toBuildDirInfo)
+            .SelectMany(x => x.GetFiles("*.csproj"))
+            .Select(x => x.FullName)
+            .ToList();
+
+        var deleteDirectorySettings = new DeleteDirectorySettings
+        {
+            Recursive = true,
+            Force = true
+        };
+
+        foreach (var projectToRestore in toRestoreProjects)
+            DotNetCoreRestore(projectToRestore);
+    });
+
 Task("Build")
     .IsDependentOn("MSBuildSettings")
     .Does(() =>
@@ -144,6 +163,7 @@ Task("Test")
     });
 
 Task("Pack")
+    .IsDependentOn("RestorePackages")
     .IsDependentOn("Test")
     .Does(() =>
     {

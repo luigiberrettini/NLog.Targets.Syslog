@@ -4,13 +4,13 @@ matrix:
     - os: linux
       dist: trusty
       mono: latest
-      dotnet: 2.1.3
+      dotnet: 2.1.201
       sudo: required
       env: MONO_BASE_PATH=/usr/lib/mono/
     - os: osx
       osx_image: xcode9.2
       mono: latest
-      dotnet: 2.1.3
+      dotnet: 2.1.201
       sudo: required
       env: MONO_BASE_PATH=/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/
 before_install:
@@ -20,13 +20,15 @@ before_install:
     fi
     DOTNET_INSTALL_DIR="$PWD/.dotnetsdk"
     curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version "1.1.9" --install-dir "$DOTNET_INSTALL_DIR" --no-path
-    curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version "2.1.200" --install-dir "$DOTNET_INSTALL_DIR" --no-path
+    curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version "2.1.201" --install-dir "$DOTNET_INSTALL_DIR" --no-path
+    curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version "2.1.301" --install-dir "$DOTNET_INSTALL_DIR" --no-path
     export PATH="$DOTNET_INSTALL_DIR:$PATH"
 script:
   - |
     mostRecentTag=$(git describe --abbrev=0 --tags --always)
     if [[ $mostRecentTag != v* ]]; then
         mostRecentTag='v1.0.0'
+        if [[ "${TRAVIS_TAG}" != "" ]]; then exit 1; fi
     fi
     mostRecentVersion=$(echo "$mostRecentTag" | cut -c 2-)
     FrameworkPathOverride=$MONO_BASE_PATH/4.5.2-api/ $(pwd)/tools/build.sh '--target=Test' "--softwareVersion=$mostRecentVersion" "--buildNumber=$TRAVIS_BUILD_NUMBER"
