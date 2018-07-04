@@ -22,6 +22,7 @@ build_script:
   - ps: |
       $additionalArgs = if ($env:APPVEYOR_REPO_TAG -ne 'true') { "--buildNumber=$env:APPVEYOR_BUILD_NUMBER" }
       .\tools\build.ps1 '--target=Pack' "--softwareVersion=$env:SW_VER" $additionalArgs
+      if ($LastExitCode -ne 0) { exit $LastExitCode }
 test: off
 artifacts:
   - path: tools\artifacts\*.nupkg
