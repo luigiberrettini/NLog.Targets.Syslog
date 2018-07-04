@@ -4,22 +4,26 @@ install:
   - ps: |
       $DOTNET_INSTALL_DIR = $(Join-Path (Get-Location) 'dotnetsdk')
       powershell -NoProfile -ExecutionPolicy Unrestricted -Command "&([scriptblock]::Create((Invoke-WebRequest -UseBasicParsing 'https://dot.net/v1/dotnet-install.ps1'))) -Version 1.1.9 -InstallDir $DOTNET_INSTALL_DIR -NoPath"
-      powershell -NoProfile -ExecutionPolicy Unrestricted -Command "&([scriptblock]::Create((Invoke-WebRequest -UseBasicParsing 'https://dot.net/v1/dotnet-install.ps1'))) -Version 2.1.200 -InstallDir $DOTNET_INSTALL_DIR -NoPath"
+      powershell -NoProfile -ExecutionPolicy Unrestricted -Command "&([scriptblock]::Create((Invoke-WebRequest -UseBasicParsing 'https://dot.net/v1/dotnet-install.ps1'))) -Version 2.1.201 -InstallDir $DOTNET_INSTALL_DIR -NoPath"
+      powershell -NoProfile -ExecutionPolicy Unrestricted -Command "&([scriptblock]::Create((Invoke-WebRequest -UseBasicParsing 'https://dot.net/v1/dotnet-install.ps1'))) -Version 2.1.301 -InstallDir $DOTNET_INSTALL_DIR -NoPath"
       $env:Path = "$DOTNET_INSTALL_DIR;$env:Path"
 before_build:
   - ps: |
       $mostRecentTag = git describe --abbrev=0 --tags --always
       if ($mostRecentTag.Substring(0, 1) -ne 'v') {
           $mostRecentTag = 'v1.0.0'
+          if ($env:APPVEYOR_REPO_TAG -eq 'true') { exit 1 }
       }
       $mostRecentVersion = $mostRecentTag.Substring(1)
       $currentCommitHash = git rev-parse --short HEAD
       Set-AppveyorBuildVariable -Name SW_VER -Value $mostRecentVersion
       Update-AppveyorBuild -Version "Build $env:APPVEYOR_BUILD_NUMBER - Commit $currentCommitHash - Tag v$env:SW_VER"
+skip_branch_with_pr: true
 build_script:
   - ps: |
       $additionalArgs = if ($env:APPVEYOR_REPO_TAG -ne 'true') { "--buildNumber=$env:APPVEYOR_BUILD_NUMBER" }
       .\tools\build.ps1 '--target=Pack' "--softwareVersion=$env:SW_VER" $additionalArgs
+      if ($LastExitCode -ne 0) { exit $LastExitCode }
 test: off
 artifacts:
   - path: tools\artifacts\*.nupkg
