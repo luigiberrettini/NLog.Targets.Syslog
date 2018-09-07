@@ -37,8 +37,8 @@ Below is a sample NLog.config file:
     <target xsi:type="Syslog" name="cee-udp">
       <sl:layout xsi:type="SimpleLayout" text="@cee: {&quot;message&quot;: &quot;${message}&quot;}" />
       <sl:messageCreation>
-        <sl:facility>Local4</facility>
-        <sl:rfc>Rfc5424</rfc>
+        <sl:facility>Local4</sl:facility>
+        <sl:rfc>Rfc5424</sl:rfc>
         <sl:rfc5424>
           <sl:hostname xsi:type="SimpleLayout" text="${machinename}" />
           <sl:appName xsi:type="SimpleLayout" text="DAEMON.MyAppName" />
