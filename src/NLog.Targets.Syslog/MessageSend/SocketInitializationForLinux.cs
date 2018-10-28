@@ -22,7 +22,7 @@ namespace NLog.Targets.Syslog.MessageSend
         // #define    TCP_KEEPALIVE_TIME      (120*60*HZ)    /* two hours */
         // #define    TCP_KEEPALIVE_INTVL     (75*HZ)
 
-        private const SocketOptionName SocketReusePort = (SocketOptionName)15;
+        // private const SocketOptionName SocketReusePort = (SocketOptionName)15;
         private const SocketOptionName TcpKeepAliveRetryCount = (SocketOptionName)0x6;
         private const SocketOptionName TcpKeepAliveTime = (SocketOptionName)0x4;
         private const SocketOptionName TcpKeepAliveInterval = (SocketOptionName)0x5;

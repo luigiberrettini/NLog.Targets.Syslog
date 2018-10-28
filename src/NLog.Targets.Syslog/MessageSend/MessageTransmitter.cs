@@ -19,7 +19,7 @@ namespace NLog.Targets.Syslog.MessageSend
 
         private volatile bool neverConnected;
         private readonly TimeSpan recoveryTime;
-        protected volatile bool disposed;
+        private volatile bool disposed;
 
         protected string Server { get; }
 

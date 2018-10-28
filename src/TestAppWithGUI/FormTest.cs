@@ -43,25 +43,26 @@ namespace TestAppWithGui
             else
                 syslogServer.Stop();
 
-            Action enableButton = () => buttonStartStopSyslogServer.Enabled = true;
-            Task.Delay(500).ContinueWith(_ => Invoke(enableButton));
+            void EnableButton() => buttonStartStopSyslogServer.Enabled = true;
+            Task.Delay(500).ContinueWith(_ => Invoke((Action) EnableButton));
         }
 
         private Action<int, string> OnReceivedStringAction()
         {
-            Action<int, string> appendStringAction = (protocolType, recString) =>
+            void AppendStringAction(int protocolType, string recString)
             {
                 var textBox = protocolType == SyslogServer.UdpProtocolHashCode ? udpTextBox : tcpTextBox;
                 textBox.AppendText(recString);
                 textBox.AppendText(Environment.NewLine);
-            };
-            return (protocolType, recString) => Invoke(appendStringAction, protocolType, recString);
+            }
+
+            return (protocolType, recString) => Invoke((Action<int, string>) AppendStringAction, protocolType, recString);
         }
 
         private Action<Task> OnExceptionAction()
         {
-            Action<Task> msgBoxAction = task => MessageBox.Show(this, task.Exception?.GetBaseException().ToString());
-            return task => Invoke(msgBoxAction, task);
+            void MsgBoxAction(Task task) => MessageBox.Show(this, task.Exception?.GetBaseException().ToString());
+            return task => Invoke((Action<Task>) MsgBoxAction, task);
         }
 
         private void OnFormClosing(object sender, FormClosingEventArgs e)

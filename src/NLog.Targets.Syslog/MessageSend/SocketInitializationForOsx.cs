@@ -22,7 +22,7 @@ namespace NLog.Targets.Syslog.MessageSend
         // #define    TCPTV_KEEP_IDLE    (120*60*TCP_RETRANSHZ)    /* time before probing */
         // #define    TCPTV_KEEPINTVL    (75*TCP_RETRANSHZ)        /* default probe interval */
 
-        private const SocketOptionName SocketReusePort = (SocketOptionName)0x0200;
+        // private const SocketOptionName SocketReusePort = (SocketOptionName)0x0200;
         private const SocketOptionName TcpKeepAliveRetryCount = (SocketOptionName)0x102;
         private const SocketOptionName TcpKeepAliveTime = (SocketOptionName)0x10;
         private const SocketOptionName TcpKeepAliveInterval = (SocketOptionName)0x101;

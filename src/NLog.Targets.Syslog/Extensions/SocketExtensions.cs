@@ -11,8 +11,8 @@ namespace NLog.Targets.Syslog.Extensions
         {
             if (timeout <= 0)
                 return true;
-            
-            var isDisconnected = socket?.Poll(timeout, SelectMode.SelectRead) == true && socket?.Available == 0;
+
+            var isDisconnected = socket?.Poll(timeout, SelectMode.SelectRead) == true && socket.Available == 0;
             return !isDisconnected;
         }
     }

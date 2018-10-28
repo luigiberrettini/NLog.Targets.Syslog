@@ -7,7 +7,7 @@ namespace NLog.Targets.Syslog.MessageCreation
 {
     internal static class SdIdToInvalidParamNamePattern
     {
-        private const string Timequality = "timeQuality";
+        private const string TimeQuality = "timeQuality";
         private const string Origin = "origin";
         private const string Meta = "meta";
         private static readonly string[] TimeQualityParamNames = { "tzKnown", "isSynced", "syncAccuracy" };
@@ -16,7 +16,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         private const string InvalidIanaParamName = @"^(?!^(?:{0})$).*$";
         private static readonly Dictionary<string, string> InvalidIanaParamNames = new Dictionary<string, string>
         {
-            { Timequality, BuildInvalidIanaParamNamePattern(TimeQualityParamNames) },
+            { TimeQuality, BuildInvalidIanaParamNamePattern(TimeQualityParamNames) },
             { Origin, BuildInvalidIanaParamNamePattern(OriginParamNames) },
             { Meta, BuildInvalidIanaParamNamePattern(MetaParamNames) }
         };

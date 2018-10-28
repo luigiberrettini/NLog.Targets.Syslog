@@ -1,7 +1,6 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
-using System;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,10 +14,7 @@ namespace NLog.Targets.Syslog.MessageSend
         private readonly int connectionCheckTimeout;
         private UdpClient udp;
 
-        protected override bool Ready
-        {
-            get { return udp?.Client?.IsConnected(connectionCheckTimeout) == true; }
-        }
+        protected override bool Ready => udp?.Client?.IsConnected(connectionCheckTimeout) == true;
 
         public Udp(UdpConfig udpConfig) : base(udpConfig.Server, udpConfig.Port, udpConfig.ReconnectInterval)
         {
