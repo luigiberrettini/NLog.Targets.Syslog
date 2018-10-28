@@ -22,8 +22,8 @@ namespace NLog.Targets.Syslog.MessageSend
         private readonly int intervalOffset;
         private readonly int structSize;
         private readonly uint onOff;
-        private readonly uint time;
-        private readonly uint interval;
+        private readonly uint timeMs;
+        private readonly uint intervalMs;
 
         public IOControlKeepAliveValues(KeepAliveConfig keepAliveConfig)
         {
@@ -33,16 +33,16 @@ namespace NLog.Targets.Syslog.MessageSend
             intervalOffset = 2 * uintSize;
             structSize = 3 * uintSize;
             onOff = (uint)(keepAliveConfig.Enabled ? 1 : 0);
-            time = (uint)keepAliveConfig.Time;
-            interval = (uint)keepAliveConfig.Interval;
+            timeMs = (uint)keepAliveConfig.Time * 1000;
+            intervalMs = (uint)keepAliveConfig.Interval * 1000;
         }
 
         public byte[] ToByteArray()
         {
             var keepAliveSettings = new byte[structSize];
             BitConverter.GetBytes(onOff).CopyTo(keepAliveSettings, onOffOffset);
-            BitConverter.GetBytes(time).CopyTo(keepAliveSettings, timeOffset);
-            BitConverter.GetBytes(interval).CopyTo(keepAliveSettings, intervalOffset);
+            BitConverter.GetBytes(timeMs).CopyTo(keepAliveSettings, timeOffset);
+            BitConverter.GetBytes(intervalMs).CopyTo(keepAliveSettings, intervalOffset);
             return keepAliveSettings;
         }
     }

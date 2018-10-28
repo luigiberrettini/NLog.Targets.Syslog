@@ -21,8 +21,8 @@ namespace NLog.Targets.Syslog.MessageSend
         // Retry count:
         //  - 5 or min(255, max(TcpMaxDataRetransmissions, PPTPTcpMaxDataRetransmissions)) on Win 2000, Win XP and Win Server 2003
         //  - 10 on Win Vista and later and value cannot be changed before Windows 10 version 1703
-        // 2 hours
-        // 1 second
+        // Time: 2 hours
+        // Interval: 1 second
 
         private const SocketOptionName TcpKeepAliveRetryCount = (SocketOptionName)0x10;
         private const SocketOptionName TcpKeepAliveTime = (SocketOptionName)0x3;
