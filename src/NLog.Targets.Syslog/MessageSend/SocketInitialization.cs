@@ -9,7 +9,7 @@ namespace NLog.Targets.Syslog.MessageSend
 {
     internal abstract class SocketInitialization
     {
-        protected Socket Socket { get; private set; }
+        protected Socket Socket { get; }
 
         public static SocketInitialization ForCurrentOs(Socket socket)
         {

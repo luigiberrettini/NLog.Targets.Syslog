@@ -28,10 +28,7 @@ namespace NLog.Targets.Syslog.MessageSend
         private TcpClient tcp;
         private Stream stream;
 
-        protected override bool Ready
-        {
-            get { return tcp?.Connected == true && tcp.Client.IsConnected(connectionCheckTimeout) == true; }
-        }
+        protected override bool Ready => tcp?.Connected == true && tcp.Client.IsConnected(connectionCheckTimeout);
 
         public Tcp(TcpConfig tcpConfig) : base(tcpConfig.Server, tcpConfig.Port, tcpConfig.ReconnectInterval)
         {

@@ -3,7 +3,6 @@
 
 using System;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
 using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageSend

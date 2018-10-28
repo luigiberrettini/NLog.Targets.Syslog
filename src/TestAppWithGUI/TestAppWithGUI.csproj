@@ -21,17 +21,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FakeSyslogServer\FakeSyslogServer.csproj" />
-    <ProjectReference Include="..\NLog.Targets.Syslog\NLog.Targets.Syslog.csproj" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Windows" />
     <Reference Include="System.Windows.Forms" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\FakeSyslogServer\FakeSyslogServer.csproj" />
+    <ProjectReference Include="..\NLog.Targets.Syslog\NLog.Targets.Syslog.csproj" />
+    <PackageReference Include="NLog.Schema" Version="4.5.10" />
     <Compile Update="FormTest.cs" SubType="Form" />
     <Compile Update="FormTest.designer.cs" SubType="Form" DependentUpon="FormTest.cs" />
+    <None Include="..\NLog.Targets.Syslog.Schema\NLog.Targets.Syslog.xsd" Link="NLog.Targets.Syslog.xsd" />
     <None Update="messagesToLog.txt" CopyToOutputDirectory="Always" />
     <None Update="NLog.config" CopyToOutputDirectory="Always" />
   </ItemGroup>

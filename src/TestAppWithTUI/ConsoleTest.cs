@@ -9,11 +9,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using FakeSyslogServer;
 using Microsoft.Extensions.Configuration;
-using NLog.Targets.Syslog.Settings;
 
 namespace TestAppWithTui
 {
-    public class ConsoleTest
+    public class ConsoleTest : IDisposable
     {
         private static readonly Dictionary<char, string> ChosenOperation;
 

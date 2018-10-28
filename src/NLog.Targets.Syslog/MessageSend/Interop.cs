@@ -13,10 +13,10 @@ namespace NLog.Targets.Syslog.MessageSend
                 ThrowOnError(SetSockOptSysCall(socket.Handle, (int)optionLevel, (int)optionName, (byte*)&optionValue, sizeof(int)));
             }
         }
-        
+
         [DllImport("libc", EntryPoint = "setsockopt")]
         private static extern unsafe int SetSockOptSysCall(IntPtr socketFileDescriptor, int optionLevel, int optionName, byte* optionValue, int optionLen);
-        
+
         private static void ThrowOnError(int error)
         {
             if (error != 0)

@@ -35,15 +35,15 @@ namespace NLog.Targets.Syslog.Settings
         /// <summary>The time interval, in milliseconds, after which a connection is retried</summary>
         public int ReconnectInterval
         {
-            get { return recoveryTime.Milliseconds; }
-            set { SetProperty(ref recoveryTime, TimeSpan.FromMilliseconds(value)); }
+            get => recoveryTime.Milliseconds;
+            set => SetProperty(ref recoveryTime, TimeSpan.FromMilliseconds(value));
         }
 
         /// <summary>The time, in microseconds, to wait for a response when checking the connection status</summary>
         public int ConnectionCheckTimeout
         {
-            get { return connectionCheckTimeout; }
-            set { SetProperty(ref connectionCheckTimeout, value); }
+            get => connectionCheckTimeout;
+            set => SetProperty(ref connectionCheckTimeout, value);
         }
 
         /// <summary>Builds a new instance of the UdpProtocolConfig class</summary>

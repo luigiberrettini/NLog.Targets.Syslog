@@ -66,6 +66,7 @@ namespace NLog.Targets.Syslog.Settings
         public KeepAliveConfig()
         {
             enabled = true;
+            retryCount = DefaultRetryCount;
             time = DefaultTime;
             interval = DefaultInterval;
         }
