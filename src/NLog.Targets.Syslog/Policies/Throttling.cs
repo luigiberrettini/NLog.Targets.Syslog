@@ -37,7 +37,7 @@ namespace NLog.Targets.Syslog.Policies
         {
             if (Strategy == ThrottlingStrategy.None || waitingLogEntries < Limit)
             {
-                actionWithTimeout(0);
+                actionWithTimeout(Timeout.Infinite);
                 return;
             }
 
