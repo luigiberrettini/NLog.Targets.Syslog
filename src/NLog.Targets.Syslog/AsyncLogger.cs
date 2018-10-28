@@ -24,6 +24,8 @@ namespace NLog.Targets.Syslog
         private readonly BlockingCollection<AsyncLogEventInfo> queue;
         private readonly ByteArray buffer;
         private readonly MessageTransmitter messageTransmitter;
+        private TaskCompletionSource<object> flushTcs;
+        private readonly AsyncLogEventInfo flushCompletionMarker;
 
         public AsyncLogger(Layout loggingLayout, EnforcementConfig enforcementConfig, MessageBuilder messageBuilder, MessageTransmitterConfig messageTransmitterConfig)
         {
@@ -34,12 +36,20 @@ namespace NLog.Targets.Syslog
             queue = NewBlockingCollection();
             buffer = new ByteArray(enforcementConfig.TruncateMessageTo);
             messageTransmitter = MessageTransmitter.FromConfig(messageTransmitterConfig);
+            flushCompletionMarker = NewFlushCompletionMarker();
             Task.Run(() => ProcessQueueAsync(messageBuilder));
         }
 
         public void Log(AsyncLogEventInfo asyncLogEvent)
         {
             throttling.Apply(queue.Count, timeout => Enqueue(asyncLogEvent, timeout));
+        }
+
+        public Task FlushAsync()
+        {
+            Interlocked.Exchange(ref flushTcs, new TaskCompletionSource<object>());
+            Enqueue(flushCompletionMarker, 0);
+            return flushTcs.Task;
         }
 
         private BlockingCollection<AsyncLogEventInfo> NewBlockingCollection()
@@ -49,6 +59,13 @@ namespace NLog.Targets.Syslog
             return throttling.BoundedBlockingCollectionNeeded ?
                 new BlockingCollection<AsyncLogEventInfo>(throttlingLimit) :
                 new BlockingCollection<AsyncLogEventInfo>();
+        }
+
+        private AsyncLogEventInfo NewFlushCompletionMarker()
+        {
+            var logEvent = new LogEventInfo(LogLevel.Off, string.Empty, string.Empty);
+            var asyncContinuation = new AsyncContinuation(exception => { });
+            return new AsyncLogEventInfo(logEvent, asyncContinuation);
         }
 
         private void ProcessQueueAsync(MessageBuilder messageBuilder)
@@ -69,6 +86,12 @@ namespace NLog.Targets.Syslog
             try
             {
                 var asyncLogEventInfo = queue.Take(token);
+                if (asyncLogEventInfo == flushCompletionMarker)
+                {
+                    flushTcs.SetResult(null);
+                    while (asyncLogEventInfo == flushCompletionMarker)
+                        asyncLogEventInfo = queue.Take(token);
+                }
                 var logEventMsgSet = new LogEventMsgSet(asyncLogEventInfo, buffer, messageBuilder, messageTransmitter);
 
                 logEventMsgSet

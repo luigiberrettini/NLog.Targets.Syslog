@@ -8,6 +8,7 @@ using NLog.Targets.Syslog.Settings;
 using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace NLog.Targets.Syslog
 {
@@ -63,6 +64,24 @@ namespace NLog.Targets.Syslog
             PrecalculateVolatileLayouts(logEvent);
             var asyncLoggerId = logEvent.SequenceID % Enforcement.MessageProcessors;
             asyncLoggers[asyncLoggerId].Log(asyncLogEvent);
+        }
+
+        /// <summary>Flushes any pending log message</summary>
+        /// <param name="asyncContinuation">The asynchronous continuation</param>
+        protected override void FlushAsync(AsyncContinuation asyncContinuation)
+        {
+            var tasks = Enforcement.MessageProcessors.Select(i => asyncLoggers[i].FlushAsync()).ToArray();
+            Task.WhenAll(tasks)
+                .ContinueWith(t =>
+                {
+                    if (t.Exception != null)
+                    {
+                        asyncContinuation(t.Exception.GetBaseException());
+                        return;
+                    }
+                    asyncContinuation(null);
+                })
+                .Wait();
         }
 
         /// <summary>Disposes the instance</summary>
