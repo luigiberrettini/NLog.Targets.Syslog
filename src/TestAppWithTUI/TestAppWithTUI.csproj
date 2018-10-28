@@ -28,6 +28,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\NLog.Targets.Syslog.Schema\NLog.Targets.Syslog.xsd" Link="NLog.Targets.Syslog.xsd" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NLog.Schema" Version="4.5.10" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="appsettings.json" CopyToOutputDirectory="Always" />
     <None Update="messagesToLog.txt" CopyToOutputDirectory="Always" />
     <None Update="NLog.config" CopyToOutputDirectory="Always" />

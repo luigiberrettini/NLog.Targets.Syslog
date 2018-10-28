@@ -19,6 +19,12 @@
 
     <StartupObject>TestAppWithGui.Program</StartupObject>
   </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\NLog.Targets.Syslog.Schema\NLog.Targets.Syslog.xsd" Link="NLog.Targets.Syslog.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="NLog.Schema" Version="4.5.10" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\FakeSyslogServer\FakeSyslogServer.csproj" />
