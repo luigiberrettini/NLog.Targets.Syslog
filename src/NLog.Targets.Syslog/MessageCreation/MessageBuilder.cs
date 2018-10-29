@@ -16,13 +16,16 @@ namespace NLog.Targets.Syslog.MessageCreation
 
         private readonly SplitOnNewLinePolicy splitOnNewLinePolicy;
         private readonly Facility facility;
+        private readonly LogLevelSeverityMapping logLevelSeverityMapping;
 
         static MessageBuilder()
         {
             BuilderFactory = new Dictionary<RfcNumber, Func<MessageBuilderConfig, EnforcementConfig, MessageBuilder>>
             {
-                { RfcNumber.Rfc3164, (msgBuilderCfg, enforcementCfg) => new Rfc3164(msgBuilderCfg.Facility, msgBuilderCfg.Rfc3164, enforcementCfg) },
-                { RfcNumber.Rfc5424, (msgBuilderCfg, enforcementCfg) => new Rfc5424(msgBuilderCfg.Facility, msgBuilderCfg.Rfc5424, enforcementCfg) }
+                { RfcNumber.Rfc3164, (msgBuilderCfg, enforcementCfg) =>
+                    new Rfc3164(msgBuilderCfg.Facility, msgBuilderCfg.PerLogLevelSeverity, msgBuilderCfg.Rfc3164, enforcementCfg) },
+                { RfcNumber.Rfc5424, (msgBuilderCfg, enforcementCfg) =>
+                    new Rfc5424(msgBuilderCfg.Facility, msgBuilderCfg.PerLogLevelSeverity, msgBuilderCfg.Rfc5424, enforcementCfg) }
             };
         }
 
@@ -31,9 +34,10 @@ namespace NLog.Targets.Syslog.MessageCreation
             return BuilderFactory[messageBuilderConfig.Rfc](messageBuilderConfig, enforcementConfig);
         }
 
-        protected MessageBuilder(Facility facility, EnforcementConfig enforcementConfig)
+        protected MessageBuilder(Facility facility, LogLevelSeverityConfig logLevelSeverityConfig, EnforcementConfig enforcementConfig)
         {
             this.facility = facility;
+            logLevelSeverityMapping = new LogLevelSeverityMapping(logLevelSeverityConfig);
             splitOnNewLinePolicy = new SplitOnNewLinePolicy(enforcementConfig);
         }
 
@@ -46,7 +50,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         public void PrepareMessage(ByteArray buffer, LogEventInfo logEvent, string logEntry)
         {
             buffer.Reset();
-            var pri = Pri(facility, (Severity)logEvent.Level);
+            var pri = Pri(facility, logLevelSeverityMapping[logEvent.Level]);
             PrepareMessage(buffer, logEvent, pri, logEntry);
         }
 

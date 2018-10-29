@@ -26,7 +26,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         private readonly MsgIdPolicySet msgIdPolicySet;
         private readonly Utf8MessagePolicy utf8MessagePolicy;
 
-        public Rfc5424(Facility facility, Rfc5424Config rfc5424Config, EnforcementConfig enforcementConfig) : base(facility, enforcementConfig)
+        public Rfc5424(Facility facility, LogLevelSeverityConfig logLevelSeverityConfig, Rfc5424Config rfc5424Config, EnforcementConfig enforcementConfig) : base(facility, logLevelSeverityConfig, enforcementConfig)
         {
             version = rfc5424Config.Version;
             hostnameLayout = rfc5424Config.Hostname;
