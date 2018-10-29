@@ -47,6 +47,24 @@
                         <xs:complexType>
                             <xs:choice minOccurs="0" maxOccurs="unbounded">
                                 <xs:element name="facility" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                <xs:element name="perLogLevelSeverity" minOccurs="0" maxOccurs="1">
+                                    <xs:complexType>
+                                        <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                            <xs:element name="fatal" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                            <xs:element name="error" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                            <xs:element name="warn"  type="xs:string" minOccurs="0" maxOccurs="1" />
+                                            <xs:element name="info"  type="xs:string" minOccurs="0" maxOccurs="1" />
+                                            <xs:element name="debug" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                            <xs:element name="trace" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                        </xs:choice>
+                                        <xs:attribute name="fatal" type="xs:string" />
+                                        <xs:attribute name="error" type="xs:string" />
+                                        <xs:attribute name="warn"  type="xs:string" />
+                                        <xs:attribute name="info"  type="xs:string" />
+                                        <xs:attribute name="debug" type="xs:string" />
+                                        <xs:attribute name="trace" type="xs:string" />
+                                    </xs:complexType>
+                                </xs:element>
                                 <xs:element name="rfc" type="xs:string" minOccurs="0" maxOccurs="1" />
                                 <xs:element name="rfc3164" minOccurs="0" maxOccurs="1">
                                     <xs:complexType>

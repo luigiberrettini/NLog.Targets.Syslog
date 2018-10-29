@@ -12,6 +12,8 @@ namespace NLog.Targets.Syslog.Settings
     public class MessageBuilderConfig : NotifyPropertyChanged, IDisposable
     {
         private Facility facility;
+        private LogLevelSeverityConfig perLogLevelSeverity;
+        private readonly PropertyChangedEventHandler perLogLevelSeverityPropsChanged;
         private RfcNumber rfc;
         private Rfc3164Config rfc3164;
         private readonly PropertyChangedEventHandler rfc3164PropsChanged;
@@ -23,6 +25,13 @@ namespace NLog.Targets.Syslog.Settings
         {
             get => facility;
             set => SetProperty(ref facility, value);
+        }
+
+        /// <summary>Log level Syslog severity related fields</summary>
+        public LogLevelSeverityConfig PerLogLevelSeverity
+        {
+            get => perLogLevelSeverity;
+            set => SetProperty(ref perLogLevelSeverity, value);
         }
 
         /// <summary>The Syslog protocol RFC to be followed</summary>
@@ -49,7 +58,11 @@ namespace NLog.Targets.Syslog.Settings
         /// <summary>Builds a new instance of the MessageBuilderConfig class</summary>
         public MessageBuilderConfig()
         {
+            perLogLevelSeverity = new LogLevelSeverityConfig();
+            perLogLevelSeverityPropsChanged = (sender, args) => OnPropertyChanged(nameof(PerLogLevelSeverity));
+
             rfc = RfcNumber.Rfc5424;
+
             rfc3164 = new Rfc3164Config();
             rfc3164PropsChanged = (sender, args) => OnPropertyChanged(nameof(Rfc3164));
             rfc3164.PropertyChanged += rfc3164PropsChanged;
@@ -63,6 +76,7 @@ namespace NLog.Targets.Syslog.Settings
         /// <summary>Disposes the instance</summary>
         public void Dispose()
         {
+            perLogLevelSeverity.PropertyChanged -= perLogLevelSeverityPropsChanged;
             rfc3164.PropertyChanged -= rfc3164PropsChanged;
             rfc5424.PropertyChanged -= rfc5424PropsChanged;
             rfc5424.Dispose();

@@ -21,7 +21,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         private readonly PlainContentPolicySet plainContentPolicySet;
         private readonly AsciiMessagePolicy asciiMessagePolicy;
 
-        public Rfc3164(Facility facility, Rfc3164Config rfc3164Config, EnforcementConfig enforcementConfig) : base(facility, enforcementConfig)
+        public Rfc3164(Facility facility, LogLevelSeverityConfig logLevelSeverityConfig, Rfc3164Config rfc3164Config, EnforcementConfig enforcementConfig) : base(facility, logLevelSeverityConfig, enforcementConfig)
         {
             hostnamePolicySet = new PlainHostnamePolicySet(enforcementConfig);
             tagPolicySet = new TagPolicySet(enforcementConfig);
