@@ -96,6 +96,13 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
 
 #### Message creation element
 * `facility` - facility name (default: `Local1`)
+* `perLogLevelSeverity` - the severity to be used for each log level:
+  * `fatal` - `Emergency` / `Alert` / `Critical` / `Error` / `Warning` / `Notice` / `Informational` / `Debug` (default: `Emergency`)
+  * `error` - `Emergency` / `Alert` / `Critical` / `Error` / `Warning` / `Notice` / `Informational` / `Debug` (default: `Error`)
+  * `warn` - `Emergency` / `Alert` / `Critical` / `Error` / `Warning` / `Notice` / `Informational` / `Debug` (default: `Warning`)
+  * `info` - `Emergency` / `Alert` / `Critical` / `Error` / `Warning` / `Notice` / `Informational` / `Debug` (default: `Informational`)
+  * `debug` - `Emergency` / `Alert` / `Critical` / `Error` / `Warning` / `Notice` / `Informational` / `Debug` (default: `Debug`)
+  * `trace` - `Emergency` / `Alert` / `Critical` / `Error` / `Warning` / `Notice` / `Informational` / `Debug` (default: `Notice`)
 * `rfc` - `rfc3164` or `rfc5424` (default: `rfc5424`)
 * `rfc3164` - settings related to RFC 3164:
   * `hostname` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the HOSTNAME part (default: the hostname of the computer that is creating the message)
