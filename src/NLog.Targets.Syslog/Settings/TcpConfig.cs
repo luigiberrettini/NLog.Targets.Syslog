@@ -14,14 +14,12 @@ namespace NLog.Targets.Syslog.Settings
         private const string Localhost = "localhost";
         private const int DefaultPort = 514;
         private const int DefaultReconnectInterval = 500;
-        private const int DefaultConnectionCheckTimeout = 500000;
         private const int DefaultBufferSize = 4096;
         private string server;
         private int port;
-        private TimeSpan recoveryTime;
+        private int reconnectInterval;
         private KeepAliveConfig keepAlive;
         private readonly PropertyChangedEventHandler keepAlivePropsChanged;
-        private int connectionCheckTimeout;
         private TlsConfig tls;
         private readonly PropertyChangedEventHandler tlsPropsChanged;
         private FramingMethod framing;
@@ -44,8 +42,8 @@ namespace NLog.Targets.Syslog.Settings
         /// <summary>The time interval, in milliseconds, after which a connection is retried</summary>
         public int ReconnectInterval
         {
-            get => recoveryTime.Milliseconds;
-            set => SetProperty(ref recoveryTime, TimeSpan.FromMilliseconds(value));
+            get => reconnectInterval;
+            set => SetProperty(ref reconnectInterval, value <= 0 ? DefaultReconnectInterval : value);
         }
 
         /// <summary>KeepAlive configuration</summary>
@@ -53,13 +51,6 @@ namespace NLog.Targets.Syslog.Settings
         {
             get => keepAlive;
             set => SetProperty(ref keepAlive, value);
-        }
-
-        /// <summary>The time, in microseconds, to wait for a response when checking the connection status</summary>
-        public int ConnectionCheckTimeout
-        {
-            get => connectionCheckTimeout;
-            set => SetProperty(ref connectionCheckTimeout, value);
         }
 
         /// <summary>Tls configuration</summary>
@@ -89,11 +80,10 @@ namespace NLog.Targets.Syslog.Settings
         {
             server = Localhost;
             port = DefaultPort;
-            recoveryTime = TimeSpan.FromMilliseconds(DefaultReconnectInterval);
+            reconnectInterval = DefaultReconnectInterval;
             keepAlive = new KeepAliveConfig();
             keepAlivePropsChanged = (sender, args) => OnPropertyChanged(nameof(KeepAlive));
             keepAlive.PropertyChanged += keepAlivePropsChanged;
-            connectionCheckTimeout = DefaultConnectionCheckTimeout;
             Tls = new TlsConfig();
             tlsPropsChanged = (sender, args) => OnPropertyChanged(nameof(KeepAlive));
             tls.PropertyChanged += tlsPropsChanged;

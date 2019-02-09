@@ -65,8 +65,8 @@ A more detailed example is included in the [test application](./src/TestApp/NLog
 
 #### Enforcement element
 * `throttling` - settings related to message throttling:
-  * `limit` - the number of log entries, waiting to be processed, that triggers throttling (default: `0`)
-  * `strategy` - `None` / `DiscardOnFixedTimeout` / `DiscardOnPercentageTimeout` / `Discard` / `DeferForFixedTime` / `DeferForPercentageTime` / `Block` (default: `None`)
+  * `limit` - the number of log entries, waiting to be processed, that triggers throttling (default: `65536`; `0` means no limit)
+  * `strategy` - `None` / `DiscardOnFixedTimeout` / `DiscardOnPercentageTimeout` / `Discard` / `DeferForFixedTime` / `DeferForPercentageTime` / `Block` (default: `Discard`)
   * `delay` - the milliseconds/percentage delay for a `DiscardOnFixedTimeout` / `DiscardOnPercentageTimeout` / `Defer` throttling strategy (default: `0`)
 * `messageProcessors` - the amount of parallel message processors (default: `1`; `0` means `Environment.ProcessorCount`)
 * `splitOnNewLine` - whether or not to split each log entry by newlines and send each line separately (default: `false`)
@@ -122,7 +122,6 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
   * `server` - IP or hostname of the Syslog server (default: `127.0.0.1`)
   * `port` - port the Syslog server is listening on (default: `514`)
   * `reconnectInterval` - the time interval, in milliseconds, after which a connection is retried (default: `500`)
-  * `connectionCheckTimeout` - the time, in microseconds, to wait for a response when checking the UDP socket connection status (default: `500000`; `0` means the only check performed is `UdpClient and inner socket != null`)
 * `tcp` - settings related to TCP:
   * `server` - IP or hostname of the Syslog server (default: `127.0.0.1`)
   * `port` - port the Syslog server is listening on (default: `514`)
@@ -132,7 +131,6 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
     * `retryCount` - the number of unacknowledged keep-alive probes to send before considering the connection dead and terminating it (default: `10`)
     * `time` - the number of seconds a connection will remain idle before the first keep-alive probe is sent (default: `5`)
     * `interval` - the number of seconds a connection will wait for a keep-alive acknowledgement before sending another keepalive probe (default: `1`)
-  * `connectionCheckTimeout` - the time, in microseconds, to wait for a response when checking the connection status (default: `500000`; `0` means the only check performed is `TcpClient.IsConnected`)
   * `tls` - settings related to TLS:
     * `enabled` - whether to use TLS or not (TLS 1.2 only) (default `false`)
     * `useClientCertificates` - whether to use client certificates or not (default `false`)

@@ -129,12 +129,10 @@
                                             <xs:element name="server" type="xs:string" minOccurs="1" maxOccurs="1" />
                                             <xs:element name="port" type="xs:integer" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="reconnectInterval" type="xs:integer" minOccurs="0" maxOccurs="1" />
-                                            <xs:element name="connectionCheckTimeout" type="xs:integer" minOccurs="0" maxOccurs="1" />
                                         </xs:choice>
                                         <xs:attribute name="server" type="xs:string" />
                                         <xs:attribute name="port" type="xs:integer" />
                                         <xs:attribute name="reconnectInterval" type="xs:integer" />
-                                        <xs:attribute name="connectionCheckTimeout" type="xs:integer" />
                                     </xs:complexType>
                                 </xs:element>
                                 <xs:element name="tcp" minOccurs="0" maxOccurs="1">
@@ -157,7 +155,6 @@
                                                     <xs:attribute name="interval" type="xs:integer" />
                                                 </xs:complexType>
                                             </xs:element>
-                                            <xs:element name="connectionCheckTimeout" type="xs:integer" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="tls" minOccurs="0" maxOccurs="1">
                                                 <xs:complexType>
                                                     <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -182,7 +179,6 @@
                                         <xs:attribute name="server" type="xs:string" />
                                         <xs:attribute name="port" type="xs:integer" />
                                         <xs:attribute name="reconnectInterval" type="xs:integer" />
-                                        <xs:attribute name="connectionCheckTimeout" type="xs:integer" />
                                         <xs:attribute name="framing" type="xs:string" />
                                         <xs:attribute name="dataChunkSize" type="xs:integer" />
                                     </xs:complexType>

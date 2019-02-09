@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using NLog.Common;
 using NLog.Targets.Syslog.Extensions;
 using NLog.Targets.Syslog.Settings;
 
@@ -15,19 +16,17 @@ namespace NLog.Targets.Syslog.MessageSend
     internal abstract class MessageTransmitter
     {
         private static readonly Dictionary<ProtocolType, Func<MessageTransmitterConfig, MessageTransmitter>> TransmitterFactory;
-        protected static readonly TimeSpan ZeroSecondsTimeSpan = TimeSpan.FromSeconds(0);
+        protected static readonly TimeSpan ZeroSeconds = TimeSpan.FromSeconds(0);
 
-        private volatile bool neverConnected;
-        private readonly TimeSpan recoveryTime;
-        private volatile bool disposed;
+        private volatile bool neverCalledInit;
+        private volatile bool isReady;
+        private readonly TimeSpan newInitDelay;
 
         protected string Server { get; }
 
         protected string IpAddress => Dns.GetHostAddresses(Server).FirstOrDefault()?.ToString();
 
         protected int Port { get; }
-
-        protected abstract bool Ready { get; }
 
         static MessageTransmitter()
         {
@@ -45,8 +44,9 @@ namespace NLog.Targets.Syslog.MessageSend
 
         protected MessageTransmitter(string server, int port, int reconnectInterval)
         {
-            neverConnected = true;
-            recoveryTime = TimeSpan.FromMilliseconds(reconnectInterval);
+            neverCalledInit = true;
+            isReady = false;
+            newInitDelay = TimeSpan.FromMilliseconds(reconnectInterval);
             Server = server;
             Port = port;
         }
@@ -56,24 +56,24 @@ namespace NLog.Targets.Syslog.MessageSend
             if (token.IsCancellationRequested)
                 return Task.FromResult<object>(null);
 
-            if (Ready)
-                return SendAsync(message, token);
-
-            var delay = neverConnected ? ZeroSecondsTimeSpan : recoveryTime;
-            neverConnected = false;
-            return Task.Delay(delay, token)
-                .Then(_ => ReInit(), token)
-                .Unwrap()
+            return PrepareForSendAsync(token)
                 .Then(_ => SendAsync(message, token), token)
+                .Unwrap()
+                .ContinueWith(t =>
+                {
+                    if (t.Exception == null) // t.IsFaulted is false
+                        return Task.FromResult<object>(null);
+
+                    InternalLogger.Warn(t.Exception?.GetBaseException(), "SendAsync failed");
+                    TidyUp();
+                    return SendMessageAsync(message, token); // Failures impact on the log entry queue
+                }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
                 .Unwrap();
         }
 
         public void Dispose()
         {
-            if (disposed)
-                return;
-            disposed = true;
-            Terminate();
+            TidyUp();
         }
 
         protected abstract Task Init();
@@ -82,10 +82,34 @@ namespace NLog.Targets.Syslog.MessageSend
 
         protected abstract void Terminate();
 
-        private Task ReInit()
+        private Task PrepareForSendAsync(CancellationToken token)
         {
-            Terminate();
-            return Init();
+            if (isReady)
+                return Task.FromResult<object>(null);
+
+            var delay = neverCalledInit ? ZeroSeconds : newInitDelay;
+            neverCalledInit = false;
+            return Task
+                .Delay(delay, token)
+                .Then(_ => Init(), token)
+                .Unwrap()
+                .Then(_ => isReady = true, token);
+        }
+
+        private void TidyUp()
+        {
+            try
+            {
+                if (isReady)
+                    Terminate();
+            }
+            catch
+            {
+            }
+            finally
+            {
+                isReady = false;
+            }
         }
     }
 }

@@ -19,7 +19,6 @@ namespace NLog.Targets.Syslog.MessageSend
     {
         private static readonly byte[] LineFeedBytes = { 0x0A };
 
-        private readonly int connectionCheckTimeout;
         private readonly KeepAliveConfig keepAliveConfig;
         private readonly bool useTls;
         private readonly Func<X509Certificate2Collection> retrieveClientCertificates;
@@ -28,11 +27,8 @@ namespace NLog.Targets.Syslog.MessageSend
         private TcpClient tcp;
         private Stream stream;
 
-        protected override bool Ready => tcp?.Connected == true && tcp.Client.IsConnected(connectionCheckTimeout);
-
         public Tcp(TcpConfig tcpConfig) : base(tcpConfig.Server, tcpConfig.Port, tcpConfig.ReconnectInterval)
         {
-            connectionCheckTimeout = tcpConfig.ConnectionCheckTimeout;
             keepAliveConfig = tcpConfig.KeepAlive;
             useTls = tcpConfig.Tls.Enabled;
             retrieveClientCertificates = tcpConfig.Tls.RetrieveClientCertificates;

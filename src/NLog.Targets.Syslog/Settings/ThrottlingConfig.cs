@@ -7,6 +7,7 @@ namespace NLog.Targets.Syslog.Settings
     /// <summary>Throttling configuration</summary>
     public class ThrottlingConfig : NotifyPropertyChanged
     {
+        private const int DefaultLimit = 65536;
         private int limit;
         private ThrottlingStrategy strategy;
         private decimal delay;
@@ -45,8 +46,8 @@ namespace NLog.Targets.Syslog.Settings
         /// <summary>Builds a new instance of the Throttling class</summary>
         public ThrottlingConfig()
         {
-            limit = 0;
-            strategy = ThrottlingStrategy.None;
+            limit = DefaultLimit;
+            strategy = ThrottlingStrategy.Discard;
             delay = 0;
         }
     }
