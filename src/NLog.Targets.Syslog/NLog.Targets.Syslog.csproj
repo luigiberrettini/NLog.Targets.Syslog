@@ -29,7 +29,7 @@
     <Description>Custom target for NLog to send logging messages to a Syslog server</Description>
     <PackageTags>NLog Syslog Log Logging</PackageTags>
     <Version>0.1.0-alpha-01-commitHash</Version>
-    <PackageLicenseUrl>https://github.com/luigiberrettini/NLog.Targets.Syslog/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/luigiberrettini/NLog.Targets.Syslog</PackageProjectUrl>
     <PackageIconUrl>http://nlog-project.org/N.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/luigiberrettini/NLog.Targets.Syslog</RepositoryUrl>

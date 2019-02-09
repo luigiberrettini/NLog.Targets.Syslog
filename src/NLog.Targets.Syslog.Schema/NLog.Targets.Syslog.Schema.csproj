@@ -12,7 +12,7 @@
     <Description>Enables Intellisense™ for Syslog target settings in NLog.config</Description>
     <PackageTags>NLog Syslog Log Logging Intellisense xsd</PackageTags>
     <Version>0.1.0-alpha-01-commitHash</Version>
-    <PackageLicenseUrl>https://github.com/luigiberrettini/NLog.Targets.Syslog/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/luigiberrettini/NLog.Targets.Syslog</PackageProjectUrl>
     <PackageIconUrl>http://nlog-project.org/NConfig.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/luigiberrettini/NLog.Targets.Syslog</RepositoryUrl>
