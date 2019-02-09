@@ -46,39 +46,5 @@ namespace NLog.Targets.Syslog.Extensions
             tcs.SetException(exception);
             return tcs.Task;
         }
-
-        public static Task SafeFromAsync<TArg1, TArg2, TArg3>(this TaskFactory taskFactory, Func<TArg1, TArg2, TArg3, AsyncCallback, object, IAsyncResult> beginMethod, Action<IAsyncResult> endMethod, TArg1 arg1, TArg2 arg2, TArg3 arg3, object state)
-        {
-            var tcs = new TaskCompletionSource<object>();
-            try
-            {
-                beginMethod(arg1, arg2, arg3, Callback(endMethod, tcs), state);
-            }
-            catch (Exception exception)
-            {
-                tcs.SetException(exception);
-            }
-            return tcs.Task;
-        }
-
-        private static AsyncCallback Callback<TResult>(Action<IAsyncResult> endMethod, TaskCompletionSource<TResult> tcs)
-        {
-            return asyncResult =>
-            {
-                try
-                {
-                    endMethod(asyncResult);
-                    tcs.SetResult(default(TResult));
-                }
-                catch (OperationCanceledException)
-                {
-                    tcs.SetCanceled();
-                }
-                catch (Exception exception)
-                {
-                    tcs.SetException(exception);
-                }
-            };
-        }
     }
 }

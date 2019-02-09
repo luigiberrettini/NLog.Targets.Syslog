@@ -54,8 +54,8 @@ namespace NLog.Targets.Syslog.MessageSend
             if (token.IsCancellationRequested)
                 return Task.FromResult<object>(null);
 
-            return FramingTask(message)
-                .Then(_ => WriteAsync(0, message, token), token)
+            return HandleFramingAsync(message)
+                .Then(_ => stream.WriteAsync(message, 0, message.Length, token), token)
                 .Unwrap();
         }
 
@@ -79,7 +79,7 @@ namespace NLog.Targets.Syslog.MessageSend
             return sslStream;
         }
 
-        private Task FramingTask(ByteArray message)
+        private Task HandleFramingAsync(ByteArray message)
         {
             if (framing == FramingMethod.NonTransparent)
             {
@@ -89,22 +89,7 @@ namespace NLog.Targets.Syslog.MessageSend
 
             var octetCount = message.Length;
             var prefix = new ASCIIEncoding().GetBytes($"{octetCount} ");
-            return Task.Factory.SafeFromAsync(stream.BeginWrite, stream.EndWrite, prefix, 0, prefix.Length, null);
-        }
-
-        private Task WriteAsync(int offset, ByteArray data, CancellationToken token)
-        {
-            if (token.IsCancellationRequested)
-                return Task.FromResult<object>(null);
-
-            var toBeWrittenTotal = data.Length - offset;
-            var isLastWrite = toBeWrittenTotal <= dataChunkSize;
-            var count = isLastWrite ? toBeWrittenTotal : dataChunkSize;
-
-            return Task.Factory
-                .SafeFromAsync(stream.BeginWrite, stream.EndWrite, (byte[])data, offset, count, null)
-                .Then(task => isLastWrite ? task : WriteAsync(offset + dataChunkSize, data, token), token)
-                .Unwrap();
+            return stream.WriteAsync(prefix, 0, prefix.Length);
         }
 
         private void DisposeSslStreamNotTcpClientInnerStream()
