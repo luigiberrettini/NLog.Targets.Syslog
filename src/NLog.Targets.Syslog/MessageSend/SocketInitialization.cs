@@ -9,36 +9,29 @@ namespace NLog.Targets.Syslog.MessageSend
 {
     internal abstract class SocketInitialization
     {
-        protected Socket Socket { get; }
-
-        public static SocketInitialization ForCurrentOs(Socket socket)
+        public static SocketInitialization ForCurrentOs()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                return new SocketInitializationForWindows(socket);
+                return new SocketInitializationForWindows();
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                return new SocketInitializationForLinux(socket);
-            return new SocketInitializationForOsx(socket);
+                return new SocketInitializationForLinux();
+            return new SocketInitializationForOsx();
         }
 
-        protected SocketInitialization(Socket socket)
+        public abstract void DisableAddressSharing(Socket socket);
+
+        public void DiscardPendingDataOnClose(Socket socket)
         {
-            Socket = socket;
+            socket.LingerState = new LingerOption(true, 0);
         }
 
-        public abstract void DisableAddressSharing();
-
-        public void DiscardPendingDataOnClose()
+        public void SetKeepAlive(Socket socket, KeepAliveConfig keepAliveConfig)
         {
-            Socket.LingerState = new LingerOption(true, 0);
-        }
-
-        public void SetKeepAlive(KeepAliveConfig keepAliveConfig)
-        {
-            Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, keepAliveConfig.Enabled);
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, keepAliveConfig.Enabled);
             if (keepAliveConfig.Enabled)
-                ApplyKeepAliveValues(keepAliveConfig);
+                ApplyKeepAliveValues(socket, keepAliveConfig);
         }
 
-        protected abstract void ApplyKeepAliveValues(KeepAliveConfig keepAliveConfig);
+        protected abstract void ApplyKeepAliveValues(Socket socket, KeepAliveConfig keepAliveConfig);
     }
 }

@@ -27,22 +27,18 @@ namespace NLog.Targets.Syslog.MessageSend
         private const SocketOptionName TcpKeepAliveTime = (SocketOptionName)0x4;
         private const SocketOptionName TcpKeepAliveInterval = (SocketOptionName)0x5;
 
-        public SocketInitializationForLinux(Socket socket) : base(socket)
-        {
-        }
-
-        public override void DisableAddressSharing()
+        public override void DisableAddressSharing(Socket socket)
         {
             // DEFAULT
-            // Interop.SetSockOptSysCall(Socket, SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, false);
-            // Interop.SetSockOptSysCall(Socket, SocketOptionLevel.Socket, SocketReusePort, 0);
+            // Interop.SetSockOptSysCall(socket, SocketOptionLevel.Socket, SocketReusePort, 0);
+            // Interop.SetSockOptSysCall(socket, SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, false);
         }
 
-        protected override void ApplyKeepAliveValues(KeepAliveConfig keepAliveConfig)
+        protected override void ApplyKeepAliveValues(Socket socket, KeepAliveConfig keepAliveConfig)
         {
-            Interop.SetSockOptSysCall(Socket, SocketOptionLevel.Tcp, TcpKeepAliveRetryCount, keepAliveConfig.RetryCount);
-            Interop.SetSockOptSysCall(Socket, SocketOptionLevel.Tcp, TcpKeepAliveTime, keepAliveConfig.Time);
-            Interop.SetSockOptSysCall(Socket, SocketOptionLevel.Tcp, TcpKeepAliveInterval, keepAliveConfig.Interval);
+            Interop.SetSockOptSysCall(socket, SocketOptionLevel.Tcp, TcpKeepAliveRetryCount, keepAliveConfig.RetryCount);
+            Interop.SetSockOptSysCall(socket, SocketOptionLevel.Tcp, TcpKeepAliveTime, keepAliveConfig.Time);
+            Interop.SetSockOptSysCall(socket, SocketOptionLevel.Tcp, TcpKeepAliveInterval, keepAliveConfig.Interval);
         }
     }
 }
