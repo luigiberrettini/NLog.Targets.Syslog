@@ -22,7 +22,6 @@ namespace NLog.Targets.Syslog.MessageSend
         private readonly KeepAliveConfig keepAliveConfig;
         private readonly bool useTls;
         private readonly Func<X509Certificate2Collection> retrieveClientCertificates;
-        private readonly int dataChunkSize;
         private readonly FramingMethod framing;
         private TcpClient tcp;
         private Stream stream;
@@ -33,7 +32,6 @@ namespace NLog.Targets.Syslog.MessageSend
             useTls = tcpConfig.Tls.Enabled;
             retrieveClientCertificates = tcpConfig.Tls.RetrieveClientCertificates;
             framing = tcpConfig.Framing;
-            dataChunkSize = tcpConfig.DataChunkSize;
         }
 
         protected override Task Init()

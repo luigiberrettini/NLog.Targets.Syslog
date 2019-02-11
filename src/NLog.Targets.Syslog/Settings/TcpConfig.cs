@@ -14,7 +14,6 @@ namespace NLog.Targets.Syslog.Settings
         private const string Localhost = "localhost";
         private const int DefaultPort = 514;
         private const int DefaultReconnectInterval = 500;
-        private const int DefaultBufferSize = 4096;
         private string server;
         private int port;
         private int reconnectInterval;
@@ -23,7 +22,6 @@ namespace NLog.Targets.Syslog.Settings
         private TlsConfig tls;
         private readonly PropertyChangedEventHandler tlsPropsChanged;
         private FramingMethod framing;
-        private int dataChunkSize;
 
         /// <summary>The IP address or hostname of the Syslog server</summary>
         public string Server
@@ -68,13 +66,6 @@ namespace NLog.Targets.Syslog.Settings
             set => SetProperty(ref framing, value);
         }
 
-        /// <summary>The size of chunks in which data is split to be sent over the wire</summary>
-        public int DataChunkSize
-        {
-            get => dataChunkSize;
-            set => SetProperty(ref dataChunkSize, value);
-        }
-
         /// <summary>Builds a new instance of the TcpProtocolConfig class</summary>
         public TcpConfig()
         {
@@ -88,7 +79,6 @@ namespace NLog.Targets.Syslog.Settings
             tlsPropsChanged = (sender, args) => OnPropertyChanged(nameof(KeepAlive));
             tls.PropertyChanged += tlsPropsChanged;
             framing = FramingMethod.OctetCounting;
-            dataChunkSize = DefaultBufferSize;
         }
 
         /// <inheritdoc />

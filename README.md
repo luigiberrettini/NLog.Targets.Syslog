@@ -139,7 +139,6 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
     * `certificateFilterType` - the [type of filter](https://msdn.microsoft.com/en-us/library/system.security.cryptography.x509certificates.x509findtype.aspx) to apply to the certificate collection (default `FindBySubjectName`)
     * `certificateFilterValue` - the value against which to filter the certificate collection
   * `framing` - `nonTransparent` or `octectCounting` (default: `octectCounting`)
-  * `dataChunkSize` - the size of chunks, in bytes, in which data is split to be sent over the wire (default: `4096`)
 
 
 
