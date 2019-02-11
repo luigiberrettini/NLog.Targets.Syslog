@@ -103,8 +103,9 @@ namespace NLog.Targets.Syslog.MessageSend
                 if (isReady)
                     Terminate();
             }
-            catch
+            catch (Exception exception)
             {
+                InternalLogger.Warn(exception, "Terminate failed");
             }
             finally
             {
