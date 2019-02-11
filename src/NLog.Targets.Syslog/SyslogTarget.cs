@@ -103,9 +103,9 @@ namespace NLog.Targets.Syslog
             {
                 Enforcement.MessageProcessors.ForEach(i => asyncLoggers[i].Dispose());
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
-                InternalLogger.Warn(ex, "{0} dispose error", GetType().Name);
+                InternalLogger.Warn(exception, "{0} dispose error", GetType().Name);
             }
         }
     }
