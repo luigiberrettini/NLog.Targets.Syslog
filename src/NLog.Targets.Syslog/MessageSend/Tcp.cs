@@ -18,6 +18,7 @@ namespace NLog.Targets.Syslog.MessageSend
     internal class Tcp : MessageTransmitter
     {
         private static readonly byte[] LineFeedBytes = { 0x0A };
+        private static readonly SocketInitialization SocketInitialization = SocketInitialization.ForCurrentOs();
 
         private readonly KeepAliveConfig keepAliveConfig;
         private readonly bool useTls;
@@ -37,10 +38,9 @@ namespace NLog.Targets.Syslog.MessageSend
         protected override Task Init()
         {
             tcp = new TcpClient();
-            var socketInitialization = SocketInitialization.ForCurrentOs(tcp.Client);
-            socketInitialization.DisableAddressSharing();
-            socketInitialization.DiscardPendingDataOnClose();
-            socketInitialization.SetKeepAlive(keepAliveConfig);
+            SocketInitialization.DisableAddressSharing(tcp.Client);
+            SocketInitialization.DiscardPendingDataOnClose(tcp.Client);
+            SocketInitialization.SetKeepAlive(tcp.Client, keepAliveConfig);
 
             return tcp
                 .ConnectAsync(IpAddress, Port)

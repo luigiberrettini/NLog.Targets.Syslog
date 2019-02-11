@@ -9,6 +9,18 @@ namespace NLog.Targets.Syslog.MessageSend
 {
     internal class SocketInitializationForWindows : SocketInitialization
     {
+        private const int DefaultRetryCount = 10;
+        private const int DefaultTime = 7200;
+        private const int DefaultInterval = 1;
+        private static readonly bool CanSetSocketOptionKeepAliveRetryCount = CanSetSockOptKeepAliveRetryCount();
+        private static readonly bool CanSetSocketOptionsKeepAliveTimeAndInterval = CanSetSockOptsKeepAliveTimeAndInterval();
+
+        [ThreadStatic]
+        private static KeepAliveConfig keepAliveConfiguration;
+
+        [ThreadStatic]
+        private static byte[] ioControlKeepAliveValues;
+
         // SOCKET OPTION NAME CONSTANT
         // Ws2ipdef.h (Windows SDK)
         // #define    TCP_KEEPCNT        16
@@ -27,36 +39,76 @@ namespace NLog.Targets.Syslog.MessageSend
         private const SocketOptionName TcpKeepAliveTime = (SocketOptionName)0x3;
         private const SocketOptionName TcpKeepAliveInterval = (SocketOptionName)0x11;
 
-        private readonly bool isWin10V1703OrLater;
-        private readonly bool isBelowWin10V1709;
-
-        public SocketInitializationForWindows(Socket socket) : base(socket)
+        public override void DisableAddressSharing(Socket socket)
         {
-            var version = Environment.OSVersion.Version;
-            isWin10V1703OrLater = version.Major > 10 || version.Major == 10 && version.Build >= 15063;
-            isBelowWin10V1709 = version.Major < 10 || version.Major == 10 && version.Build < 16299;
-        }
-
-        public override void DisableAddressSharing()
-        {
-            Socket.ExclusiveAddressUse = true;
+            socket.ExclusiveAddressUse = true;
             // DEFAULT
-            // Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, false);
+            // socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, false);
         }
 
-        protected override void ApplyKeepAliveValues(KeepAliveConfig keepAliveConfig)
+        protected override void ApplyKeepAliveValues(Socket socket, KeepAliveConfig keepAliveConfig)
         {
-            if (isWin10V1703OrLater)
-                Socket.SetSocketOption(SocketOptionLevel.Tcp, TcpKeepAliveRetryCount, keepAliveConfig.RetryCount);
+            if (CanSetSocketOptionKeepAliveRetryCount)
+                socket.SetSocketOption(SocketOptionLevel.Tcp, TcpKeepAliveRetryCount, keepAliveConfig.RetryCount);
 
-            if (isBelowWin10V1709)
+            if (CanSetSocketOptionsKeepAliveTimeAndInterval)
             {
-                // Call WSAIoctl via IOControl
-                Socket.IOControl(IOControlCode.KeepAliveValues, new IOControlKeepAliveValues(keepAliveConfig).ToByteArray(), null);
+                socket.SetSocketOption(SocketOptionLevel.Tcp, TcpKeepAliveTime, keepAliveConfig.Time);
+                socket.SetSocketOption(SocketOptionLevel.Tcp, TcpKeepAliveInterval, keepAliveConfig.Interval);
                 return;
             }
-            Socket.SetSocketOption(SocketOptionLevel.Tcp, TcpKeepAliveTime, keepAliveConfig.Time);
-            Socket.SetSocketOption(SocketOptionLevel.Tcp, TcpKeepAliveInterval, keepAliveConfig.Interval);
+
+            // Call WSAIoctl via IOControl
+            if (KeepAliveConfigurationIsUpToDate(keepAliveConfig) && ioControlKeepAliveValues != null)
+            {
+                socket.IOControl(IOControlCode.KeepAliveValues, ioControlKeepAliveValues, null);
+                return;
+            }
+            keepAliveConfiguration = keepAliveConfig;
+            var buffer = ioControlKeepAliveValues ?? (ioControlKeepAliveValues = new byte[3 * sizeof(uint)]);
+            BitConverter.GetBytes(keepAliveConfig.Enabled ? 1u : 0u).CopyTo(buffer, 0);
+            BitConverter.GetBytes((uint)keepAliveConfig.Time * 1000).CopyTo(buffer, sizeof(uint));
+            BitConverter.GetBytes((uint)keepAliveConfig.Interval * 1000).CopyTo(buffer, sizeof(uint) * 2);
+            socket.IOControl(IOControlCode.KeepAliveValues, buffer, null);
+        }
+
+        private static bool CanSetSockOptKeepAliveRetryCount()
+        {
+            return CanSetSockOptKeepAliveSetting(socket =>
+                socket.SetSocketOption(SocketOptionLevel.Tcp, TcpKeepAliveRetryCount, DefaultRetryCount));
+        }
+
+        private static bool CanSetSockOptsKeepAliveTimeAndInterval()
+        {
+            return CanSetSockOptKeepAliveSetting(socket =>
+            {
+                socket.SetSocketOption(SocketOptionLevel.Tcp, TcpKeepAliveTime, DefaultTime);
+                socket.SetSocketOption(SocketOptionLevel.Tcp, TcpKeepAliveInterval, DefaultInterval);
+            });
+        }
+
+        private static bool CanSetSockOptKeepAliveSetting(Action<Socket> setKeepAliveSetting)
+        {
+            using (var tcp = new TcpClient())
+            {
+                try
+                {
+                    setKeepAliveSetting(tcp.Client);
+                    return true;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
+
+        private static bool KeepAliveConfigurationIsUpToDate(KeepAliveConfig keepAliveConfig)
+        {
+            return keepAliveConfiguration.Enabled == keepAliveConfig.Enabled &&
+                keepAliveConfiguration.RetryCount == keepAliveConfig.RetryCount &&
+                keepAliveConfiguration.Time == keepAliveConfig.Time &&
+                keepAliveConfiguration.Interval == keepAliveConfig.Interval;
         }
     }
 }
