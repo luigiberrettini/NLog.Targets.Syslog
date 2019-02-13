@@ -1,5 +1,9 @@
 version: BUILD {build}
 image: Visual Studio 2017
+skip_branch_with_pr: true
+environment:
+  NUGET_API_KEY:
+    secure: +Z/sH3FwRcvcnfBZn6dzy8MRi7N10hqh6Lq2MPua3AGtVvvT7sqw2nxENKG3g0/6
 install:
   - ps: |
       $DOTNET_INSTALL_DIR = $(Join-Path (Get-Location) 'dotnetsdk')
@@ -17,20 +21,18 @@ before_build:
       $mostRecentVersion = $mostRecentTag.Substring(1)
       $currentCommitHash = git rev-parse --short HEAD
       Set-AppveyorBuildVariable -Name SW_VER -Value $mostRecentVersion
-      Update-AppveyorBuild -Version "Build $env:APPVEYOR_BUILD_NUMBER - Commit $currentCommitHash - Tag v$env:SW_VER"
-skip_branch_with_pr: true
+      Update-AppveyorBuild -Version "Build $env:APPVEYOR_BUILD_NUMBER - Commit $currentCommitHash - Tag v$mostRecentVersion"
 build_script:
   - ps: |
-      $additionalArgs = if ($env:APPVEYOR_REPO_TAG -ne 'true') { "--buildNumber=$env:APPVEYOR_BUILD_NUMBER" }
-      .\tools\build.ps1 '--target=Pack' "--softwareVersion=$env:SW_VER" $additionalArgs
+      if ($env:APPVEYOR_REPO_TAG -ne 'true') {
+          .\tools\build.ps1 '--target=Pack' "--softwareVersion=$env:SW_VER" "--buildNumber=$env:APPVEYOR_BUILD_NUMBER"
+      }
+      else {
+          .\tools\build.ps1 '--target=NuGetPush' "--softwareVersion=$env:SW_VER" "--nuGetApiKey=$env:NUGET_API_KEY"
+      }
       if ($LastExitCode -ne 0) { exit $LastExitCode }
+after_build:
+  - ps: |
+      .\tools\build.ps1 '--target=ZipArtifacts'
+      Push-AppveyorArtifact .\tools\artifacts\artifacts.zip -FileName "artifacts_$env:APPVEYOR_BUILD_ID.zip"
 test: off
-artifacts:
-  - path: tools\artifacts\*.nupkg
-deploy:
-  provider: NuGet
-  api_key:
-      secure: +Z/sH3FwRcvcnfBZn6dzy8MRi7N10hqh6Lq2MPua3AGtVvvT7sqw2nxENKG3g0/6
-  skip_symbols: false
-  on:
-      appveyor_repo_tag: true

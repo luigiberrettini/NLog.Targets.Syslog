@@ -199,8 +199,22 @@ Task("NuGetPush")
     .Does(() =>
     {
         var packageSearchPattern = System.IO.Path.Combine(artifactsDir, "*.nupkg");
-        var nuGetPushSettings = new DotNetCoreNuGetPushSettings { Source = "https://www.nuget.org/api/v2/package", ApiKey = nuGetApiKey };
+        var nuGetPushSettings = new DotNetCoreNuGetPushSettings { Source = "https://api.nuget.org/v3/index.json", ApiKey = nuGetApiKey };
         DotNetCoreNuGetPush(packageSearchPattern, nuGetPushSettings);
+    });
+
+Task("ZipArtifacts")
+    .Does(() =>
+    {
+        if (!DirectoryExists(artifactsDir) || !System.IO.Directory.EnumerateFileSystemEntries(artifactsDir).Any())
+        {
+            Information("The artifacts directory is missing or empty");
+            return;
+        }
+
+        var artifactsDirFullName = new DirectoryInfo(artifactsDir).FullName;
+        var artifactsZipFile = System.IO.Path.Combine(artifactsDirFullName, "artifacts.zip");
+        Zip(artifactsDirFullName, artifactsZipFile);
     });
 
 RunTarget(target);
