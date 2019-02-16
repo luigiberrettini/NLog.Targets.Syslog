@@ -7,9 +7,9 @@ environment:
 install:
   - ps: |
       $DOTNET_INSTALL_DIR = $(Join-Path (Get-Location) 'dotnetsdk')
-      powershell -NoProfile -ExecutionPolicy Unrestricted -Command "&([scriptblock]::Create((Invoke-WebRequest -UseBasicParsing 'https://dot.net/v1/dotnet-install.ps1'))) -Version 1.1.11 -InstallDir $DOTNET_INSTALL_DIR -NoPath"
-      powershell -NoProfile -ExecutionPolicy Unrestricted -Command "&([scriptblock]::Create((Invoke-WebRequest -UseBasicParsing 'https://dot.net/v1/dotnet-install.ps1'))) -Version 2.1.503 -InstallDir $DOTNET_INSTALL_DIR -NoPath"
-      powershell -NoProfile -ExecutionPolicy Unrestricted -Command "&([scriptblock]::Create((Invoke-WebRequest -UseBasicParsing 'https://dot.net/v1/dotnet-install.ps1'))) -Version 2.2.103 -InstallDir $DOTNET_INSTALL_DIR -NoPath"
+      powershell -NoProfile -ExecutionPolicy Unrestricted -Command "&([scriptblock]::Create((Invoke-WebRequest -UseBasicParsing 'https://dot.net/v1/dotnet-install.ps1'))) -Channel 1.1 -InstallDir $DOTNET_INSTALL_DIR -NoPath"
+      powershell -NoProfile -ExecutionPolicy Unrestricted -Command "&([scriptblock]::Create((Invoke-WebRequest -UseBasicParsing 'https://dot.net/v1/dotnet-install.ps1'))) -Channel 2.1 -InstallDir $DOTNET_INSTALL_DIR -NoPath"
+      powershell -NoProfile -ExecutionPolicy Unrestricted -Command "&([scriptblock]::Create((Invoke-WebRequest -UseBasicParsing 'https://dot.net/v1/dotnet-install.ps1'))) -Channel 2.2 -InstallDir $DOTNET_INSTALL_DIR -NoPath"
       $env:Path = "$DOTNET_INSTALL_DIR;$env:Path"
 before_build:
   - ps: |
