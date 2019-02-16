@@ -162,7 +162,7 @@ Task("Test")
         }
     });
 
-Task("Pack")
+Task("NuGetPack")
     .IsDependentOn("RestorePackages")
     .IsDependentOn("Test")
     .Does(() =>
@@ -195,10 +195,11 @@ Task("Pack")
 
 Task("NuGetPush")
     .IsDependentOn("Clean")
-    .IsDependentOn("Pack")
+    .IsDependentOn("NuGetPack")
     .Does(() =>
     {
         var packageSearchPattern = System.IO.Path.Combine(artifactsDir, "*.nupkg");
+        
         var nuGetPushSettings = new DotNetCoreNuGetPushSettings { Source = "https://api.nuget.org/v3/index.json", ApiKey = nuGetApiKey };
         DotNetCoreNuGetPush(packageSearchPattern, nuGetPushSettings);
     });
