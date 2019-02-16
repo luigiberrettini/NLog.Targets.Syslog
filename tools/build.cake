@@ -7,6 +7,7 @@ var buildVerbosity = (DotNetCoreVerbosity)Enum.Parse(typeof(DotNetCoreVerbosity)
 var softwareVersion = target.ToLower() == "nugetpack" || target.ToLower() == "nugetpush" ? Argument<string>("softwareVersion") : Argument<string>("softwareVersion", string.Empty);
 var buildNumber = Argument<int>("buildNumber", 0);
 var commitHash = Argument<string>("commitHash");
+var nuGetSource = Argument<string>("nuGetSource", null);
 var nuGetApiKey = Argument<string>("nuGetApiKey", string.Empty);
 
 var srcDirInfo = new DirectoryInfo(srcDir);
@@ -198,9 +199,18 @@ Task("NuGetPush")
     .IsDependentOn("NuGetPack")
     .Does(() =>
     {
+        if (nuGetSource == null)
+        {
+            Information("Missing NuGet source:");
+            Information(" - test source = {0}", "https://apiint.nugettest.org/v3/index.json");
+            Information(" - live source = {0}", "https://api.nuget.org/v3/index.json");
+            return;
+        }
+
         var packageSearchPattern = System.IO.Path.Combine(artifactsDir, "*.nupkg");
         
-        var nuGetPushSettings = new DotNetCoreNuGetPushSettings { Source = "https://api.nuget.org/v3/index.json", ApiKey = nuGetApiKey };
+        Information("NuGet source: {0}", nuGetSource);
+        var nuGetPushSettings = new DotNetCoreNuGetPushSettings { Source = nuGetSource, ApiKey = nuGetApiKey };
         DotNetCoreNuGetPush(packageSearchPattern, nuGetPushSettings);
     });
 

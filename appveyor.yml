@@ -28,7 +28,7 @@ build_script:
           .\tools\build.ps1 '--target=NuGetPack' "--softwareVersion=$env:SW_VER" "--buildNumber=$env:APPVEYOR_BUILD_NUMBER"
       }
       else {
-          .\tools\build.ps1 '--target=NuGetPush' "--softwareVersion=$env:SW_VER" "--nuGetApiKey=$env:NUGET_API_KEY"
+          .\tools\build.ps1 '--target=NuGetPush' "--softwareVersion=$env:SW_VER" '--nuGetSource=https://api.nuget.org/v3/index.json' "--nuGetApiKey=$env:NUGET_API_KEY"
       }
       if ($LastExitCode -ne 0) { exit $LastExitCode }
 after_build:
