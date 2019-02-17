@@ -13,6 +13,9 @@
     <AssemblyOriginatorKeyFile>NLog.Targets.Syslog.snk</AssemblyOriginatorKeyFile>
     <PublicSign Condition="'$(OS)' != 'Windows_NT'">true</PublicSign>
 
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
     <Product>NLog.Targets.Syslog</Product>
     <Copyright>Copyright © 2013 - present by Luigi Berrettini and others: https://github.com/luigiberrettini/NLog.Targets.Syslog/graphs/contributors</Copyright>
     <AssemblyTitle>NLog Syslog target</AssemblyTitle>
@@ -51,6 +54,10 @@
   <PropertyGroup Condition="'$(TargetFramework)'=='net452'">
     <DisableImplicitFrameworkReferences>true</DisableImplicitFrameworkReferences>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta2-18618-05" PrivateAssets="All"/>
+  </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)'=='net452'">
     <Reference Include="System" />
