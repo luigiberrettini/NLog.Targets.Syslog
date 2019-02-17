@@ -19,9 +19,15 @@ before_install:
       brew install jq
     fi
     DOTNET_INSTALL_DIR="$PWD/.dotnetsdk"
-    curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel "1.1" --install-dir "$DOTNET_INSTALL_DIR" --no-path
-    curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel "2.1" --install-dir "$DOTNET_INSTALL_DIR" --no-path
-    curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel "2.2" --install-dir "$DOTNET_INSTALL_DIR" --no-path
+    function installLatestDotNetSdk {
+        local channel=$1
+        local url="https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/$channel/releases.json"
+        local version=$(curl --silent $url | jq ."\"latest-sdk\"" | sed -e 's/^"//' -e 's/"$//')
+        curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version $version --install-dir "$DOTNET_INSTALL_DIR" --no-path
+    }
+    installLatestDotNetSdk '1.1'
+    installLatestDotNetSdk '2.1'
+    installLatestDotNetSdk '2.2'
     export PATH="$DOTNET_INSTALL_DIR:$PATH"
 script:
   - |
