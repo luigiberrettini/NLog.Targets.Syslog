@@ -206,10 +206,9 @@ Task("NuGetPush")
             Information(" - live source = {0}", "https://api.nuget.org/v3/index.json");
             return;
         }
+        Information("NuGet source: {0}", nuGetSource);
 
         var packageSearchPattern = System.IO.Path.Combine(artifactsDir, "*.nupkg");
-        
-        Information("NuGet source: {0}", nuGetSource);
         var nuGetPushSettings = new DotNetCoreNuGetPushSettings { Source = nuGetSource, ApiKey = nuGetApiKey };
         DotNetCoreNuGetPush(packageSearchPattern, nuGetPushSettings);
     });

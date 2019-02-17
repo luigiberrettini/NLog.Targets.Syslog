@@ -7,14 +7,15 @@ environment:
 install:
   - ps: |
       $DOTNET_INSTALL_DIR = $(Join-Path (Get-Location) 'dotnetsdk')
-      function Install-LatestDotNetSdk($channel) {
-          $url = "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/$channel/releases.json"
-          $version = (Invoke-WebRequest $url | ConvertFrom-Json).'latest-sdk'
+      $dotnetReleasesUrl = 'https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json'
+      $dotnetReleases = $(Invoke-WebRequest $dotnetReleasesUrl | ConvertFrom-Json)."releases-index"
+      function Install-LatestDotNetSdk($Channel) {
+          $version = ($dotnetReleases | Where-Object { $_.'channel-version' -eq $channel }).'latest-sdk'
           powershell -NoProfile -ExecutionPolicy Unrestricted -Command "&([scriptblock]::Create((Invoke-WebRequest -UseBasicParsing 'https://dot.net/v1/dotnet-install.ps1'))) -Version $version -InstallDir $DOTNET_INSTALL_DIR -NoPath"
       }
-      Install-LatestDotNetSdk '1.1'
-      Install-LatestDotNetSdk '2.1'
-      Install-LatestDotNetSdk '2.2'
+      Install-LatestDotNetSdk -Channel '1.1'
+      Install-LatestDotNetSdk -Channel '2.1'
+      Install-LatestDotNetSdk -Channel '2.2'
       $env:Path = "$DOTNET_INSTALL_DIR;$env:Path"
 before_build:
   - ps: |
