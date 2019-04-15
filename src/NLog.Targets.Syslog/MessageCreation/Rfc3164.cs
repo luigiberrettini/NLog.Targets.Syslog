@@ -14,6 +14,8 @@ namespace NLog.Targets.Syslog.MessageCreation
         private const string TimestampFormat = "{0:MMM} {0,11:d HH:mm:ss}";
         private static readonly byte[] SpaceBytes = { 0x20 };
 
+        private readonly bool outputPri;
+        private readonly bool outputHeader;
         private readonly Layout hostnameLayout;
         private readonly Layout tagLayout;
         private readonly PlainHostnamePolicySet hostnamePolicySet;
@@ -28,6 +30,8 @@ namespace NLog.Targets.Syslog.MessageCreation
             plainContentPolicySet = new PlainContentPolicySet(enforcementConfig);
             asciiMessagePolicy = new AsciiMessagePolicy(enforcementConfig);
 
+            outputPri = rfc3164Config.OutputPri;
+            outputHeader = rfc3164Config.OutputHeader;
             hostnameLayout = rfc3164Config.Hostname;
             tagLayout = rfc3164Config.Tag;
         }
@@ -44,14 +48,18 @@ namespace NLog.Targets.Syslog.MessageCreation
             asciiMessagePolicy.Apply(buffer);
         }
 
-        private static void AppendPriBytes(ByteArray buffer, string pri, Encoding encoding)
+        private void AppendPriBytes(ByteArray buffer, string pri, Encoding encoding)
         {
+            if (!outputPri)
+                return;
             var priBytes = encoding.GetBytes(pri);
             buffer.Append(priBytes);
         }
 
         private void AppendHeaderBytes(ByteArray buffer, LogEventInfo logEvent, Encoding encoding)
         {
+            if (!outputHeader)
+                return;
             var timestamp = string.Format(CultureInfo.InvariantCulture, TimestampFormat, logEvent.TimeStamp);
             var host = hostnamePolicySet.Apply(hostnameLayout.Render(logEvent));
             var header = $"{timestamp} {host}";
