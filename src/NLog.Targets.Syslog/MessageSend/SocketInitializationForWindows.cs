@@ -59,7 +59,7 @@ namespace NLog.Targets.Syslog.MessageSend
             }
 
             // Call WSAIoctl via IOControl
-            if (KeepAliveConfigurationIsUpToDate(keepAliveConfig) && ioControlKeepAliveValues != null)
+            if (KeepAliveConfigurationIsUpToDate(keepAliveConfig))
             {
                 socket.IOControl(IOControlCode.KeepAliveValues, ioControlKeepAliveValues, null);
                 return;
@@ -105,7 +105,8 @@ namespace NLog.Targets.Syslog.MessageSend
 
         private static bool KeepAliveConfigurationIsUpToDate(KeepAliveConfig keepAliveConfig)
         {
-            return keepAliveConfiguration.Enabled == keepAliveConfig.Enabled &&
+            return keepAliveConfiguration != null && 
+                keepAliveConfiguration.Enabled == keepAliveConfig.Enabled &&
                 keepAliveConfiguration.RetryCount == keepAliveConfig.RetryCount &&
                 keepAliveConfiguration.Time == keepAliveConfig.Time &&
                 keepAliveConfiguration.Interval == keepAliveConfig.Interval;
