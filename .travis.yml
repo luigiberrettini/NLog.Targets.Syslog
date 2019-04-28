@@ -24,12 +24,14 @@ before_install:
     function installLatestDotNetSdk {
         local channel=$1
         version=$(echo $dotnetReleases | jq "select(.\"channel-version\" == \"$channel\") | .\"latest-sdk\"" | sed -e 's/^"//' -e 's/"$//')
-        curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version "$version" --install-dir "'$DOTNET_INSTALL_DIR'" --no-path
+        curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version "$version" --install-dir "$DOTNET_INSTALL_DIR" --no-path
     }
     installLatestDotNetSdk '1.1'
     installLatestDotNetSdk '2.1'
     installLatestDotNetSdk '2.2'
     export PATH="$DOTNET_INSTALL_DIR:$PATH"
+    # See https://github.com/dotnet/cli/issues/9114
+    export DOTNET_ROOT="$DOTNET_INSTALL_DIR"
 script:
   - |
     mostRecentTag=$(git describe --abbrev=0 --tags --always)
@@ -38,6 +40,6 @@ script:
         if [[ "${TRAVIS_TAG}" != "" ]]; then exit 1; fi
     fi
     mostRecentVersion=$(echo "$mostRecentTag" | cut -c 2-)
-    FrameworkPathOverride=$MONO_BASE_PATH/4.5.2-api/ $(pwd)/tools/build.sh '--target=Test' "--softwareVersion=$mostRecentVersion" "--buildNumber=$TRAVIS_BUILD_NUMBER"
+    FrameworkPathOverride=$MONO_BASE_PATH/4.5.2-api/ $(pwd)/build/scripts/bootstrap.sh '--target=Test' "--softwareVersion=$mostRecentVersion" "--buildNumber=$TRAVIS_BUILD_NUMBER"
 notifications:
   email: false
