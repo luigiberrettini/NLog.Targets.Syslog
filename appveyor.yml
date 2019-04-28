@@ -31,14 +31,14 @@ before_build:
 build_script:
   - ps: |
       if ($env:APPVEYOR_REPO_TAG -ne 'true') {
-          .\tools\build.ps1 '--target=NuGetPack' "--softwareVersion=$env:SW_VER" "--buildNumber=$env:APPVEYOR_BUILD_NUMBER"
+          .\build\scripts\bootstrap.ps1 '--target=NuGetPack' "--softwareVersion=$env:SW_VER" "--buildNumber=$env:APPVEYOR_BUILD_NUMBER"
       }
       else {
-          .\tools\build.ps1 '--target=NuGetPush' "--softwareVersion=$env:SW_VER" '--nuGetSource=https://api.nuget.org/v3/index.json' "--nuGetApiKey=$env:NUGET_API_KEY"
+          .\build\scripts\bootstrap.ps1 '--target=NuGetPush' "--softwareVersion=$env:SW_VER" '--nuGetSource=https://api.nuget.org/v3/index.json' "--nuGetApiKey=$env:NUGET_API_KEY"
       }
       if ($LastExitCode -ne 0) { exit $LastExitCode }
 after_build:
   - ps: |
-      .\tools\build.ps1 '--target=ZipArtifacts'
-      Push-AppveyorArtifact .\tools\artifacts\artifacts.zip -FileName "artifacts_$env:APPVEYOR_BUILD_ID.zip"
+      .\build\scripts\bootstrap.ps1 '--target=ZipArtifacts'
+      Push-AppveyorArtifact .\build\artifacts\artifacts.zip -FileName "artifacts_$env:APPVEYOR_BUILD_ID.zip"
 test: off

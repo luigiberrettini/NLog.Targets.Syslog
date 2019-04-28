@@ -41,12 +41,12 @@ function Get-PackageAssemblyPath {
 
 $scriptDir = $PSScriptRoot
 $rootDir = $scriptDir; while ($(Get-ChildItem -Force -Filter '.git' $rootDir | Measure-Object).Count -eq 0) { $rootDir = Join-Path $rootDir '..' }
-$buildScriptPackagesDir = Join-Path $rootDir (Join-Path 'tools' 'pkgs')
+$buildScriptPackagesDir = Join-Path $rootDir (Join-Path 'build' 'tools')
 $cakeAssemblyPath = Get-PackageAssemblyPath $args $buildScriptPackagesDir 'cake.coreclr' '--cakePackageVersion=' 'Cake.dll'
-$cakeScript = Join-Path $scriptDir 'build.cake'
+$cakeScript = Join-Path $scriptDir 'cake.cs'
 $gitRemote=$(git remote get-url origin) -replace '.git$', ''
 $srcDir = Join-Path $rootDir 'src'
-$artifactsDir = Join-Path $rootDir (Join-Path 'tools' 'artifacts')
+$artifactsDir = Join-Path $rootDir (Join-Path 'build' 'artifacts')
 $commitHash=$(git rev-parse --short HEAD)
 
 dotnet "$cakeAssemblyPath" "$cakeScript" "--gitRemote=$gitRemote" "--srcDir=$srcDir" "--artifactsDir=$artifactsDir" "--commitHash=$commitHash" $args

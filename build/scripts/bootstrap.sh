@@ -53,13 +53,13 @@ function getPackageAssemblyPath {
 
 scriptDir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 rootDir=$scriptDir; while [ $(ls -Ald "$rootDir/.git" 2>/dev/null | wc -l) -eq 0 ]; do rootDir="$rootDir/.."; done
-buildScriptPackagesDir="$rootDir/tools/pkgs"
+buildScriptPackagesDir="$rootDir/build/tools"
 allArgs=$@
 getPackageAssemblyPath cakeAssemblyPath allArgs $buildScriptPackagesDir 'cake.coreclr' '--cakePackageVersion=' 'Cake.dll'
-cakeScript="$scriptDir/build.cake"
+cakeScript="$scriptDir/cake.cs"
 gitRemote=$(git remote get-url origin | sed -e 's/.git$//')
 srcDir="$rootDir/src"
-artifactsDir="$rootDir/tools/artifacts"
+artifactsDir="$rootDir/build/artifacts"
 commitHash=$(git rev-parse --short HEAD)
 
 dotnet "$cakeAssemblyPath" "$cakeScript" "--gitRemote=$gitRemote" "--srcDir=$srcDir" "--artifactsDir=$artifactsDir" "--commitHash=$commitHash" "$@"
