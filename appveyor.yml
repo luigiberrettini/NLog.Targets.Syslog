@@ -3,7 +3,7 @@ image: Visual Studio 2017
 skip_branch_with_pr: true
 environment:
   NUGET_API_KEY:
-    secure: +Z/sH3FwRcvcnfBZn6dzy8MRi7N10hqh6Lq2MPua3AGtVvvT7sqw2nxENKG3g0/6
+    secure: w4DT+CkuVfttvjO4tkpTtiD8kRWvu4Jgf9YTIWIEQ/ebVLLF1lbz/JyeigqirQQt
 install:
   - ps: |
       $DOTNET_INSTALL_DIR = $(Join-Path (Get-Location) 'dotnetsdk')
