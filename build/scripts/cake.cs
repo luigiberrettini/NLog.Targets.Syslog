@@ -114,12 +114,6 @@ Task("RestorePackages")
             .Select(x => x.FullName)
             .ToList();
 
-        var deleteDirectorySettings = new DeleteDirectorySettings
-        {
-            Recursive = true,
-            Force = true
-        };
-
         foreach (var projectToRestore in toRestoreProjects)
             DotNetCoreRestore(projectToRestore);
     });
