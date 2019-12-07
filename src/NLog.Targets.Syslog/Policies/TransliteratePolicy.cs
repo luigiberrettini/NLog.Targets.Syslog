@@ -26,7 +26,7 @@ namespace NLog.Targets.Syslog.Policies
                 return s;
 
             var unidecoded = s.Unidecode();
-            InternalLogger.Trace("Transliterated '{0}' to '{1}'", s, unidecoded);
+            InternalLogger.Trace("[Syslog] Transliterated '{0}' to '{1}'", s, unidecoded);
             return unidecoded;
         }
     }

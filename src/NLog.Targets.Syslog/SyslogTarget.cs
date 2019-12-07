@@ -107,7 +107,7 @@ namespace NLog.Targets.Syslog
             }
             catch (Exception exception)
             {
-                InternalLogger.Warn(exception, "{0} dispose error", GetType().Name);
+                InternalLogger.Warn(exception, "[Syslog] Dispose error");
             }
         }
     }

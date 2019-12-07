@@ -65,7 +65,7 @@ namespace NLog.Targets.Syslog
             ProcessQueueAsync(messageBuilder, new TaskCompletionSource<object>())
                 .ContinueWith(t =>
                 {
-                    InternalLogger.Warn(t.Exception?.GetBaseException(), "ProcessQueueAsync faulted within try");
+                    InternalLogger.Warn(t.Exception?.GetBaseException(), "[Syslog] ProcessQueueAsync faulted within try");
                     ProcessQueueAsync(messageBuilder);
                 }, token, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Current);
         }
@@ -88,14 +88,14 @@ namespace NLog.Targets.Syslog
                     {
                         if (t.IsCanceled)
                         {
-                            InternalLogger.Debug("Task canceled");
+                            InternalLogger.Debug("[Syslog] Task canceled");
                             tcs.SetCanceled();
                             return;
                         }
                         if (t.Exception != null) // t.IsFaulted is true
-                            InternalLogger.Warn(t.Exception.GetBaseException(), "Task faulted");
+                            InternalLogger.Warn(t.Exception.GetBaseException(), "[Syslog] Task faulted");
                         else
-                            InternalLogger.Debug("Successfully sent message '{0}'", logEventMsgSet);
+                            InternalLogger.Debug("[Syslog] Successfully sent message '{0}'", logEventMsgSet);
                         ProcessQueueAsync(messageBuilder, tcs);
                     }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current);
 
@@ -110,7 +110,8 @@ namespace NLog.Targets.Syslog
         private void Enqueue(AsyncLogEventInfo asyncLogEventInfo, int timeout)
         {
             queue.TryAdd(asyncLogEventInfo, timeout, token);
-            InternalLogger.Debug(() => $"Enqueued '{asyncLogEventInfo.ToFormattedMessage()}'");
+            if (InternalLogger.IsDebugEnabled)
+                InternalLogger.Debug("[Syslog] Enqueued '{0}'", asyncLogEventInfo.ToFormattedMessage());
         }
 
         private AsyncLogEventInfo NewFlushCompletionMarker(TaskCompletionSource<object> tcs)
