@@ -1,23 +1,23 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
-using NLog.Common;
-using NLog.Targets.Syslog.Extensions;
-using NLog.Targets.Syslog.MessageCreation;
-using NLog.Targets.Syslog.Settings;
 using System;
 using System.ComponentModel;
-using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using NLog.Targets.Syslog.MessageCreation;
+using NLog.Targets.Syslog.MessageSend;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog
 {
     /// <summary>Enables logging to a Unix-style Syslog server using NLog</summary>
     [Target("Syslog")]
-    public class SyslogTarget : TargetWithLayout
+    public class SyslogTarget : AsyncTaskTarget
     {
         private MessageBuilder messageBuilder;
-        private AsyncLogger[] asyncLoggers;
+        private MessageTransmitter messageTransmitter;
+        private ByteArray reusableBuffer;
 
         /// <summary>The enforcement to be applied on the Syslog message</summary>
         public EnforcementConfig Enforcement { get; set; }
@@ -36,76 +36,53 @@ namespace NLog.Targets.Syslog
             MessageSend = new MessageTransmitterConfig();
         }
 
-        /// <summary>Initializes the SyslogTarget</summary>
+        /// <inheritdoc />
         protected override void InitializeTarget()
         {
-            base.InitializeTarget();
             Enforcement.PropertyChanged += Init;
             MessageCreation.PropertyChanged += Init;
             MessageSend.PropertyChanged += Init;
             Init();
+            base.InitializeTarget();
         }
 
         private void Init(object sender = null, PropertyChangedEventArgs eventArgs = null)
         {
-            if (IsInitialized)
-                DisposeDependencies();
-
+            if (Enforcement.Throttling.Strategy != ThrottlingStrategy.None)
+            {
+                QueueLimit = Math.Max(Enforcement.Throttling.Limit, 2);
+                if (Enforcement.Throttling.Strategy == ThrottlingStrategy.Block)
+                    OverflowAction = Wrappers.AsyncTargetWrapperOverflowAction.Block;
+                else if (Enforcement.Throttling.Strategy == ThrottlingStrategy.DeferForFixedTime
+                    || Enforcement.Throttling.Strategy == ThrottlingStrategy.DeferForPercentageTime)
+                    OverflowAction = Wrappers.AsyncTargetWrapperOverflowAction.Grow;
+            }
+                
             messageBuilder = MessageBuilder.FromConfig(MessageCreation, Enforcement);
-            asyncLoggers = Enforcement.MessageProcessors.Select(i => new AsyncLogger(Layout, Enforcement, messageBuilder, MessageSend)).ToArray();
+            messageTransmitter = MessageTransmitter.FromConfig(MessageSend);
         }
 
-        /// <summary>Writes a single event</summary>
-        /// <param name="asyncLogEvent">The NLog.AsyncLogEventInfo</param>
-        /// <remarks>Write(LogEventInfo) is called only by Write(AsyncLogEventInfo/AsyncLogEventInfo[]): no need to override it</remarks>
-        protected override void Write(AsyncLogEventInfo asyncLogEvent)
+        /// <inheritdoc />
+        protected override async Task WriteAsyncTask(LogEventInfo logEvent, CancellationToken cancellationToken)
         {
-            var logEvent = asyncLogEvent.LogEvent;
             if (logEvent.Level == LogLevel.Off)
                 return;
-            PrecalculateVolatileLayouts(logEvent);
-            var asyncLoggerId = logEvent.SequenceID % Enforcement.MessageProcessors;
-            asyncLoggers[asyncLoggerId].Log(asyncLogEvent);
+
+            var buffer = Interlocked.Exchange(ref reusableBuffer, null) ?? new ByteArray(Enforcement.TruncateMessageTo);
+            var originalLogEntry = RenderLogEvent(Layout, logEvent);
+            messageBuilder.PrepareMessage(buffer, logEvent, originalLogEntry);
+            await messageTransmitter.SendMessageAsync(buffer, cancellationToken);
+            Interlocked.Exchange(ref reusableBuffer, buffer);
         }
 
-        /// <summary>Flushes any pending log message</summary>
-        /// <param name="asyncContinuation">The asynchronous continuation</param>
-        protected override void FlushAsync(AsyncContinuation asyncContinuation)
+        /// <inheritdoc />
+        protected override void CloseTarget()
         {
-            InternalLogger.Debug("[Syslog] Explicit flush started");
-            var tasks = Enforcement.MessageProcessors.Select(i => asyncLoggers[i].FlushAsync()).ToArray();
-            Task.WhenAll(tasks)
-                .ContinueWith(t =>
-                {
-                    InternalLogger.Debug("[Syslog] Explicit flush completed");
-                    asyncContinuation(t.Exception?.GetBaseException());
-                })
-                .Wait();
-        }
-
-        /// <summary>Disposes the instance</summary>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Enforcement.PropertyChanged -= Init;
-                MessageCreation.PropertyChanged -= Init;
-                MessageSend.PropertyChanged -= Init;
-                DisposeDependencies();
-            }
-            base.Dispose(disposing);
-        }
-
-        private void DisposeDependencies()
-        {
-            try
-            {
-                Enforcement.MessageProcessors.ForEach(i => asyncLoggers[i].Dispose());
-            }
-            catch (Exception exception)
-            {
-                InternalLogger.Warn(exception, "[Syslog] Dispose error");
-            }
+            Enforcement.PropertyChanged -= Init;
+            MessageCreation.PropertyChanged -= Init;
+            MessageSend.PropertyChanged -= Init;
+            base.CloseTarget();
+            messageTransmitter.Dispose();
         }
     }
 }

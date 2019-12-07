@@ -27,24 +27,5 @@ namespace NLog.Targets.Syslog.Extensions
                 }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
                 .Unwrap();
         }
-
-        public static Task CanceledTask(this TaskCompletionSource<object> tcs)
-        {
-            tcs.SetCanceled();
-            return tcs.Task;
-        }
-
-        public static Task SucceededTask(this TaskCompletionSource<object> tcs, Action action = null)
-        {
-            action?.Invoke();
-            tcs.SetResult(null);
-            return tcs.Task;
-        }
-
-        public static Task FailedTask(this TaskCompletionSource<object> tcs, Exception exception)
-        {
-            tcs.SetException(exception);
-            return tcs.Task;
-        }
     }
 }

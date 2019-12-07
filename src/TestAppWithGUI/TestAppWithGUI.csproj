@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>net461</TargetFramework>
     <RootNamespace>TestAppWithGui</RootNamespace>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
     <OutputType>WinExe</OutputType>
@@ -27,7 +27,7 @@
     <Reference Include="System.Windows.Forms" />
     <ProjectReference Include="..\FakeSyslogServer\FakeSyslogServer.csproj" />
     <ProjectReference Include="..\NLog.Targets.Syslog\NLog.Targets.Syslog.csproj" />
-    <PackageReference Include="NLog.Schema" Version="4.5.10" />
+    <PackageReference Include="NLog.Schema" Version="4.6.8" />
     <Compile Update="FormTest.cs" SubType="Form" />
     <Compile Update="FormTest.designer.cs" SubType="Form" DependentUpon="FormTest.cs" />
     <None Include="..\NLog.Targets.Syslog.Schema\NLog.Targets.Syslog.xsd" Link="NLog.Targets.Syslog.xsd" />

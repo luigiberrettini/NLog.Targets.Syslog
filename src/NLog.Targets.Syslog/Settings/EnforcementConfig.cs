@@ -13,7 +13,6 @@ namespace NLog.Targets.Syslog.Settings
     {
         private ThrottlingConfig throttling;
         private readonly PropertyChangedEventHandler throttlingPropsChanged;
-        private int messageProcessors;
         private bool splitOnNewLine;
         private bool transliterate;
         private bool replaceInvalidCharacters;
@@ -28,12 +27,8 @@ namespace NLog.Targets.Syslog.Settings
         }
 
         /// <summary>The amount of parallel message processors</summary>
-        public int MessageProcessors
-        {
-            get => messageProcessors;
-            set => SetProperty(ref messageProcessors, value <= 0 ? Environment.ProcessorCount : value);
-        }
-
+        [Obsolete("NLog AsyncTaskTarget is not sending out-of-order. Use RoundRobinGroup with several SysLog targets if needed.")]
+        public int MessageProcessors { get; set; }
         /// <summary>Whether or not to split each log entry by newlines and send each line separately</summary>
         public bool SplitOnNewLine
         {
@@ -75,7 +70,6 @@ namespace NLog.Targets.Syslog.Settings
             throttling = new ThrottlingConfig();
             throttlingPropsChanged = (sender, args) => OnPropertyChanged(nameof(Throttling));
             throttling.PropertyChanged += throttlingPropsChanged;
-            messageProcessors = 1;
         }
 
         /// <inheritdoc />

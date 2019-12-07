@@ -41,12 +41,6 @@ namespace NLog.Targets.Syslog.MessageCreation
             splitOnNewLinePolicy = new SplitOnNewLinePolicy(enforcementConfig);
         }
 
-        public string[] BuildLogEntries(LogEventInfo logEvent, Layout layout)
-        {
-            var originalLogEntry = layout.Render(logEvent);
-            return splitOnNewLinePolicy.IsApplicable() ? splitOnNewLinePolicy.Apply(originalLogEntry) : new[] { originalLogEntry };
-        }
-
         public void PrepareMessage(ByteArray buffer, LogEventInfo logEvent, string logEntry)
         {
             buffer.Reset();
