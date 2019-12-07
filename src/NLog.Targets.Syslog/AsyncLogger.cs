@@ -126,7 +126,10 @@ namespace NLog.Targets.Syslog
             void SignalFlushCompletion() => asyncLogEventInfo.Continuation(null);
 
             if (IsFlushCompletionMarker(asyncLogEventInfo))
+            {
+                InternalLogger.Debug("[Syslog] AsyncLogger flushed");
                 SignalFlushCompletion();
+            }
         }
 
         public void Dispose()

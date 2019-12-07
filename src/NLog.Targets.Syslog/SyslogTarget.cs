@@ -72,16 +72,13 @@ namespace NLog.Targets.Syslog
         /// <param name="asyncContinuation">The asynchronous continuation</param>
         protected override void FlushAsync(AsyncContinuation asyncContinuation)
         {
+            InternalLogger.Debug("[Syslog] Explicit flush started");
             var tasks = Enforcement.MessageProcessors.Select(i => asyncLoggers[i].FlushAsync()).ToArray();
             Task.WhenAll(tasks)
                 .ContinueWith(t =>
                 {
-                    if (t.Exception != null)
-                    {
-                        asyncContinuation(t.Exception.GetBaseException());
-                        return;
-                    }
-                    asyncContinuation(null);
+                    InternalLogger.Debug("[Syslog] Explicit flush completed");
+                    asyncContinuation(t.Exception?.GetBaseException());
                 })
                 .Wait();
         }
