@@ -64,7 +64,7 @@ namespace NLog.Targets.Syslog.MessageSend
                     if (t.Exception == null) // t.IsFaulted is false
                         return Task.FromResult<object>(null);
 
-                    InternalLogger.Warn(t.Exception?.GetBaseException(), "SendAsync failed");
+                    InternalLogger.Warn(t.Exception?.GetBaseException(), "[Syslog] SendAsync failed");
                     TidyUp();
                     return SendMessageAsync(message, token); // Failures impact on the log entry queue
                 }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
@@ -105,7 +105,7 @@ namespace NLog.Targets.Syslog.MessageSend
             }
             catch (Exception exception)
             {
-                InternalLogger.Warn(exception, "Terminate failed");
+                InternalLogger.Warn(exception, "[Syslog] Terminate failed");
             }
             finally
             {

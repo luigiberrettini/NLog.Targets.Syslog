@@ -31,7 +31,7 @@ namespace NLog.Targets.Syslog.Policies
                 return s;
 
             var replaced = Regex.Replace(s, searchFor, replaceWith);
-            InternalLogger.Trace("Replaced '{0}' (if found) with '{1}' given known value '{2}': '{3}'", searchFor, replaceWith, s, replaced);
+            InternalLogger.Trace("[Syslog] Replaced '{0}' (if found) with '{1}' given known value '{2}': '{3}'", searchFor, replaceWith, s, replaced);
             return replaced;
         }
     }

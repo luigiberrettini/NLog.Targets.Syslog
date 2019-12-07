@@ -20,7 +20,7 @@ namespace NLog.Targets.Syslog.Policies
                 .TrimStart(',', ' ');
 
             if (duplicates.Any())
-                InternalLogger.Trace("Found duplicates: {0}", duplicates);
+                InternalLogger.Trace("[Syslog] Found duplicates: {0}", duplicates);
         }
     }
 }

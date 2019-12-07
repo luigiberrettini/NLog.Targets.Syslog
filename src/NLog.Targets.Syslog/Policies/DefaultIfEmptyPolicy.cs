@@ -24,7 +24,7 @@ namespace NLog.Targets.Syslog.Policies
             if (s.Length != 0)
                 return s;
 
-            InternalLogger.Trace("Applied default value '{0}'", defaultValue);
+            InternalLogger.Trace("[Syslog] Applied default value '{0}'", defaultValue);
             return defaultValue;
         }
     }
