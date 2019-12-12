@@ -26,8 +26,8 @@ namespace NLog.Targets.Syslog.MessageCreation
         public void AppendBytes(ByteArray message, string renderedSdId, EncodingSet encodings)
         {
             var sdId = sdIdPolicySet.Apply(renderedSdId);
-            var sdIdBytes = encodings.Ascii.GetBytes(sdId);
-            message.Append(sdIdBytes);
+
+            message.Append(sdId, encodings.Ascii);
         }
     }
 }

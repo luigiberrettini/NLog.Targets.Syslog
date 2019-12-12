@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 
 namespace NLog.Targets.Syslog
 {
@@ -11,7 +12,9 @@ namespace NLog.Targets.Syslog
         private const int Zero = 0;
         private const int DefaultBufferCapacity = 65535;
         private const int MaxBufferCapacity = int.MaxValue;
+        private const int MaxEncodingBufferCapacity = 1024;
         private readonly MemoryStream memoryStream;
+        private readonly char[] encodingBuffer;
 
         public int Length => (int)memoryStream.Length;
 
@@ -19,6 +22,7 @@ namespace NLog.Targets.Syslog
         {
             var capacity = EnforceAllowedValues(initialCapacity);
             memoryStream = new MemoryStream(capacity);
+            encodingBuffer = new char[MaxEncodingBufferCapacity];
         }
 
         public static implicit operator byte[](ByteArray byteArray)
@@ -34,6 +38,21 @@ namespace NLog.Targets.Syslog
                     throw new IndexOutOfRangeException();
 
                 return memoryStream.GetBuffer()[index];
+            }
+        }
+
+        public void Append(string buffer, Encoding encoding)
+        {
+            if (string.IsNullOrEmpty(buffer))
+                return;
+
+            var byteCount = encoding.GetByteCount(buffer);
+            memoryStream.SetLength(memoryStream.Length + byteCount);
+            for (int i = 0; i < buffer.Length; i += encodingBuffer.Length)
+            {
+                int remainingCount = Math.Min(buffer.Length - i, encodingBuffer.Length);
+                buffer.CopyTo(i, encodingBuffer, 0, remainingCount);
+                memoryStream.Position += encoding.GetBytes(encodingBuffer, 0, remainingCount, memoryStream.GetBuffer(), (int)memoryStream.Position);
             }
         }
 

@@ -61,15 +61,13 @@ namespace NLog.Targets.Syslog.MessageCreation
         private void AppendNameBytes(ByteArray message, LogEventInfo logEvent, string invalidNamesPattern, EncodingSet encodings)
         {
             var paramName = paramNamePolicySet.Apply(name.Render(logEvent), invalidNamesPattern);
-            var nameBytes = encodings.Ascii.GetBytes(paramName);
-            message.Append(nameBytes);
+            message.Append(paramName, encodings.Ascii);
         }
 
         private void AppendValueBytes(ByteArray message, LogEventInfo logEvent, EncodingSet encodings)
         {
             var paramValue = paramValuePolicySet.Apply(value.Render(logEvent));
-            var valueBytes = encodings.Utf8.GetBytes(paramValue);
-            message.Append(valueBytes);
+            message.Append(paramValue, encodings.Utf8);
         }
     }
 }

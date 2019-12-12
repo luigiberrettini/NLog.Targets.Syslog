@@ -57,14 +57,23 @@ namespace NLog.Targets.Syslog.MessageCreation
 
         private void AppendHeaderBytes(ByteArray buffer, string pri, LogEventInfo logEvent, EncodingSet encodings)
         {
-            var timestamp = string.Format(CultureInfo.InvariantCulture, TimestampFormat, logEvent.TimeStamp);
+            var timestamp = logEvent.TimeStamp.ToString(TimestampFormat, CultureInfo.InvariantCulture);
             var hostname = hostnamePolicySet.Apply(hostnameLayout.Render(logEvent));
             var appName = appNamePolicySet.Apply(appNameLayout.Render(logEvent));
             var procId = procIdPolicySet.Apply(procIdLayout.Render(logEvent));
             var msgId = msgIdPolicySet.Apply(msgIdLayout.Render(logEvent));
-            var header = $"{pri}{version} {timestamp} {hostname} {appName} {procId} {msgId}";
-            var headerBytes = encodings.Ascii.GetBytes(header);
-            buffer.Append(headerBytes);
+            buffer.Append(pri, encodings.Ascii);
+            buffer.Append(version, encodings.Ascii);
+            buffer.Append(SpaceBytes);
+            buffer.Append(timestamp, encodings.Ascii);
+            buffer.Append(SpaceBytes);
+            buffer.Append(hostname, encodings.Ascii);
+            buffer.Append(SpaceBytes);
+            buffer.Append(appName, encodings.Ascii);
+            buffer.Append(SpaceBytes);
+            buffer.Append(procId, encodings.Ascii);
+            buffer.Append(SpaceBytes);
+            buffer.Append(msgId, encodings.Ascii);
         }
 
         private void AppendStructuredDataBytes(ByteArray buffer, LogEventInfo logEvent, EncodingSet encodings)
@@ -86,8 +95,7 @@ namespace NLog.Targets.Syslog.MessageCreation
 
         private static void AppendLogEntryBytes(ByteArray buffer, string logEntry, EncodingSet encodings)
         {
-            var logEntryBytes = encodings.Utf8.GetBytes(logEntry);
-            buffer.Append(logEntryBytes);
+            buffer.Append(logEntry, encodings.Utf8);
         }
     }
 }

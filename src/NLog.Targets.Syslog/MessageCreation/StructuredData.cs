@@ -28,8 +28,7 @@ namespace NLog.Targets.Syslog.MessageCreation
 
             if (!string.IsNullOrEmpty(sdFromEvtProps))
             {
-                var sdBytes = encodings.Utf8.GetBytes(sdFromEvtProps);
-                message.Append(sdBytes);
+                message.Append(sdFromEvtProps, encodings.Utf8);
                 return;
             }
 
