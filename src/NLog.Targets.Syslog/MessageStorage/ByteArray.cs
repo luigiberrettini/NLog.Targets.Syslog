@@ -3,8 +3,9 @@
 
 using System;
 using System.IO;
+using System.Text;
 
-namespace NLog.Targets.Syslog
+namespace NLog.Targets.Syslog.MessageStorage
 {
     internal class ByteArray : IDisposable
     {
@@ -12,6 +13,7 @@ namespace NLog.Targets.Syslog
         private const int DefaultBufferCapacity = 65535;
         private const int MaxBufferCapacity = int.MaxValue;
         private readonly MemoryStream memoryStream;
+        private readonly MultiEncodingStreamWriter streamWriter;
 
         public int Length => (int)memoryStream.Length;
 
@@ -19,6 +21,7 @@ namespace NLog.Targets.Syslog
         {
             var capacity = EnforceAllowedValues(initialCapacity);
             memoryStream = new MemoryStream(capacity);
+            streamWriter = new MultiEncodingStreamWriter(memoryStream);
         }
 
         public static implicit operator byte[](ByteArray byteArray)
@@ -35,6 +38,14 @@ namespace NLog.Targets.Syslog
 
                 return memoryStream.GetBuffer()[index];
             }
+        }
+
+        public void Append(string s, Encoding encoding)
+        {
+            if (s.Length == 0)
+                return;
+
+            streamWriter.Write(encoding, s);
         }
 
         public void Append(byte[] buffer)
@@ -69,7 +80,7 @@ namespace NLog.Targets.Syslog
         {
             memoryStream.SetLength(Zero);
             memoryStream.Capacity = Zero;
-            memoryStream.Dispose();
+            streamWriter.Dispose();
         }
     }
 }

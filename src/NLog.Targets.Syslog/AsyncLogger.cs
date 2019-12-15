@@ -10,6 +10,7 @@ using NLog.Layouts;
 using NLog.Targets.Syslog.Extensions;
 using NLog.Targets.Syslog.MessageCreation;
 using NLog.Targets.Syslog.MessageSend;
+using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Policies;
 using NLog.Targets.Syslog.Settings;
 

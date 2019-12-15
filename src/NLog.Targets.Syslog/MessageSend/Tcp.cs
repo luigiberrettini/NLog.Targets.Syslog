@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog.Targets.Syslog.Extensions;
+using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageSend

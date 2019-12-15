@@ -5,6 +5,7 @@ using NLog.Layouts;
 using NLog.Targets.Syslog.Policies;
 using System.Globalization;
 using System.Text;
+using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageCreation
@@ -39,7 +40,6 @@ namespace NLog.Targets.Syslog.MessageCreation
         protected override void PrepareMessage(ByteArray buffer, LogEventInfo logEvent, string pri, string logEntry)
         {
             var encoding = new ASCIIEncoding();
-
             AppendPriBytes(buffer, pri, encoding);
             AppendHeaderBytes(buffer, logEvent, encoding);
             buffer.Append(SpaceBytes);
@@ -52,19 +52,18 @@ namespace NLog.Targets.Syslog.MessageCreation
         {
             if (!outputPri)
                 return;
-            var priBytes = encoding.GetBytes(pri);
-            buffer.Append(priBytes);
+            buffer.Append(pri, encoding);
         }
 
         private void AppendHeaderBytes(ByteArray buffer, LogEventInfo logEvent, Encoding encoding)
         {
             if (!outputHeader)
                 return;
-            var timestamp = string.Format(CultureInfo.InvariantCulture, TimestampFormat, logEvent.TimeStamp);
+            var timestamp = logEvent.TimeStamp.ToString(TimestampFormat, CultureInfo.InvariantCulture);
             var host = hostnamePolicySet.Apply(hostnameLayout.Render(logEvent));
-            var header = $"{timestamp} {host}";
-            var headerBytes = encoding.GetBytes(header);
-            buffer.Append(headerBytes);
+            buffer.Append(timestamp, encoding);
+            buffer.Append(SpaceBytes);
+            buffer.Append(host, encoding);
         }
 
         private void AppendMsgBytes(ByteArray buffer, LogEventInfo logEvent, string logEntry, Encoding encoding)
@@ -76,15 +75,13 @@ namespace NLog.Targets.Syslog.MessageCreation
         private void AppendTagBytes(ByteArray buffer, LogEventInfo logEvent, Encoding encoding)
         {
             var tag = tagPolicySet.Apply(tagLayout.Render(logEvent));
-            var tagBytes = encoding.GetBytes(tag);
-            buffer.Append(tagBytes);
+            buffer.Append(tag, encoding);
         }
 
         private void AppendContentBytes(ByteArray buffer, string logEntry, Encoding encoding)
         {
             var content = plainContentPolicySet.Apply(logEntry);
-            var contentBytes = encoding.GetBytes(content);
-            buffer.Append(contentBytes);
+            buffer.Append(content, encoding);
         }
     }
 }

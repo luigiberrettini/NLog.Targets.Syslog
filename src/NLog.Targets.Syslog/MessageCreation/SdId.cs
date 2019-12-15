@@ -2,6 +2,7 @@
 // See the LICENSE file in the project root for more information
 
 using NLog.Layouts;
+using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Policies;
 using NLog.Targets.Syslog.Settings;
 
@@ -26,8 +27,8 @@ namespace NLog.Targets.Syslog.MessageCreation
         public void AppendBytes(ByteArray message, string renderedSdId, EncodingSet encodings)
         {
             var sdId = sdIdPolicySet.Apply(renderedSdId);
-            var sdIdBytes = encodings.Ascii.GetBytes(sdId);
-            message.Append(sdIdBytes);
+
+            message.Append(sdId, encodings.Ascii);
         }
     }
 }

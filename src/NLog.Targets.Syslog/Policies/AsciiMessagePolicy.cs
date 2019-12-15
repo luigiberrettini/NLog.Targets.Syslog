@@ -1,6 +1,7 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
+using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.Policies

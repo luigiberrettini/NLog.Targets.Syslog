@@ -9,6 +9,7 @@ using NLog.Layouts;
 using NLog.Targets.Syslog.Extensions;
 using NLog.Targets.Syslog.MessageCreation;
 using NLog.Targets.Syslog.MessageSend;
+using NLog.Targets.Syslog.MessageStorage;
 
 namespace NLog.Targets.Syslog
 {

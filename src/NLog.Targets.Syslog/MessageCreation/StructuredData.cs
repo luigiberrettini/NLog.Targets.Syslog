@@ -4,6 +4,7 @@
 using NLog.Layouts;
 using System.Collections.Generic;
 using System.Linq;
+using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageCreation
@@ -28,8 +29,7 @@ namespace NLog.Targets.Syslog.MessageCreation
 
             if (!string.IsNullOrEmpty(sdFromEvtProps))
             {
-                var sdBytes = encodings.Utf8.GetBytes(sdFromEvtProps);
-                message.Append(sdBytes);
+                message.Append(sdFromEvtProps, encodings.Utf8);
                 return;
             }
 
