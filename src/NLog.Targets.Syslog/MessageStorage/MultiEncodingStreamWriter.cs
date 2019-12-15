@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace NLog.Targets.Syslog
+namespace NLog.Targets.Syslog.MessageStorage
 {
     internal class MultiEncodingStreamWriter : IDisposable
     {

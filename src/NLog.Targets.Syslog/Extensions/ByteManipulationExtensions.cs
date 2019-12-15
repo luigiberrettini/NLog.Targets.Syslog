@@ -1,6 +1,8 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
+using NLog.Targets.Syslog.MessageStorage;
+
 namespace NLog.Targets.Syslog.Extensions
 {
     internal static class ByteManipulationExtensions
