@@ -12,9 +12,9 @@ namespace NLog.Targets.Syslog
         private const int Zero = 0;
         private const int DefaultBufferCapacity = 65535;
         private const int MaxBufferCapacity = int.MaxValue;
-        private const int MaxEncodingBufferCapacity = 1024;
+
         private readonly MemoryStream memoryStream;
-        private readonly char[] encodingBuffer;
+        private readonly MultiEncodingStreamWriter streamWriter;
 
         public int Length => (int)memoryStream.Length;
 
@@ -22,7 +22,7 @@ namespace NLog.Targets.Syslog
         {
             var capacity = EnforceAllowedValues(initialCapacity);
             memoryStream = new MemoryStream(capacity);
-            encodingBuffer = new char[MaxEncodingBufferCapacity];
+            streamWriter = new MultiEncodingStreamWriter(memoryStream);
         }
 
         public static implicit operator byte[](ByteArray byteArray)
@@ -41,22 +41,16 @@ namespace NLog.Targets.Syslog
             }
         }
 
-        public void Append(string buffer, Encoding encoding)
+        public void Append(string s, Encoding encoding)
         {
-            if (string.IsNullOrEmpty(buffer))
+            if (s.Length == 0)
                 return;
 
-            var byteCount = encoding.GetByteCount(buffer);
-            memoryStream.SetLength(memoryStream.Length + byteCount);
-            for (int i = 0; i < buffer.Length; i += encodingBuffer.Length)
-            {
-                int remainingCount = Math.Min(buffer.Length - i, encodingBuffer.Length);
-                buffer.CopyTo(i, encodingBuffer, 0, remainingCount);
-                memoryStream.Position += encoding.GetBytes(encodingBuffer, 0, remainingCount, memoryStream.GetBuffer(), (int)memoryStream.Position);
-            }
+            streamWriter.Write(encoding, s);
         }
 
         public void Append(byte[] buffer)
+
         {
             if (buffer.Length == 0)
                 return;
@@ -88,7 +82,7 @@ namespace NLog.Targets.Syslog
         {
             memoryStream.SetLength(Zero);
             memoryStream.Capacity = Zero;
-            memoryStream.Dispose();
+            streamWriter.Dispose();
         }
     }
 }
