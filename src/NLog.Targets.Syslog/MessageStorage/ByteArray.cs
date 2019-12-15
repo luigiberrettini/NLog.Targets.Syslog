@@ -12,7 +12,6 @@ namespace NLog.Targets.Syslog.MessageStorage
         private const int Zero = 0;
         private const int DefaultBufferCapacity = 65535;
         private const int MaxBufferCapacity = int.MaxValue;
-
         private readonly MemoryStream memoryStream;
         private readonly MultiEncodingStreamWriter streamWriter;
 
@@ -50,7 +49,6 @@ namespace NLog.Targets.Syslog.MessageStorage
         }
 
         public void Append(byte[] buffer)
-
         {
             if (buffer.Length == 0)
                 return;
