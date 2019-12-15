@@ -64,7 +64,7 @@ Task("MSBuildSettings")
             Information("AssemblyInformationalVersion/NuGet package version: {0}", assemblyInformationalVersion);
             Information("Package release notes URL: {0}{1}", packageReleaseNotesUrl, Environment.NewLine);
 
-            perProjectMsBuildSettings[project] = new DotNetCoreMSBuildSettings { NoLogo = true }
+            perProjectMsBuildSettings[project] = new DotNetCoreMSBuildSettings { NoLogo = true, Verbosity = buildVerbosity }
                 .WithProperty("AssemblyVersion", assemblyVersion)
                 .WithProperty("FileVersion", assemblyFileVersion)
                 .WithProperty("InformationalVersion", assemblyInformationalVersion)
@@ -87,8 +87,7 @@ Task("Clean")
 
         var cleanSettings = new DotNetCoreCleanSettings
         {
-            MSBuildSettings = new DotNetCoreMSBuildSettings { NoLogo = true },
-            Verbosity = buildVerbosity
+            MSBuildSettings = new DotNetCoreMSBuildSettings { NoLogo = true, Verbosity = buildVerbosity }
         };
 
         foreach (var folder in toBuildFolders)
@@ -132,8 +131,7 @@ Task("Build")
             var buildSettings = new DotNetCoreBuildSettings
             {
                 MSBuildSettings = perProjectMsBuildSettings[projectToBuild],
-                Configuration = buildConfiguration,
-                Verbosity = buildVerbosity
+                Configuration = buildConfiguration
             };
             DotNetCoreBuild(projectToBuild, buildSettings);
         }
@@ -180,7 +178,6 @@ Task("NuGetPack")
             {
                 MSBuildSettings = perProjectMsBuildSettings[projectToPack],
                 Configuration = buildConfiguration,
-                Verbosity = buildVerbosity,
                 NoBuild = true,
                 OutputDirectory = artifactsDir
             };
