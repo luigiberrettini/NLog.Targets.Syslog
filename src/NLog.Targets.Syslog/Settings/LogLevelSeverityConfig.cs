@@ -1,9 +1,6 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
-using System;
-using System.ComponentModel;
-
 namespace NLog.Targets.Syslog.Settings
 {
     /// <inheritdoc cref="NotifyPropertyChanged" />

@@ -4,7 +4,6 @@
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using NLog.Targets.Syslog.Extensions;
 using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageSend
