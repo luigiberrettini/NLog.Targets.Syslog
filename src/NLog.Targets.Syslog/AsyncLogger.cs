@@ -25,7 +25,7 @@ namespace NLog.Targets.Syslog
         private readonly BlockingCollection<AsyncLogEventInfo> queue;
         private readonly ByteArray buffer;
         private readonly MessageTransmitter messageTransmitter;
-        private readonly LogEventInfo notLoggedLogEventInfo;
+        private readonly LogEventInfo flushCompletionMarker;
 
         public AsyncLogger(Layout loggingLayout, EnforcementConfig enforcementConfig, MessageBuilder messageBuilder, MessageTransmitterConfig messageTransmitterConfig)
         {
@@ -36,7 +36,7 @@ namespace NLog.Targets.Syslog
             queue = NewBlockingCollection();
             buffer = new ByteArray(enforcementConfig.TruncateMessageTo);
             messageTransmitter = MessageTransmitter.FromConfig(messageTransmitterConfig);
-            notLoggedLogEventInfo = new LogEventInfo(LogLevel.Off, string.Empty, nameof(notLoggedLogEventInfo));
+            flushCompletionMarker = new LogEventInfo(LogLevel.Off, string.Empty, nameof(flushCompletionMarker));
             Task.Run(() => ProcessQueueAsync(messageBuilder));
         }
 
@@ -47,10 +47,8 @@ namespace NLog.Targets.Syslog
 
         public Task FlushAsync()
         {
-            AsyncLogEventInfo NewFlushCompletionMarker(TaskCompletionSource<object> tcs) => notLoggedLogEventInfo.WithContinuation(_ => tcs.SucceededTask());
-
             var flushTcs = new TaskCompletionSource<object>();
-            Enqueue(NewFlushCompletionMarker(flushTcs), Timeout.Infinite);
+            Enqueue(flushCompletionMarker.WithContinuation(_ => flushTcs.SucceededTask()), Timeout.Infinite);
             return flushTcs.Task;
         }
 
@@ -78,15 +76,12 @@ namespace NLog.Targets.Syslog
             if (token.IsCancellationRequested)
                 return tcs.CanceledTask();
 
-            bool IsFlushCompletionMarker(AsyncLogEventInfo x) => ReferenceEquals(x.LogEvent, notLoggedLogEventInfo);
-
             try
             {
                 var asyncLogEventInfo = queue.Take(token);
-                bool flushCompletion = IsFlushCompletionMarker(asyncLogEventInfo);
                 var logEventMsgSet = new LogEventMsgSet(asyncLogEventInfo, buffer, messageBuilder, messageTransmitter);
                 logEventMsgSet
-                    .Build(layout, flushCompletion)
+                    .Build(layout)
                     .SendAsync(token)
                     .ContinueWith(t =>
                     {
@@ -113,20 +108,18 @@ namespace NLog.Targets.Syslog
 
         private void Enqueue(AsyncLogEventInfo asyncLogEventInfo, int timeout)
         {
-            if (!queue.TryAdd(asyncLogEventInfo, timeout, token))
-                asyncLogEventInfo.Continuation(new InvalidOperationException("AsyncLogger Queue Full"));
+            queue.TryAdd(asyncLogEventInfo, timeout, token);
             if (InternalLogger.IsDebugEnabled)
                 InternalLogger.Debug("[Syslog] Enqueued '{0}'", asyncLogEventInfo.ToFormattedMessage());
         }
 
         public void Dispose()
         {
-            cts.Cancel();           // Signal cancel token
-            queue.CompleteAdding(); // Release all from queue, and block for adding new elements
-            queue.Dispose();        // Dispose internal queue resources
-            messageTransmitter.Dispose();   // Close down communication
-            buffer.Dispose();       // Dispose buffers used by communication
-            cts.Dispose();          // Dispose cancel token
+            cts.Cancel();
+            cts.Dispose();
+            queue.Dispose();
+            buffer.Dispose();
+            messageTransmitter.Dispose();
         }
     }
 }

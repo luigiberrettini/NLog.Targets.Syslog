@@ -31,12 +31,9 @@ namespace NLog.Targets.Syslog
             currentMessage = 0;
         }
 
-        public LogEventMsgSet Build(Layout layout, bool flushCompletion)
+        public LogEventMsgSet Build(Layout layout)
         {
-            if (flushCompletion)
-                logEntries = new string[0]; // Nothing to send
-            else
-                logEntries = messageBuilder.BuildLogEntries(asyncLogEvent.LogEvent, layout);
+            logEntries = messageBuilder.BuildLogEntries(asyncLogEvent.LogEvent, layout);
             return this;
         }
 

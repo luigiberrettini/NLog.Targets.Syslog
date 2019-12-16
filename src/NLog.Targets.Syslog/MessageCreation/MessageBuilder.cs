@@ -44,6 +44,8 @@ namespace NLog.Targets.Syslog.MessageCreation
 
         public string[] BuildLogEntries(LogEventInfo logEvent, Layout layout)
         {
+            if (logEvent.Level == LogLevel.Off)
+                return new string[0];
             var originalLogEntry = layout.Render(logEvent);
             return splitOnNewLinePolicy.IsApplicable() ? splitOnNewLinePolicy.Apply(originalLogEntry) : new[] { originalLogEntry };
         }
