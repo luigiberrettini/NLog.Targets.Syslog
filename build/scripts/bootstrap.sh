@@ -7,11 +7,11 @@ function findToolAssembly {
     local packageVersion=$4
     local toolName=$5
     local assemblyName=$6
-    local packageAssembly=$(find "$dir/$packageName/$packageVersion" -iname "$assemblyName" 2>/dev/null)
+    local packageAssembly=$((find "$dir/$packageName/$packageVersion" -iname "$assemblyName" 2>/dev/null -print &) | head -n 1)
     if [ ! -f "$packageAssembly" ]; then
         eval $resultvar="$packageAssembly"
     else
-        local toolAssembly=$(find "$dir/$packageName/$packageVersion" -iname "$toolName" 2>/dev/null)
+        local toolAssembly=$((find "$dir/$packageName/$packageVersion" -iname "$toolName" 2>/dev/null -print &) | head -n 1)
         eval $resultvar="$toolAssembly"
     fi
 }
