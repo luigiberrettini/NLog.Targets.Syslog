@@ -130,10 +130,11 @@ namespace NLog.Targets.Syslog
         public void Dispose()
         {
             cts.Cancel();
-            cts.Dispose();
+            queue.CompleteAdding();
             queue.Dispose();
-            buffer.Dispose();
             messageTransmitter.Dispose();
+            buffer.Dispose();
+            cts.Dispose();
         }
     }
 }
