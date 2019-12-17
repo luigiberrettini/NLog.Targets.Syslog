@@ -19,11 +19,11 @@ namespace NLog.Targets.Syslog.MessageCreation
 
         public SdElement(SdElementConfig sdElementConfig, EnforcementConfig enforcementConfig)
         {
-            sdId = new SdId(sdElementConfig.SdId , enforcementConfig);
+            sdId = new SdId(sdElementConfig.SdId, enforcementConfig);
             sdParams = sdElementConfig.SdParams.Select(sdParamConfig => new SdParam(sdParamConfig, enforcementConfig)).ToList();
         }
 
-        public static void AppendBytes(ByteArray message, IEnumerable<SdElement> sdElements, LogEventInfo logEvent, EncodingSet encodings)
+        public static void Append(ByteArray message, IEnumerable<SdElement> sdElements, LogEventInfo logEvent)
         {
             var elements = sdElements
                 .Select(x => new { SdId = x.sdId, RenderedSdId = x.sdId.Render(logEvent), SdParams = x.sdParams })
@@ -34,10 +34,10 @@ namespace NLog.Targets.Syslog.MessageCreation
             elements
                 .ForEach(elem =>
                 {
-                    message.Append(LeftBracketBytes);
-                    elem.SdId.AppendBytes(message, elem.RenderedSdId, encodings);
-                    SdParam.AppendBytes(message, elem.SdParams, logEvent, SdIdToInvalidParamNamePattern.Map(elem.RenderedSdId), encodings);
-                    message.Append(RightBracketBytes);
+                    message.AppendBytes(LeftBracketBytes);
+                    elem.SdId.Append(message, elem.RenderedSdId);
+                    SdParam.Append(message, elem.SdParams, logEvent, SdIdToInvalidParamNamePattern.Map(elem.RenderedSdId));
+                    message.AppendBytes(RightBracketBytes);
                 });
         }
 

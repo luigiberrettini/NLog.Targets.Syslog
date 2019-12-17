@@ -82,7 +82,7 @@ namespace NLog.Targets.Syslog.MessageSend
         {
             if (framing == FramingMethod.NonTransparent)
             {
-                message.Append(LineFeedBytes);
+                message.AppendBytes(LineFeedBytes);
                 return Task.FromResult<object>(null);
             }
 

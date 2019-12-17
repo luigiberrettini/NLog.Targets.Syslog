@@ -40,15 +40,17 @@ namespace NLog.Targets.Syslog.MessageStorage
             }
         }
 
-        public void Append(string s, Encoding encoding)
+        public void AppendAscii(string s)
         {
-            if (s.Length == 0)
-                return;
-
-            streamWriter.Write(encoding, s);
+            Append(s, Encoding.ASCII);
         }
 
-        public void Append(byte[] buffer)
+        public void AppendUtf8(string s)
+        {
+            Append(s, Encoding.UTF8);
+        }
+
+        public void AppendBytes(byte[] buffer)
         {
             if (buffer.Length == 0)
                 return;
@@ -74,6 +76,14 @@ namespace NLog.Targets.Syslog.MessageStorage
             if (initialCapacity > MaxBufferCapacity)
                 return MaxBufferCapacity;
             return (int)initialCapacity;
+        }
+
+        private void Append(string s, Encoding encoding)
+        {
+            if (s.Length == 0)
+                return;
+
+            streamWriter.Write(encoding, s);
         }
 
         public void Dispose()
