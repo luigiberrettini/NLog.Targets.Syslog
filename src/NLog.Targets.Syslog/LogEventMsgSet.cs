@@ -15,16 +15,16 @@ namespace NLog.Targets.Syslog
 {
     internal class LogEventMsgSet
     {
-        private AsyncLogEventInfo asyncLogEvent;
+        private AsyncLogEventInfo asyncLogEventInfo;
         private readonly ByteArray buffer;
         private readonly MessageBuilder messageBuilder;
         private readonly MessageTransmitter messageTransmitter;
         private int currentMessage;
         private string[] logEntries;
 
-        public LogEventMsgSet(AsyncLogEventInfo asyncLogEvent, ByteArray buffer, MessageBuilder messageBuilder, MessageTransmitter messageTransmitter)
+        public LogEventMsgSet(AsyncLogEventInfo asyncLogEventInfo, ByteArray buffer, MessageBuilder messageBuilder, MessageTransmitter messageTransmitter)
         {
-            this.asyncLogEvent = asyncLogEvent;
+            this.asyncLogEventInfo = asyncLogEventInfo;
             this.buffer = buffer;
             this.messageBuilder = messageBuilder;
             this.messageTransmitter = messageTransmitter;
@@ -33,7 +33,7 @@ namespace NLog.Targets.Syslog
 
         public LogEventMsgSet Build(Layout layout)
         {
-            logEntries = messageBuilder.BuildLogEntries(asyncLogEvent.LogEvent, layout);
+            logEntries = messageBuilder.BuildLogEntries(asyncLogEventInfo.LogEvent, layout);
             return this;
         }
 
@@ -49,7 +49,7 @@ namespace NLog.Targets.Syslog
 
             var allSent = currentMessage == logEntries.Length;
             if (allSent)
-                return tcs.SucceededTask(() => asyncLogEvent.Continuation(null));
+                return tcs.SucceededTask(() => asyncLogEventInfo.Continuation(null));
 
             try
             {
@@ -66,7 +66,7 @@ namespace NLog.Targets.Syslog
                         }
                         if (t.Exception != null)
                         {
-                            asyncLogEvent.Continuation(t.Exception.GetBaseException());
+                            asyncLogEventInfo.Continuation(t.Exception.GetBaseException());
                             tcs.SetException(t.Exception);
                             return;
                         }
@@ -83,12 +83,12 @@ namespace NLog.Targets.Syslog
 
         private void PrepareMessage()
         {
-            messageBuilder.PrepareMessage(buffer, asyncLogEvent.LogEvent, logEntries[currentMessage++]);
+            messageBuilder.PrepareMessage(buffer, asyncLogEventInfo.LogEvent, logEntries[currentMessage++]);
         }
 
         public override string ToString()
         {
-            return asyncLogEvent.ToFormattedMessage();
+            return asyncLogEventInfo.ToFormattedMessage();
         }
     }
 }
