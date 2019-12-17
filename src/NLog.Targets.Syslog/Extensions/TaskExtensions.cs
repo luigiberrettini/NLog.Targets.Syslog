@@ -12,7 +12,7 @@ namespace NLog.Targets.Syslog.Extensions
         public static Task<TResult> Then<TResult>(this Task task, Func<Task, TResult> continuationFunction, CancellationToken token)
         {
             return task
-                .ContinueWith((t,c) =>
+                .ContinueWith((t, c) =>
                 {
                     var tcs = new TaskCompletionSource<TResult>();
 
@@ -26,25 +26,6 @@ namespace NLog.Targets.Syslog.Extensions
                     return tcs.Task;
                 }, continuationFunction, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
                 .Unwrap();
-        }
-
-        public static Task CanceledTask(this TaskCompletionSource<object> tcs)
-        {
-            tcs.SetCanceled();
-            return tcs.Task;
-        }
-
-        public static Task SucceededTask(this TaskCompletionSource<object> tcs, Action action = null)
-        {
-            action?.Invoke();
-            tcs.SetResult(null);
-            return tcs.Task;
-        }
-
-        public static Task FailedTask(this TaskCompletionSource<object> tcs, Exception exception)
-        {
-            tcs.SetException(exception);
-            return tcs.Task;
         }
     }
 }
