@@ -87,7 +87,7 @@ namespace NLog.Targets.Syslog.MessageSend
             }
 
             var octetCount = message.Length;
-            var prefix = new ASCIIEncoding().GetBytes($"{octetCount} ");
+            var prefix = Encoding.ASCII.GetBytes($"{octetCount} ");
             return stream.WriteAsync(prefix, 0, prefix.Length);
         }
 

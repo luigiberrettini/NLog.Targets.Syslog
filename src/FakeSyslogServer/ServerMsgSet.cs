@@ -9,7 +9,6 @@ namespace FakeSyslogServer
 {
     internal class ServerMsgSet
     {
-        private readonly UTF8Encoding encoding;
         private string[] messages;
 
         private string LastMessage => messages[messages.Length - 1];
@@ -20,7 +19,7 @@ namespace FakeSyslogServer
 
         public string this[int index] => messages[index];
 
-        public byte[] LastMessageBytes => encoding.GetBytes(LastMessage);
+        public byte[] LastMessageBytes => Encoding.UTF8.GetBytes(LastMessage);
 
         public static ServerMsgSet FromStringAndFraming(string s, int? framing)
         {
@@ -42,7 +41,7 @@ namespace FakeSyslogServer
 
             var splitted = Regex.Split(message, "(\\d{1,11}) (<\\d{3}>)").Where(x => x != string.Empty).ToArray();
             var octetCount = splitted[0];
-            var octets = splitted.Length < 3 ? null : encoding.GetBytes(splitted[1] + splitted[2]);
+            var octets = splitted.Length < 3 ? null : Encoding.UTF8.GetBytes(splitted[1] + splitted[2]);
             return octetCount == octets?.Length.ToString();
         }
 
@@ -72,11 +71,6 @@ namespace FakeSyslogServer
             serverMsgSet.LastIsPartial = !serverMsgSet.IsValid(serverMsgSet.LastMessage, TcpState.OctetCountingHashCode);
 
             return serverMsgSet;
-        }
-
-        private ServerMsgSet()
-        {
-            encoding = new UTF8Encoding();
         }
     }
 }
