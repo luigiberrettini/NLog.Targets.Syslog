@@ -57,7 +57,7 @@ namespace NLog.Targets.Syslog.MessageCreation
 
         private void AppendHeader(ByteArray buffer, string pri, LogEventInfo logEvent)
         {
-            var timestamp = logEvent.TimeStamp.ToString(TimestampFormat, CultureInfo.InvariantCulture);
+            var timestamp = string.Format(CultureInfo.InvariantCulture, TimestampFormat, logEvent.TimeStamp);
             var hostname = hostnamePolicySet.Apply(hostnameLayout.Render(logEvent));
             var appName = appNamePolicySet.Apply(appNameLayout.Render(logEvent));
             var procId = procIdPolicySet.Apply(procIdLayout.Render(logEvent));

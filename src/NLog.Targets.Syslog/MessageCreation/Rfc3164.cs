@@ -58,7 +58,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         {
             if (!outputHeader)
                 return;
-            var timestamp = logEvent.TimeStamp.ToString(TimestampFormat, CultureInfo.InvariantCulture);
+            var timestamp = string.Format(CultureInfo.InvariantCulture, TimestampFormat, logEvent.TimeStamp);
             var host = hostnamePolicySet.Apply(hostnameLayout.Render(logEvent));
             buffer.AppendAscii(timestamp);
             buffer.AppendBytes(SpaceBytes);
