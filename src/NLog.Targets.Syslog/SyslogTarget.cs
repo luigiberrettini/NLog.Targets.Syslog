@@ -56,14 +56,14 @@ namespace NLog.Targets.Syslog
         }
 
         /// <summary>Writes a single event</summary>
-        /// <param name="asyncLogEvent">The NLog.AsyncLogEventInfo</param>
+        /// <param name="asyncLogEventInfo">The NLog.AsyncLogEventInfo</param>
         /// <remarks>Write(LogEventInfo) is called only by Write(AsyncLogEventInfo/AsyncLogEventInfo[]): no need to override it</remarks>
-        protected override void Write(AsyncLogEventInfo asyncLogEvent)
+        protected override void Write(AsyncLogEventInfo asyncLogEventInfo)
         {
-            var logEvent = asyncLogEvent.LogEvent;
+            var logEvent = asyncLogEventInfo.LogEvent;
             PrecalculateVolatileLayouts(logEvent);
             var asyncLoggerId = logEvent.SequenceID % Enforcement.MessageProcessors;
-            asyncLoggers[asyncLoggerId].Log(asyncLogEvent);
+            asyncLoggers[asyncLoggerId].Log(asyncLogEventInfo);
         }
 
         /// <summary>Flushes any pending log message</summary>

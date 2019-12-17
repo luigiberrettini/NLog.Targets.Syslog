@@ -40,9 +40,12 @@ namespace NLog.Targets.Syslog
             Task.Run(() => ProcessQueueAsync(messageBuilder));
         }
 
-        public void Log(AsyncLogEventInfo asyncLogEvent)
+        public void Log(AsyncLogEventInfo asyncLogEventInfo)
         {
-            throttling.Apply(queue.Count, timeout => Enqueue(asyncLogEvent, timeout));
+            void NonDiscardAction(int timeout) => Enqueue(asyncLogEventInfo, timeout);
+            var asyncContinuation = asyncLogEventInfo.Continuation;
+            void DiscardAction() => asyncContinuation(new InvalidOperationException($"Enqueue skipped"));
+            throttling.Apply(queue.Count, NonDiscardAction, DiscardAction);
         }
 
         public Task FlushAsync()
@@ -108,9 +111,20 @@ namespace NLog.Targets.Syslog
 
         private void Enqueue(AsyncLogEventInfo asyncLogEventInfo, int timeout)
         {
-            queue.TryAdd(asyncLogEventInfo, timeout, token);
-            if (InternalLogger.IsDebugEnabled)
-                InternalLogger.Debug("[Syslog] Enqueued '{0}'", asyncLogEventInfo.ToFormattedMessage());
+            void LogEnqueueResult(string message)
+            {
+                if (!InternalLogger.IsDebugEnabled)
+                    return;
+                InternalLogger.Debug("[Syslog] {0} '{1}'", message, asyncLogEventInfo.ToFormattedMessage());
+            }
+
+            if (queue.TryAdd(asyncLogEventInfo, timeout, token))
+            {
+                LogEnqueueResult("Enqueued");
+                return;
+            }
+            LogEnqueueResult("Failed enqueuing");
+            asyncLogEventInfo.Continuation(new InvalidOperationException($"Enqueue failed"));
         }
 
         public void Dispose()
