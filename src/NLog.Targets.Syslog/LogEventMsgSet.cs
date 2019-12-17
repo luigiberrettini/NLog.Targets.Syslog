@@ -45,11 +45,18 @@ namespace NLog.Targets.Syslog
         private Task SendAsync(CancellationToken token, TaskCompletionSource<object> tcs)
         {
             if (token.IsCancellationRequested)
-                return tcs.CanceledTask();
+            {
+                tcs.SetCanceled();
+                return tcs.Task;
+            }
 
             var allSent = currentMessage == logEntries.Length;
             if (allSent)
-                return tcs.SucceededTask(() => asyncLogEventInfo.Continuation(null));
+            {
+                asyncLogEventInfo.Continuation(null);
+                tcs.SetResult(null);
+                return tcs.Task;
+            }
 
             try
             {
@@ -77,7 +84,8 @@ namespace NLog.Targets.Syslog
             }
             catch (Exception exception)
             {
-                return tcs.FailedTask(exception);
+                tcs.SetException(exception);
+                return tcs.Task;
             }
         }
 

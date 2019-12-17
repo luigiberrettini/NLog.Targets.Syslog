@@ -51,7 +51,7 @@ namespace NLog.Targets.Syslog
         public Task FlushAsync()
         {
             var flushTcs = new TaskCompletionSource<object>();
-            Enqueue(flushCompletionMarker.WithContinuation(_ => flushTcs.SucceededTask()), Timeout.Infinite);
+            Enqueue(flushCompletionMarker.WithContinuation(_ => flushTcs.SetResult(null)), Timeout.Infinite);
             return flushTcs.Task;
         }
 
@@ -77,7 +77,10 @@ namespace NLog.Targets.Syslog
         private Task ProcessQueueAsync(MessageBuilder messageBuilder, TaskCompletionSource<object> tcs)
         {
             if (token.IsCancellationRequested)
-                return tcs.CanceledTask();
+            {
+                tcs.SetCanceled();
+                return tcs.Task;
+            }
 
             try
             {
@@ -105,7 +108,8 @@ namespace NLog.Targets.Syslog
             }
             catch (Exception exception)
             {
-                return tcs.FailedTask(exception);
+                tcs.SetException(exception);
+                return tcs.Task;
             }
         }
 
