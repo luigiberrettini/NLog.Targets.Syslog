@@ -7,7 +7,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    
+
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>NLog.Targets.Syslog.snk</AssemblyOriginatorKeyFile>

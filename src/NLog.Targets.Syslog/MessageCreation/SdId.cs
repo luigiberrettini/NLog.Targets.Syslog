@@ -1,6 +1,7 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
+using System.Text;
 using NLog.Layouts;
 using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Policies;
@@ -24,11 +25,10 @@ namespace NLog.Targets.Syslog.MessageCreation
             return layout.Render(logEvent);
         }
 
-        public void AppendBytes(ByteArray message, string renderedSdId, EncodingSet encodings)
+        public void Append(ByteArray message, string renderedSdId)
         {
             var sdId = sdIdPolicySet.Apply(renderedSdId);
-
-            message.Append(sdId, encodings.Ascii);
+            message.AppendAscii(sdId);
         }
     }
 }

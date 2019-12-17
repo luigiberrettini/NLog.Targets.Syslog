@@ -82,12 +82,12 @@ namespace NLog.Targets.Syslog.MessageSend
         {
             if (framing == FramingMethod.NonTransparent)
             {
-                message.Append(LineFeedBytes);
+                message.AppendBytes(LineFeedBytes);
                 return Task.FromResult<object>(null);
             }
 
             var octetCount = message.Length;
-            var prefix = new ASCIIEncoding().GetBytes($"{octetCount} ");
+            var prefix = Encoding.ASCII.GetBytes($"{octetCount} ");
             return stream.WriteAsync(prefix, 0, prefix.Length);
         }
 

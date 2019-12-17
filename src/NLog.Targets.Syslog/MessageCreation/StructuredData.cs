@@ -4,6 +4,7 @@
 using NLog.Layouts;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Settings;
 
@@ -23,20 +24,20 @@ namespace NLog.Targets.Syslog.MessageCreation
             sdElements = sdConfig.SdElements.Select(sdElementConfig => new SdElement(sdElementConfig, enforcementConfig)).ToList();
         }
 
-        public void AppendBytes(ByteArray message, LogEventInfo logEvent, EncodingSet encodings)
+        public void Append(ByteArray message, LogEventInfo logEvent)
         {
             var sdFromEvtProps = fromEventProperties.Render(logEvent);
 
             if (!string.IsNullOrEmpty(sdFromEvtProps))
             {
-                message.Append(sdFromEvtProps, encodings.Utf8);
+                message.AppendUtf8(sdFromEvtProps);
                 return;
             }
 
             if (sdElements.Count == 0)
-                message.Append(NilValueBytes);
+                message.AppendBytes(NilValueBytes);
             else
-                SdElement.AppendBytes(message, sdElements, logEvent, encodings);
+                SdElement.Append(message, sdElements, logEvent);
         }
 
         public override string ToString()

@@ -39,49 +39,38 @@ namespace NLog.Targets.Syslog.MessageCreation
 
         protected override void PrepareMessage(ByteArray buffer, LogEventInfo logEvent, string pri, string logEntry)
         {
-            var encoding = new ASCIIEncoding();
-            AppendPriBytes(buffer, pri, encoding);
-            AppendHeaderBytes(buffer, logEvent, encoding);
-            buffer.Append(SpaceBytes);
-            AppendMsgBytes(buffer, logEvent, logEntry, encoding);
+            AppendPri(buffer, pri);
+            AppendHeader(buffer, logEvent);
+            buffer.AppendBytes(SpaceBytes);
+            AppendMsg(buffer, logEvent, logEntry);
 
             asciiMessagePolicy.Apply(buffer);
         }
 
-        private void AppendPriBytes(ByteArray buffer, string pri, Encoding encoding)
+        private void AppendPri(ByteArray buffer, string pri)
         {
             if (!outputPri)
                 return;
-            buffer.Append(pri, encoding);
+            buffer.AppendAscii(pri);
         }
 
-        private void AppendHeaderBytes(ByteArray buffer, LogEventInfo logEvent, Encoding encoding)
+        private void AppendHeader(ByteArray buffer, LogEventInfo logEvent)
         {
             if (!outputHeader)
                 return;
-            var timestamp = logEvent.TimeStamp.ToString(TimestampFormat, CultureInfo.InvariantCulture);
+            var timestamp = string.Format(CultureInfo.InvariantCulture, TimestampFormat, logEvent.TimeStamp);
             var host = hostnamePolicySet.Apply(hostnameLayout.Render(logEvent));
-            buffer.Append(timestamp, encoding);
-            buffer.Append(SpaceBytes);
-            buffer.Append(host, encoding);
+            buffer.AppendAscii(timestamp);
+            buffer.AppendBytes(SpaceBytes);
+            buffer.AppendAscii(host);
         }
 
-        private void AppendMsgBytes(ByteArray buffer, LogEventInfo logEvent, string logEntry, Encoding encoding)
-        {
-            AppendTagBytes(buffer, logEvent, encoding);
-            AppendContentBytes(buffer, logEntry, encoding);
-        }
-
-        private void AppendTagBytes(ByteArray buffer, LogEventInfo logEvent, Encoding encoding)
+        private void AppendMsg(ByteArray buffer, LogEventInfo logEvent, string logEntry)
         {
             var tag = tagPolicySet.Apply(tagLayout.Render(logEvent));
-            buffer.Append(tag, encoding);
-        }
-
-        private void AppendContentBytes(ByteArray buffer, string logEntry, Encoding encoding)
-        {
             var content = plainContentPolicySet.Apply(logEntry);
-            buffer.Append(content, encoding);
+            buffer.AppendAscii(tag);
+            buffer.AppendAscii(content);
         }
     }
 }

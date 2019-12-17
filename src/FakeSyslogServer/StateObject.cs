@@ -11,14 +11,12 @@ namespace FakeSyslogServer
     internal abstract class StateObject
     {
         private const int BufferSize = 65535;
-        private readonly UTF8Encoding encoding;
         private readonly Socket receiveSocket;
 
         protected MemoryStream Buffer { get; }
 
         protected StateObject(Socket socket)
         {
-            encoding = new UTF8Encoding();
             receiveSocket = socket;
             Buffer = new MemoryStream(BufferSize);
         }
@@ -47,7 +45,7 @@ namespace FakeSyslogServer
 
         private string BufferToString(int position, int bytesRead)
         {
-            return encoding.GetString(Buffer.GetBuffer(), position, bytesRead);
+            return Encoding.UTF8.GetString(Buffer.GetBuffer(), position, bytesRead);
         }
 
         private int EndReceive(IAsyncResult asyncResult)

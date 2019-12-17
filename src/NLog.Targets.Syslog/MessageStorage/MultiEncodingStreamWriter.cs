@@ -10,25 +10,23 @@ namespace NLog.Targets.Syslog.MessageStorage
 {
     internal class MultiEncodingStreamWriter : IDisposable
     {
-        private readonly Dictionary<Type, StreamWriter> streamWriterForEncodingType;
+        private readonly Dictionary<Encoding, StreamWriter> streamWriterForEncodingType;
 
         public MultiEncodingStreamWriter(Stream stream)
         {
             var ascii = new StreamWriter(stream, new ASCIIEncoding()) { AutoFlush = true };
             var utf8 = new StreamWriter(stream, new UTF8Encoding(false)) { AutoFlush = true };
 
-            streamWriterForEncodingType = new Dictionary<Type, StreamWriter>
+            streamWriterForEncodingType = new Dictionary<Encoding, StreamWriter>
             {
-                { typeof(ASCIIEncoding), ascii },
-                { Encoding.ASCII.GetType(), ascii },
-                { typeof(UTF8Encoding), utf8 },
-                { Encoding.UTF8.GetType(), utf8 }
+                { Encoding.ASCII, ascii },
+                { Encoding.UTF8, utf8 }
             };
         }
 
         public void Write(Encoding encoding, string s)
         {
-            streamWriterForEncodingType[encoding.GetType()].Write(s);
+            streamWriterForEncodingType[encoding].Write(s);
         }
 
         public void Dispose()

@@ -5,6 +5,7 @@ using NLog.Layouts;
 using NLog.Targets.Syslog.Policies;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using NLog.Targets.Syslog.Extensions;
 using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Settings;
@@ -30,12 +31,12 @@ namespace NLog.Targets.Syslog.MessageCreation
             paramValuePolicySet = new ParamValuePolicySet(enforcementConfig);
         }
 
-        public static void AppendBytes(ByteArray message, IEnumerable<SdParam> sdParams, LogEventInfo logEvent, string invalidNamesPattern, EncodingSet encodings)
+        public static void Append(ByteArray message, IEnumerable<SdParam> sdParams, LogEventInfo logEvent, string invalidNamesPattern)
         {
             sdParams.ForEach(sdParam =>
             {
-                message.Append(SpaceBytes);
-                sdParam.AppendBytes(message, logEvent, invalidNamesPattern, encodings);
+                message.AppendBytes(SpaceBytes);
+                sdParam.Append(message, logEvent, invalidNamesPattern);
             });
         }
 
@@ -50,25 +51,25 @@ namespace NLog.Targets.Syslog.MessageCreation
             return $"{name.Render(nullEvent)}=\"{value.Render(nullEvent)}\"";
         }
 
-        private void AppendBytes(ByteArray message, LogEventInfo logEvent, string invalidNamesPattern, EncodingSet encodings)
+        private void Append(ByteArray message, LogEventInfo logEvent, string invalidNamesPattern)
         {
-            AppendNameBytes(message, logEvent, invalidNamesPattern, encodings);
-            message.Append(EqualBytes);
-            message.Append(QuotesBytes);
-            AppendValueBytes(message, logEvent, encodings);
-            message.Append(QuotesBytes);
+            AppendName(message, logEvent, invalidNamesPattern);
+            message.AppendBytes(EqualBytes);
+            message.AppendBytes(QuotesBytes);
+            AppendValue(message, logEvent);
+            message.AppendBytes(QuotesBytes);
         }
 
-        private void AppendNameBytes(ByteArray message, LogEventInfo logEvent, string invalidNamesPattern, EncodingSet encodings)
+        private void AppendName(ByteArray message, LogEventInfo logEvent, string invalidNamesPattern)
         {
             var paramName = paramNamePolicySet.Apply(name.Render(logEvent), invalidNamesPattern);
-            message.Append(paramName, encodings.Ascii);
+            message.AppendAscii(paramName);
         }
 
-        private void AppendValueBytes(ByteArray message, LogEventInfo logEvent, EncodingSet encodings)
+        private void AppendValue(ByteArray message, LogEventInfo logEvent)
         {
             var paramValue = paramValuePolicySet.Apply(value.Render(logEvent));
-            message.Append(paramValue, encodings.Utf8);
+            message.AppendUtf8(paramValue);
         }
     }
 }
