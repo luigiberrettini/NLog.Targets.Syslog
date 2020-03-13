@@ -1,18 +1,20 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
-using NLog.Layouts;
-using NLog.Targets.Syslog.Extensions;
 using System;
 using System.ComponentModel;
 using System.Net;
 using System.Net.NetworkInformation;
+using NLog.Config;
+using NLog.Layouts;
+using NLog.Targets.Syslog.Extensions;
 
 namespace NLog.Targets.Syslog.Settings
 {
     /// <inheritdoc cref="NotifyPropertyChanged" />
     /// <inheritdoc cref="IDisposable" />
     /// <summary>RFC 5424 configuration</summary>
+    [NLogConfigurationItem]
     public class Rfc5424Config : NotifyPropertyChanged, IDisposable
     {
         private const string DefaultVersion = "1";

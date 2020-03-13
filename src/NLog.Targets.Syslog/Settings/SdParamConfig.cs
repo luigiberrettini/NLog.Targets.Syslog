@@ -1,12 +1,14 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
+using NLog.Config;
 using NLog.Layouts;
 
 namespace NLog.Targets.Syslog.Settings
 {
     /// <inheritdoc />
     /// <summary>Syslog SD-PARAM field configuration</summary>
+    [NLogConfigurationItem]
     public class SdParamConfig : NotifyPropertyChanged
     {
         private Layout name;
