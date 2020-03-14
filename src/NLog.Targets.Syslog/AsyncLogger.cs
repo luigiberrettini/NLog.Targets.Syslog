@@ -26,6 +26,8 @@ namespace NLog.Targets.Syslog
         private readonly ByteArray buffer;
         private readonly MessageTransmitter messageTransmitter;
         private readonly LogEventInfo flushCompletionMarker;
+        private readonly Action<AsyncLogEventInfo, int> _enqueueAction;
+        private readonly Action<AsyncLogEventInfo> _discardAction;
 
         public AsyncLogger(Layout loggingLayout, EnforcementConfig enforcementConfig, MessageBuilder messageBuilder, MessageTransmitterConfig messageTransmitterConfig)
         {
@@ -38,14 +40,13 @@ namespace NLog.Targets.Syslog
             messageTransmitter = MessageTransmitter.FromConfig(messageTransmitterConfig);
             flushCompletionMarker = new LogEventInfo(LogLevel.Off, string.Empty, nameof(flushCompletionMarker));
             Task.Run(() => ProcessQueueAsync(messageBuilder));
+            _enqueueAction = (asyncLogEventInfo, timeout) => Enqueue(asyncLogEventInfo, timeout);
+            _discardAction = (asyncLogEventInfo) => asyncLogEventInfo.Continuation(new InvalidOperationException($"Enqueue skipped"));
         }
 
         public void Log(AsyncLogEventInfo asyncLogEventInfo)
         {
-            void NonDiscardAction(int timeout) => Enqueue(asyncLogEventInfo, timeout);
-            var asyncContinuation = asyncLogEventInfo.Continuation;
-            void DiscardAction() => asyncContinuation(new InvalidOperationException($"Enqueue skipped"));
-            throttling.Apply(queue.Count, NonDiscardAction, DiscardAction);
+            throttling.Apply(asyncLogEventInfo, queue.Count, _enqueueAction, _discardAction);
         }
 
         public Task FlushAsync()

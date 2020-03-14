@@ -33,23 +33,23 @@ namespace NLog.Targets.Syslog.Policies
             Delay = throttlingConfig.Delay;
         }
 
-        public void Apply(int waitingLogEntries, Action<int> nonDiscardActionWithTimeout, Action discardAction)
+        public void Apply<T>(T entry, int waitingLogEntries, Action<T, int> processActionWithTimeout, Action<T> discardAction)
         {
             if (Strategy == ThrottlingStrategy.None || waitingLogEntries < Limit)
             {
-                nonDiscardActionWithTimeout(Timeout.Infinite);
+                processActionWithTimeout(entry, Timeout.Infinite);
                 return;
             }
 
             if (Strategy == ThrottlingStrategy.Discard)
             {
                 InternalLogger.Warn("[Syslog] Applied discard throttling strategy");
-                discardAction();
+                discardAction(entry);
                 return;
             }
 
             ApplyDeferment(waitingLogEntries);
-            nonDiscardActionWithTimeout(CalculateTimeout(waitingLogEntries));
+            processActionWithTimeout(entry, CalculateTimeout(waitingLogEntries));
         }
 
         private void ApplyDeferment(int waitingLogEntries)
