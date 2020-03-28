@@ -2,7 +2,6 @@
 // See the LICENSE file in the project root for more information
 
 using System.Collections.Generic;
-using System.Linq;
 
 namespace NLog.Targets.Syslog.Policies
 {
@@ -22,9 +21,12 @@ namespace NLog.Targets.Syslog.Policies
 
         public string Apply(string s)
         {
-            var afterApplication = policies
-                .Where(p => p.IsApplicable())
-                .Aggregate(s, (acc, curr) => curr.Apply(acc));
+            var afterApplication = s;
+            foreach (var policy in policies)
+            {
+                if (policy.IsApplicable())
+                    afterApplication = policy.Apply(afterApplication);
+            }
             return afterApplication;
         }
     }

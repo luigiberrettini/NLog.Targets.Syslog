@@ -12,12 +12,14 @@ namespace NLog.Targets.Syslog.Policies
         private readonly EnforcementConfig enforcementConfig;
         private readonly string searchFor;
         private readonly string replaceWith;
+        private readonly string applytracemessage;
 
         public ReplaceKnownValuePolicy(EnforcementConfig enforcementConfig, string searchFor, string replaceWith)
         {
             this.enforcementConfig = enforcementConfig;
             this.searchFor = searchFor;
             this.replaceWith = replaceWith;
+            this.applytracemessage = $"'{searchFor}' (if found) with '{replaceWith}'"; // Skip params-array-allocation in InternalLogger.Trace
         }
 
         public bool IsApplicable()
@@ -31,7 +33,8 @@ namespace NLog.Targets.Syslog.Policies
                 return s;
 
             var replaced = Regex.Replace(s, searchFor, replaceWith);
-            InternalLogger.Trace("[Syslog] Replaced '{0}' (if found) with '{1}' given known value '{2}': '{3}'", searchFor, replaceWith, s, replaced);
+            if (!ReferenceEquals(replaced, s))
+                InternalLogger.Trace("[Syslog] Replaced {0} given computed value '{1}': '{2}'", applytracemessage, s, replaced);
             return replaced;
         }
     }
