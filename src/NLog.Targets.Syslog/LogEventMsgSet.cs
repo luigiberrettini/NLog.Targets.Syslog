@@ -19,8 +19,9 @@ namespace NLog.Targets.Syslog
         private readonly ByteArray buffer;
         private readonly MessageBuilder messageBuilder;
         private readonly MessageTransmitter messageTransmitter;
+        private string firstLogEntry;
         private int currentMessage;
-        private string[] logEntries;
+        private string[] splitLogEntries;
 
         public LogEventMsgSet(AsyncLogEventInfo asyncLogEventInfo, ByteArray buffer, MessageBuilder messageBuilder, MessageTransmitter messageTransmitter)
         {
@@ -33,7 +34,7 @@ namespace NLog.Targets.Syslog
 
         public LogEventMsgSet Build(Layout layout)
         {
-            logEntries = messageBuilder.BuildLogEntries(asyncLogEventInfo.LogEvent, layout);
+            firstLogEntry = messageBuilder.BuildLogEntry(asyncLogEventInfo.LogEvent, layout, out splitLogEntries);
             return this;
         }
 
@@ -50,7 +51,7 @@ namespace NLog.Targets.Syslog
                 return tcs.Task;
             }
 
-            var allSent = currentMessage == logEntries.Length;
+            var allSent = firstLogEntry == null || currentMessage == (splitLogEntries?.Length ?? 1);
             if (allSent)
             {
                 asyncLogEventInfo.Continuation(null);
@@ -91,7 +92,8 @@ namespace NLog.Targets.Syslog
 
         private void PrepareMessage()
         {
-            messageBuilder.PrepareMessage(buffer, asyncLogEventInfo.LogEvent, logEntries[currentMessage++]);
+            var logEntry = ++currentMessage == 1 ? firstLogEntry : splitLogEntries[currentMessage];
+            messageBuilder.PrepareMessage(buffer, asyncLogEventInfo.LogEvent, logEntry);
         }
 
         public override string ToString()

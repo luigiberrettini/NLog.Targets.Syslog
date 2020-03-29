@@ -2,19 +2,18 @@
 // See the LICENSE file in the project root for more information
 
 using System;
-using NLog.Layouts;
-using NLog.Targets.Syslog.Policies;
 using System.Collections.Generic;
 using System.Globalization;
+using NLog.Layouts;
 using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Settings;
+using NLog.Targets.Syslog.Policies;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {
     internal abstract class MessageBuilder
     {
         private static readonly Dictionary<RfcNumber, Func<MessageBuilderConfig, EnforcementConfig, MessageBuilder>> BuilderFactory;
-
         private readonly SplitOnNewLinePolicy splitOnNewLinePolicy;
         private readonly Facility facility;
         private readonly LogLevelSeverityMapping logLevelSeverityMapping;
@@ -42,12 +41,29 @@ namespace NLog.Targets.Syslog.MessageCreation
             splitOnNewLinePolicy = new SplitOnNewLinePolicy(enforcementConfig);
         }
 
-        public string[] BuildLogEntries(LogEventInfo logEvent, Layout layout)
+        public string BuildLogEntry(LogEventInfo logEvent, Layout layout, out string[] splitLogEntries)
         {
+            splitLogEntries = null;
+
             if (logEvent.Level == LogLevel.Off)
-                return new string[0];
+            {
+                return null;
+            }
+
             var originalLogEntry = layout.Render(logEvent);
-            return splitOnNewLinePolicy.IsApplicable() ? splitOnNewLinePolicy.Apply(originalLogEntry) : new[] { originalLogEntry };
+            if (splitOnNewLinePolicy.IsApplicable(originalLogEntry))
+            {
+                var logEntries = splitOnNewLinePolicy.Apply(originalLogEntry);
+                if (logEntries.Length == 0)
+                    return string.Empty;
+                if (logEntries.Length == 1)
+                    return logEntries[0];
+
+                splitLogEntries = logEntries;
+                return splitLogEntries[0];
+            }
+
+            return originalLogEntry;
         }
 
         public void PrepareMessage(ByteArray buffer, LogEventInfo logEvent, string logEntry)
