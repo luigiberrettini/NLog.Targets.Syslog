@@ -14,6 +14,7 @@ namespace NLog.Targets.Syslog.MessageCreation
     internal abstract class MessageBuilder
     {
         private static readonly Dictionary<RfcNumber, Func<MessageBuilderConfig, EnforcementConfig, MessageBuilder>> BuilderFactory;
+        private static readonly Dictionary<int, string> PriValueCache = new Dictionary<int, string>();
 
         private readonly SplitOnNewLinePolicy splitOnNewLinePolicy;
         private readonly Facility facility;
@@ -28,6 +29,15 @@ namespace NLog.Targets.Syslog.MessageCreation
                 { RfcNumber.Rfc5424, (msgBuilderCfg, enforcementCfg) =>
                     new Rfc5424(msgBuilderCfg.Facility, msgBuilderCfg.PerLogLevelSeverity, msgBuilderCfg.Rfc5424, enforcementCfg) }
             };
+
+            foreach (var facility in Enum.GetValues(typeof(Facility)))
+            {
+                foreach (var severity in Enum.GetValues(typeof(Severity)))
+                {
+                    var priValue = (int)facility * 8 + (int)severity;
+                    PriValueCache[priValue] = GeneratePriOutput(priValue);
+                }
+            }
         }
 
         public static MessageBuilder FromConfig(MessageBuilderConfig messageBuilderConfig, EnforcementConfig enforcementConfig)
@@ -62,6 +72,14 @@ namespace NLog.Targets.Syslog.MessageCreation
         private static string Pri(Facility facility, Severity severity)
         {
             var priVal = (int)facility * 8 + (int)severity;
+            if (PriValueCache.TryGetValue(priVal, out var priOutput))
+                return priOutput;
+            
+            return GeneratePriOutput(priVal);
+        }
+
+        private static string GeneratePriOutput(int priVal)
+        {
             return $"<{priVal.ToString(CultureInfo.InvariantCulture)}>";
         }
     }
