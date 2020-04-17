@@ -3,8 +3,6 @@
 
 using NLog.Layouts;
 using NLog.Targets.Syslog.Policies;
-using System.Globalization;
-using System.Text;
 using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Settings;
 
@@ -12,12 +10,12 @@ namespace NLog.Targets.Syslog.MessageCreation
 {
     internal class Rfc3164 : MessageBuilder
     {
-        private const string TimestampFormat = "{0:MMM} {0,11:d HH:mm:ss}";
         private static readonly byte[] SpaceBytes = { 0x20 };
 
         private readonly bool outputPri;
         private readonly bool outputHeader;
         private readonly Layout hostnameLayout;
+        private readonly Layout timestampLayout;
         private readonly Layout tagLayout;
         private readonly PlainHostnamePolicySet hostnamePolicySet;
         private readonly TagPolicySet tagPolicySet;
@@ -34,6 +32,7 @@ namespace NLog.Targets.Syslog.MessageCreation
             outputPri = rfc3164Config.OutputPri;
             outputHeader = rfc3164Config.OutputHeader;
             hostnameLayout = rfc3164Config.Hostname;
+            timestampLayout = rfc3164Config.Timestamp;
             tagLayout = rfc3164Config.Tag;
         }
 
@@ -58,7 +57,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         {
             if (!outputHeader)
                 return;
-            var timestamp = string.Format(CultureInfo.InvariantCulture, TimestampFormat, logEvent.TimeStamp);
+            var timestamp = timestampLayout.Render(logEvent);
             var host = hostnamePolicySet.Apply(hostnameLayout.Render(logEvent));
             buffer.AppendAscii(timestamp);
             buffer.AppendBytes(SpaceBytes);

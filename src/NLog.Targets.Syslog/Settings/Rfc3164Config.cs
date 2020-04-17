@@ -14,6 +14,7 @@ namespace NLog.Targets.Syslog.Settings
         private bool outputPri;
         private bool outputHeader;
         private Layout hostname;
+        private Layout timestamp = "${date:format=MMM d HH\\:mm\\:ss}";
         private Layout tag;
 
         /// <summary>Whether to output or not the PRI part</summary>
@@ -35,6 +36,13 @@ namespace NLog.Targets.Syslog.Settings
         {
             get => hostname;
             set => SetProperty(ref hostname, value);
+        }
+
+        /// <summary>The TIMESTAMP field of the HEADER part</summary>
+        public Layout Timestamp
+        {
+            get => timestamp;
+            set => SetProperty(ref timestamp, value);
         }
 
         /// <summary>The TAG field of the MSG part</summary>

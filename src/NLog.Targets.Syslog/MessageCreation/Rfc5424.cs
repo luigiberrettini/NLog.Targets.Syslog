@@ -3,7 +3,6 @@
 
 using NLog.Layouts;
 using NLog.Targets.Syslog.Policies;
-using System.Globalization;
 using System.Text;
 using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Settings;
@@ -12,7 +11,6 @@ namespace NLog.Targets.Syslog.MessageCreation
 {
     internal class Rfc5424 : MessageBuilder
     {
-        private const string TimestampFormat = "{0:yyyy-MM-ddTHH:mm:ss.ffffffK}";
         private static readonly byte[] SpaceBytes = { 0x20 };
 
         private readonly string version;
@@ -20,6 +18,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         private readonly Layout appNameLayout;
         private readonly Layout procIdLayout;
         private readonly Layout msgIdLayout;
+        private readonly Layout timestampLayout;
         private readonly StructuredData structuredData;
         private readonly byte[] preamble;
         private readonly FqdnHostnamePolicySet hostnamePolicySet;
@@ -33,6 +32,7 @@ namespace NLog.Targets.Syslog.MessageCreation
             version = rfc5424Config.Version;
             hostnameLayout = rfc5424Config.Hostname;
             appNameLayout = rfc5424Config.AppName;
+            timestampLayout = rfc5424Config.Timestamp;
             procIdLayout = rfc5424Config.ProcId;
             msgIdLayout = rfc5424Config.MsgId;
             structuredData = new StructuredData(rfc5424Config.StructuredData, enforcementConfig);
@@ -57,7 +57,7 @@ namespace NLog.Targets.Syslog.MessageCreation
 
         private void AppendHeader(ByteArray buffer, string pri, LogEventInfo logEvent)
         {
-            var timestamp = string.Format(CultureInfo.InvariantCulture, TimestampFormat, logEvent.TimeStamp);
+            var timestamp = timestampLayout.Render(logEvent);
             var hostname = hostnamePolicySet.Apply(hostnameLayout.Render(logEvent));
             var appName = appNamePolicySet.Apply(appNameLayout.Render(logEvent));
             var procId = procIdPolicySet.Apply(procIdLayout.Render(logEvent));

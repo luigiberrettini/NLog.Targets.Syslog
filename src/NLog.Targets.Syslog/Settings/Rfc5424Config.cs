@@ -21,6 +21,7 @@ namespace NLog.Targets.Syslog.Settings
         private Layout appName;
         private Layout procId;
         private Layout msgId;
+        private Layout timestamp = "${date:format=yyyy-MM-ddTHH\\:mm\\:ss.ffffffK}";
         private StructuredDataConfig structuredData;
         private readonly PropertyChangedEventHandler structuredDataPropsChanged;
         private bool disableBom;
@@ -60,6 +61,13 @@ namespace NLog.Targets.Syslog.Settings
         {
             get => msgId;
             set => SetProperty(ref msgId, value);
+        }
+
+        /// <summary>The TIMESTAMP field of the HEADER part</summary>
+        public Layout Timestamp
+        {
+            get => timestamp;
+            set => SetProperty(ref timestamp, value);
         }
 
         /// <summary>The STRUCTURED-DATA part</summary>
