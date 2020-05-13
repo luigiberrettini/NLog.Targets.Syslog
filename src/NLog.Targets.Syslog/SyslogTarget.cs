@@ -75,10 +75,16 @@ namespace NLog.Targets.Syslog
             Task.WhenAll(tasks)
                 .ContinueWith(t =>
                 {
-                    InternalLogger.Debug("[Syslog] Explicit flush completed");
+                    InternalLogger.Debug(t.Exception?.GetBaseException(), "[Syslog] Explicit flush completed");
                     asyncContinuation(t.Exception?.GetBaseException());
-                })
-                .Wait();
+                });
+        }
+
+        /// <inheritdoc />
+        protected override void CloseTarget()
+        {
+            DisposeDependencies();
+            base.CloseTarget();
         }
 
         /// <summary>Disposes the instance</summary>
@@ -86,9 +92,6 @@ namespace NLog.Targets.Syslog
         {
             if (disposing)
             {
-                Enforcement.PropertyChanged -= Init;
-                MessageCreation.PropertyChanged -= Init;
-                MessageSend.PropertyChanged -= Init;
                 DisposeDependencies();
             }
             base.Dispose(disposing);
@@ -96,13 +99,22 @@ namespace NLog.Targets.Syslog
 
         private void DisposeDependencies()
         {
+            Enforcement.PropertyChanged -= Init;
+            MessageCreation.PropertyChanged -= Init;
+            MessageSend.PropertyChanged -= Init;
+
             try
             {
-                Enforcement.MessageProcessors.ForEach(i => asyncLoggers[i].Dispose());
+                if (asyncLoggers != null)
+                    Enforcement.MessageProcessors.ForEach(i => asyncLoggers[i].Dispose());
             }
             catch (Exception exception)
             {
                 InternalLogger.Warn(exception, "[Syslog] Dispose error");
+            }
+            finally
+            {
+                asyncLoggers = null;
             }
         }
     }
