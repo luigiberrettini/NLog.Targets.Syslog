@@ -105,8 +105,9 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
   * `trace` - `Emergency` / `Alert` / `Critical` / `Error` / `Warning` / `Notice` / `Informational` / `Debug` (default: `Notice`)
 * `rfc` - `rfc3164` or `rfc5424` (default: `rfc5424`)
 * `rfc3164` - settings related to RFC 3164:
-  * `outputPri` - `true` or `false` to output or not the PRI part (custom messages)
-  * `outputHeader` - `true` or `false` to output or not the HEADER part (custom messages)
+  * `outputPri` - `true` or `false` to output or not the PRI part (default: true, used for custom messages)
+  * `outputHeader` - `true` or `false` to output or not the HEADER part (default: true, used for custom messages)
+  * `outputSpaceBeforeMsg` - `true` or `false` to output or not the space before the MSG part (default: true, used for custom messages)
   * `hostname` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the HOSTNAME field of the HEADER part (default: the hostname of the computer that is creating the message)
   * `tag` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the TAG field of the MSG part (default: the name of the assembly that is creating the message)
 * `rfc5424` - settings related to RFC 5424:

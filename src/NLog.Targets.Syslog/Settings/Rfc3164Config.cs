@@ -15,6 +15,7 @@ namespace NLog.Targets.Syslog.Settings
     {
         private bool outputPri;
         private bool outputHeader;
+        private bool outputSpaceBeforeMsg;
         private Layout hostname;
         private Layout tag;
 
@@ -30,6 +31,13 @@ namespace NLog.Targets.Syslog.Settings
         {
             get => outputHeader;
             set => SetProperty(ref outputHeader, value);
+        }
+
+        /// <summary>Whether to output or not the space before the MSG part</summary>
+        public bool OutputSpaceBeforeMsg
+        {
+            get => outputSpaceBeforeMsg;
+            set => SetProperty(ref outputSpaceBeforeMsg, value);
         }
 
         /// <summary>The HOSTNAME field of the HEADER part</summary>
@@ -51,6 +59,7 @@ namespace NLog.Targets.Syslog.Settings
         {
             outputPri = true;
             outputHeader = true;
+            outputSpaceBeforeMsg = true;
             hostname = Dns.GetHostName();
             tag = UniversalAssembly.EntryAssembly().Name();
         }
