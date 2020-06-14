@@ -1,17 +1,11 @@
 language: csharp
-matrix:
+jobs:
   include:
     - os: linux
-      dist: trusty
       mono: latest
-      dotnet: 2.1.201
-      sudo: required
       env: MONO_BASE_PATH=/usr/lib/mono/
     - os: osx
-      osx_image: xcode10.3
       mono: latest
-      dotnet: 2.1.201
-      sudo: required
       env: MONO_BASE_PATH=/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/
 before_install:
   - |
