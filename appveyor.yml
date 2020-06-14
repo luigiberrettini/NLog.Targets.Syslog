@@ -16,6 +16,8 @@ install:
       Install-LatestDotNetSdk -Channel '2.1'
       Install-LatestDotNetSdk -Channel '3.1'
       $env:Path = "$DOTNET_INSTALL_DIR;$env:Path"
+      $env:DOTNET_ROOT = "$DOTNET_INSTALL_DIR"
+      $env:DOTNET_MULTILEVEL_LOOKUP = 0
 before_build:
   - ps: |
       $mostRecentTag = git describe --abbrev=0 --tags --always

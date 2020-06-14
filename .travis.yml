@@ -29,8 +29,8 @@ before_install:
     installLatestDotNetSdk '2.1'
     installLatestDotNetSdk '3.1'
     export PATH="$DOTNET_INSTALL_DIR:$PATH"
-    # See https://github.com/dotnet/cli/issues/9114
     export DOTNET_ROOT="$DOTNET_INSTALL_DIR"
+    export DOTNET_MULTILEVEL_LOOKUP=0
 script:
   - |
     mostRecentTag=$(git describe --abbrev=0 --tags --always)
