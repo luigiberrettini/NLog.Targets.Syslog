@@ -5,12 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog.Common;
 using NLog.Targets.Syslog.Extensions;
 using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Settings;
+using ProtocolType = NLog.Targets.Syslog.Settings.ProtocolType;
 
 namespace NLog.Targets.Syslog.MessageSend
 {
@@ -24,8 +26,6 @@ namespace NLog.Targets.Syslog.MessageSend
         private readonly TimeSpan newInitDelay;
 
         protected string Server { get; }
-
-        protected string IpAddress => Dns.GetHostAddresses(Server).FirstOrDefault()?.ToString();
 
         protected int Port { get; }
 
@@ -78,6 +78,17 @@ namespace NLog.Targets.Syslog.MessageSend
         }
 
         protected abstract Task Init();
+
+        protected IPEndPoint GetIpEndPoint()
+        {
+            return Dns
+                .GetHostAddresses(Server)
+                .Where(ipAddress => ipAddress.AddressFamily == AddressFamily.InterNetwork && Socket.OSSupportsIPv4 ||
+                                    ipAddress.AddressFamily == AddressFamily.InterNetworkV6 && Socket.OSSupportsIPv6)
+                .OrderBy(x => x.AddressFamily)
+                .Select(x => new IPEndPoint(x, Port))
+                .FirstOrDefault();
+        }
 
         protected abstract Task SendAsync(ByteArray message, CancellationToken token);
 
