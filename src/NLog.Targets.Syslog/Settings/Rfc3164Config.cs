@@ -1,14 +1,16 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
+using System.Net;
+using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets.Syslog.Extensions;
-using System.Net;
 
 namespace NLog.Targets.Syslog.Settings
 {
     /// <inheritdoc />
     /// <summary>RFC 3164 configuration</summary>
+    [NLogConfigurationItem]
     public class Rfc3164Config : NotifyPropertyChanged
     {
         private bool outputPri;
