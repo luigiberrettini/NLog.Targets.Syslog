@@ -33,11 +33,11 @@ namespace NLog.Targets.Syslog.Policies
             Delay = throttlingConfig.Delay;
         }
 
-        public void Apply<T>(T entry, int waitingLogEntries, Action<T, int> processActionWithTimeout, Action<T> discardAction)
+        public void Apply<T>(int waitingLogEntries, T entry, Action<T, int> processWithTimeoutAction, Action<T> discardAction)
         {
             if (Strategy == ThrottlingStrategy.None || waitingLogEntries < Limit)
             {
-                processActionWithTimeout(entry, Timeout.Infinite);
+                processWithTimeoutAction(entry, Timeout.Infinite);
                 return;
             }
 
@@ -49,7 +49,7 @@ namespace NLog.Targets.Syslog.Policies
             }
 
             ApplyDeferment(waitingLogEntries);
-            processActionWithTimeout(entry, CalculateTimeout(waitingLogEntries));
+            processWithTimeoutAction(entry, CalculateTimeout(waitingLogEntries));
         }
 
         private void ApplyDeferment(int waitingLogEntries)
