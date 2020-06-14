@@ -111,6 +111,7 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
   * `hostname` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the HOSTNAME field of the HEADER part (default: the hostname of the computer that is creating the message)
   * `tag` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the TAG field of the MSG part (default: the name of the assembly that is creating the message)
 * `rfc5424` - settings related to RFC 5424:
+  * `timestampFractionalDigits` - the number of fractional digits for the TIMESTAMP field of the HEADER part (default: 6, max: 16 as per ISO 8601 but since .NET is limited to 7 the other digits will be zeroed)
   * `hostname` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the HOSTNAME field of the HEADER part (default: the hostname of the computer that is creating the message)
   * `appName` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the APPNAME field of the HEADER part (default: the name of the assembly that is creating the message)
   * `procId` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the PROCID field of the HEADER part (default: `-`)

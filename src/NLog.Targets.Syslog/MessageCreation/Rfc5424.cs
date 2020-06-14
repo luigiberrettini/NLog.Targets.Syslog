@@ -1,6 +1,7 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
+using System;
 using NLog.Layouts;
 using NLog.Targets.Syslog.Policies;
 using System.Globalization;
@@ -12,10 +13,13 @@ namespace NLog.Targets.Syslog.MessageCreation
 {
     internal class Rfc5424 : MessageBuilder
     {
-        private const string TimestampFormat = "{0:yyyy-MM-ddTHH:mm:ss.ffffffK}";
+        private const string BaseTimestampFormat = "yyyy-MM-ddTHH:mm:ss";
+        private const int Iso8601MaxTimestampFractionalDigits = 16;
+        private const int DotNetDateTimeMaxFractionalDigits = 7;
         private static readonly byte[] SpaceBytes = { 0x20 };
 
         private readonly string version;
+        private readonly string timestampFormat;
         private readonly Layout hostnameLayout;
         private readonly Layout appNameLayout;
         private readonly Layout procIdLayout;
@@ -31,6 +35,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         public Rfc5424(Facility facility, LogLevelSeverityConfig logLevelSeverityConfig, Rfc5424Config rfc5424Config, EnforcementConfig enforcementConfig) : base(facility, logLevelSeverityConfig, enforcementConfig)
         {
             version = rfc5424Config.Version;
+            timestampFormat = $"{{0:{TimestampFormat(rfc5424Config.TimestampFractionalDigits)}}}";
             hostnameLayout = rfc5424Config.Hostname;
             appNameLayout = rfc5424Config.AppName;
             procIdLayout = rfc5424Config.ProcId;
@@ -55,9 +60,29 @@ namespace NLog.Targets.Syslog.MessageCreation
             utf8MessagePolicy.Apply(buffer);
         }
 
+        private static StringBuilder TimestampFormat(int fractionalDigits)
+        {
+            // BaseTimestampFormat.Length + 1 decimal point + 1 K + Iso8601MaxTimestampFractionalDigits
+            var maxTimestampFormatLength = BaseTimestampFormat.Length + 2 + Iso8601MaxTimestampFractionalDigits;
+            var formatSb = new StringBuilder(BaseTimestampFormat, maxTimestampFormatLength);
+
+            if (fractionalDigits <= 0)
+                return formatSb.Append("K");
+
+            var fRepeatCount = Math.Min(fractionalDigits, DotNetDateTimeMaxFractionalDigits);
+            var requestedMinusDotNet = fractionalDigits - DotNetDateTimeMaxFractionalDigits;
+            const int isoMinusDotNet = Iso8601MaxTimestampFractionalDigits - DotNetDateTimeMaxFractionalDigits;
+            var zeroRepeatCount = Math.Max(0, Math.Min(requestedMinusDotNet, isoMinusDotNet));
+            return formatSb
+                .Append('.')
+                .Append('f', fRepeatCount)
+                .Append('0', Math.Max(0, zeroRepeatCount))
+                .Append("K");
+        }
+
         private void AppendHeader(ByteArray buffer, string pri, LogEventInfo logEvent)
         {
-            var timestamp = string.Format(CultureInfo.InvariantCulture, TimestampFormat, logEvent.TimeStamp);
+            var timestamp = string.Format(CultureInfo.InvariantCulture, timestampFormat, logEvent.TimeStamp);
             var hostname = hostnamePolicySet.Apply(hostnameLayout.Render(logEvent));
             var appName = appNamePolicySet.Apply(appNameLayout.Render(logEvent));
             var procId = procIdPolicySet.Apply(procIdLayout.Render(logEvent));

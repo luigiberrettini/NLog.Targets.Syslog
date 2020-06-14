@@ -85,6 +85,7 @@
                                 <xs:element name="rfc5424" minOccurs="0" maxOccurs="1">
                                     <xs:complexType>
                                         <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                            <xs:element name="timestampFractionalDigits" type="xs:integer" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="hostname" type="nlog:Layout" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="appName" type="nlog:Layout" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="procId" type="nlog:Layout" minOccurs="0" maxOccurs="1" />
@@ -115,6 +116,7 @@
                                             </xs:element>
                                             <xs:element name="disableBom" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                         </xs:choice>
+                                        <xs:attribute name="timestampFractionalDigits" type="xs:integer" />
                                         <xs:attribute name="hostname" type="nlog:SimpleLayoutAttribute" />
                                         <xs:attribute name="appName" type="nlog:SimpleLayoutAttribute" />
                                         <xs:attribute name="procId" type="nlog:SimpleLayoutAttribute" />
