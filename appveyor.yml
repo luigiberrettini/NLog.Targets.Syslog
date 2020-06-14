@@ -13,9 +13,8 @@ install:
           $version = ($dotnetReleases | Where-Object { $_.'channel-version' -eq $channel }).'latest-sdk'
           powershell -NoProfile -ExecutionPolicy Unrestricted -Command "&([scriptblock]::Create((Invoke-WebRequest -UseBasicParsing 'https://dot.net/v1/dotnet-install.ps1'))) -Version $version -InstallDir $DOTNET_INSTALL_DIR -NoPath"
       }
-      Install-LatestDotNetSdk -Channel '1.1'
       Install-LatestDotNetSdk -Channel '2.1'
-      Install-LatestDotNetSdk -Channel '2.2'
+      Install-LatestDotNetSdk -Channel '3.1'
       $env:Path = "$DOTNET_INSTALL_DIR;$env:Path"
 before_build:
   - ps: |
