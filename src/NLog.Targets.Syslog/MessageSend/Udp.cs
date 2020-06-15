@@ -20,7 +20,9 @@ namespace NLog.Targets.Syslog.MessageSend
 
         protected override Task Init()
         {
-            udp = new UdpClient(GetIpEndPoint());
+            var ipEndPoint = GetIpEndPoint();
+            udp = new UdpClient(ipEndPoint.AddressFamily);
+            udp.Connect(ipEndPoint);
             return Task.FromResult<object>(null);
         }
 
