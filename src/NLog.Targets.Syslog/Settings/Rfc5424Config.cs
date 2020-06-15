@@ -1,22 +1,26 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
-using NLog.Layouts;
-using NLog.Targets.Syslog.Extensions;
 using System;
 using System.ComponentModel;
 using System.Net;
 using System.Net.NetworkInformation;
+using NLog.Config;
+using NLog.Layouts;
+using NLog.Targets.Syslog.Extensions;
 
 namespace NLog.Targets.Syslog.Settings
 {
     /// <inheritdoc cref="NotifyPropertyChanged" />
     /// <inheritdoc cref="IDisposable" />
     /// <summary>RFC 5424 configuration</summary>
+    [NLogConfigurationItem]
     public class Rfc5424Config : NotifyPropertyChanged, IDisposable
     {
         private const string DefaultVersion = "1";
+        private const int DefaultTimestampFractionalDigits = 6;
         private const string NilValue = "-";
+        private int timestampFractionalDigits;
         private Layout hostname;
         private Layout appName;
         private Layout procId;
@@ -27,6 +31,13 @@ namespace NLog.Targets.Syslog.Settings
 
         /// <summary>The VERSION field of the HEADER part</summary>
         public string Version { get; }
+
+        /// <summary>The number of fractional digits for the TIMESTAMP field of the HEADER part</summary>
+        public int TimestampFractionalDigits
+        {
+            get => timestampFractionalDigits;
+            set => SetProperty(ref timestampFractionalDigits, value);
+        }
 
         /// <summary>The default HOSTNAME if no value is provided</summary>
         public string DefaultHostname { get; }
@@ -81,6 +92,7 @@ namespace NLog.Targets.Syslog.Settings
         public Rfc5424Config()
         {
             Version = DefaultVersion;
+            TimestampFractionalDigits = DefaultTimestampFractionalDigits;
             DefaultHostname = HostFqdn();
             hostname = DefaultHostname;
             DefaultAppName = UniversalAssembly.EntryAssembly().Name();

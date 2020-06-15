@@ -1,18 +1,21 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
+using System.Net;
+using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets.Syslog.Extensions;
-using System.Net;
 
 namespace NLog.Targets.Syslog.Settings
 {
     /// <inheritdoc />
     /// <summary>RFC 3164 configuration</summary>
+    [NLogConfigurationItem]
     public class Rfc3164Config : NotifyPropertyChanged
     {
         private bool outputPri;
         private bool outputHeader;
+        private bool outputSpaceBeforeMsg;
         private Layout hostname;
         private Layout tag;
 
@@ -28,6 +31,13 @@ namespace NLog.Targets.Syslog.Settings
         {
             get => outputHeader;
             set => SetProperty(ref outputHeader, value);
+        }
+
+        /// <summary>Whether to output or not the space before the MSG part</summary>
+        public bool OutputSpaceBeforeMsg
+        {
+            get => outputSpaceBeforeMsg;
+            set => SetProperty(ref outputSpaceBeforeMsg, value);
         }
 
         /// <summary>The HOSTNAME field of the HEADER part</summary>
@@ -49,6 +59,7 @@ namespace NLog.Targets.Syslog.Settings
         {
             outputPri = true;
             outputHeader = true;
+            outputSpaceBeforeMsg = true;
             hostname = Dns.GetHostName();
             tag = UniversalAssembly.EntryAssembly().Name();
         }

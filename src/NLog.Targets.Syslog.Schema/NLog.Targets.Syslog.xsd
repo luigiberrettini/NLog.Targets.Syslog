@@ -71,11 +71,13 @@
                                         <xs:choice minOccurs="0" maxOccurs="unbounded">
                                             <xs:element name="outputPri" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="outputHeader" type="xs:boolean" minOccurs="0" maxOccurs="1" />
+                                            <xs:element name="outputSpaceBeforeMsg" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="hostname" type="xs:string" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="tag" type="xs:string" minOccurs="0" maxOccurs="1" />
                                         </xs:choice>
                                         <xs:attribute name="outputPri" type="xs:boolean" />
                                         <xs:attribute name="outputHeader" type="xs:boolean" />
+                                        <xs:attribute name="outputSpaceBeforeMsg" type="xs:boolean" />
                                         <xs:attribute name="hostname" type="xs:string" />
                                         <xs:attribute name="tag" type="xs:string" />
                                     </xs:complexType>
@@ -83,6 +85,7 @@
                                 <xs:element name="rfc5424" minOccurs="0" maxOccurs="1">
                                     <xs:complexType>
                                         <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                            <xs:element name="timestampFractionalDigits" type="xs:integer" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="hostname" type="nlog:Layout" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="appName" type="nlog:Layout" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="procId" type="nlog:Layout" minOccurs="0" maxOccurs="1" />
@@ -113,6 +116,7 @@
                                             </xs:element>
                                             <xs:element name="disableBom" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                         </xs:choice>
+                                        <xs:attribute name="timestampFractionalDigits" type="xs:integer" />
                                         <xs:attribute name="hostname" type="nlog:SimpleLayoutAttribute" />
                                         <xs:attribute name="appName" type="nlog:SimpleLayoutAttribute" />
                                         <xs:attribute name="procId" type="nlog:SimpleLayoutAttribute" />
