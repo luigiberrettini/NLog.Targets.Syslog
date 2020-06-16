@@ -38,13 +38,14 @@ namespace NLog.Targets.Syslog.MessageSend
 
         protected override Task Init()
         {
-            tcp = new TcpClient();
+            var ipEndPoint = GetIpEndPoint();
+            tcp = new TcpClient(ipEndPoint.AddressFamily);
             SocketInitialization.DisableAddressSharing(tcp.Client);
             SocketInitialization.DiscardPendingDataOnClose(tcp.Client);
             SocketInitialization.SetKeepAlive(tcp.Client, keepAliveConfig);
 
             return tcp
-                .ConnectAsync(IpAddress, Port)
+                .ConnectAsync(ipEndPoint.Address, ipEndPoint.Port)
                 .Then(_ => stream = SslDecorate(tcp), CancellationToken.None);
         }
 

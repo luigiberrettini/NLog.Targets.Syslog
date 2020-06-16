@@ -3,12 +3,14 @@
 
 using System;
 using System.ComponentModel;
+using NLog.Config;
 
 namespace NLog.Targets.Syslog.Settings
 {
     /// <inheritdoc cref="NotifyPropertyChanged" />
     /// <inheritdoc cref="IDisposable" />
     /// <summary>Enforcement configuration</summary>
+    [NLogConfigurationItem]
     public class EnforcementConfig : NotifyPropertyChanged, IDisposable
     {
         private ThrottlingConfig throttling;

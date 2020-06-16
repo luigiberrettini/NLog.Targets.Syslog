@@ -14,6 +14,7 @@ namespace NLog.Targets.Syslog.Settings
     /// <inheritdoc cref="NotifyPropertyChanged" />
     /// <inheritdoc cref="IDisposable" />
     /// <summary>Syslog STRUCTURED-DATA part configuration</summary>
+    [NLogConfigurationItem]
     public class StructuredDataConfig : NotifyPropertyChanged, IDisposable
     {
         private Layout fromEventProperties;

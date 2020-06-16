@@ -1,6 +1,7 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,7 +20,9 @@ namespace NLog.Targets.Syslog.MessageSend
 
         protected override Task Init()
         {
-            udp = new UdpClient(IpAddress, Port);
+            var ipEndPoint = GetIpEndPoint();
+            udp = new UdpClient(ipEndPoint.AddressFamily);
+            udp.Connect(ipEndPoint);
             return Task.FromResult<object>(null);
         }
 

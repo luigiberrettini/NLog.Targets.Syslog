@@ -13,6 +13,7 @@ namespace NLog.Targets.Syslog.Settings
     /// <inheritdoc cref="NotifyPropertyChanged" />
     /// <inheritdoc cref="IDisposable" />
     /// <summary>Syslog SD-ELEMENT field configuration</summary>
+    [NLogConfigurationItem]
     public class SdElementConfig : NotifyPropertyChanged, IDisposable
     {
         private SdIdConfig sdId;

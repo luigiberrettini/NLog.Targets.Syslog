@@ -34,25 +34,16 @@ namespace NLog.Targets.Syslog
             Enforcement = new EnforcementConfig();
             MessageCreation = new MessageBuilderConfig();
             MessageSend = new MessageTransmitterConfig();
+            Enforcement.PropertyChanged += OnConfigurationChanges;
+            MessageCreation.PropertyChanged += OnConfigurationChanges;
+            MessageSend.PropertyChanged += OnConfigurationChanges;
         }
 
         /// <summary>Initializes the SyslogTarget</summary>
         protected override void InitializeTarget()
         {
             base.InitializeTarget();
-            Enforcement.PropertyChanged += Init;
-            MessageCreation.PropertyChanged += Init;
-            MessageSend.PropertyChanged += Init;
             Init();
-        }
-
-        private void Init(object sender = null, PropertyChangedEventArgs eventArgs = null)
-        {
-            if (IsInitialized)
-                DisposeDependencies();
-
-            messageBuilder = MessageBuilder.FromConfig(MessageCreation, Enforcement);
-            asyncLoggers = Enforcement.MessageProcessors.Select(i => new AsyncLogger(Layout, Enforcement, messageBuilder, MessageSend)).ToArray();
         }
 
         /// <summary>Writes a single event</summary>
@@ -75,34 +66,56 @@ namespace NLog.Targets.Syslog
             Task.WhenAll(tasks)
                 .ContinueWith(t =>
                 {
-                    InternalLogger.Debug("[Syslog] Explicit flush completed");
-                    asyncContinuation(t.Exception?.GetBaseException());
-                })
-                .Wait();
+                    var exception = t.Exception?.GetBaseException();
+                    InternalLogger.Debug(exception, "[Syslog] Explicit flush completed");
+                    asyncContinuation(exception);
+                });
+        }
+
+        /// <summary>Closes the target</summary>
+        protected override void CloseTarget()
+        {
+            DisposeDependencies();
+            base.CloseTarget();
         }
 
         /// <summary>Disposes the instance</summary>
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                Enforcement.PropertyChanged -= Init;
-                MessageCreation.PropertyChanged -= Init;
-                MessageSend.PropertyChanged -= Init;
-                DisposeDependencies();
-            }
+            Enforcement.PropertyChanged -= OnConfigurationChanges;
+            MessageCreation.PropertyChanged -= OnConfigurationChanges;
+            MessageSend.PropertyChanged -= OnConfigurationChanges;
+            DisposeDependencies();
             base.Dispose(disposing);
+        }
+
+        private void OnConfigurationChanges(object sender, PropertyChangedEventArgs eventArgs)
+        {
+            if (!IsInitialized)
+                return;
+            DisposeDependencies();
+            Init();
+        }
+
+        private void Init()
+        {
+            messageBuilder = MessageBuilder.FromConfig(MessageCreation, Enforcement);
+            asyncLoggers = Enforcement.MessageProcessors.Select(i => new AsyncLogger(Layout, Enforcement, messageBuilder, MessageSend)).ToArray();
         }
 
         private void DisposeDependencies()
         {
             try
             {
-                Enforcement.MessageProcessors.ForEach(i => asyncLoggers[i].Dispose());
+                Enforcement.MessageProcessors.ForEach(i => asyncLoggers[i]?.Dispose());
             }
             catch (Exception exception)
             {
                 InternalLogger.Warn(exception, "[Syslog] Dispose error");
+            }
+            finally
+            {
+                asyncLoggers = null;
             }
         }
     }
