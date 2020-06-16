@@ -6,6 +6,7 @@ using NLog.Layouts;
 using NLog.Targets.Syslog.Policies;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Settings;
 
@@ -14,6 +15,7 @@ namespace NLog.Targets.Syslog.MessageCreation
     internal abstract class MessageBuilder
     {
         private static readonly Dictionary<RfcNumber, Func<MessageBuilderConfig, EnforcementConfig, MessageBuilder>> BuilderFactory;
+        private static readonly Dictionary<Facility, Dictionary<Severity, string>> PriForFacilityAndSeverity;
 
         private readonly SplitOnNewLinePolicy splitOnNewLinePolicy;
         private readonly Facility facility;
@@ -28,6 +30,18 @@ namespace NLog.Targets.Syslog.MessageCreation
                 { RfcNumber.Rfc5424, (msgBuilderCfg, enforcementCfg) =>
                     new Rfc5424(msgBuilderCfg.Facility, msgBuilderCfg.PerLogLevelSeverity, msgBuilderCfg.Rfc5424, enforcementCfg) }
             };
+
+            PriForFacilityAndSeverity = Enum
+                .GetValues(typeof(Facility))
+                .Cast<Facility>()
+                .ToDictionary
+                (
+                    facility => facility,
+                    facility => Enum
+                        .GetValues(typeof(Severity))
+                        .Cast<Severity>()
+                        .ToDictionary(severity => severity, severity => Pri(facility, severity))
+                );
         }
 
         public static MessageBuilder FromConfig(MessageBuilderConfig messageBuilderConfig, EnforcementConfig enforcementConfig)
@@ -53,7 +67,8 @@ namespace NLog.Targets.Syslog.MessageCreation
         public void PrepareMessage(ByteArray buffer, LogEventInfo logEvent, string logEntry)
         {
             buffer.Reset();
-            var pri = Pri(facility, logLevelSeverityMapping[logEvent.Level]);
+            var severity = logLevelSeverityMapping[logEvent.Level];
+            var pri = PriForFacilityAndSeverity[facility][severity];
             PrepareMessage(buffer, logEvent, pri, logEntry);
         }
 
