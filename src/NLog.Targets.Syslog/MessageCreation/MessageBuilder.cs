@@ -6,6 +6,7 @@ using NLog.Layouts;
 using NLog.Targets.Syslog.Policies;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Settings;
 
@@ -14,7 +15,7 @@ namespace NLog.Targets.Syslog.MessageCreation
     internal abstract class MessageBuilder
     {
         private static readonly Dictionary<RfcNumber, Func<MessageBuilderConfig, EnforcementConfig, MessageBuilder>> BuilderFactory;
-        private static readonly Dictionary<int, string> PriValueCache = new Dictionary<int, string>();
+        private static readonly Dictionary<Facility, Dictionary<Severity, string>> PriForFacilityAndSeverity;
 
         private readonly SplitOnNewLinePolicy splitOnNewLinePolicy;
         private readonly Facility facility;
@@ -30,14 +31,17 @@ namespace NLog.Targets.Syslog.MessageCreation
                     new Rfc5424(msgBuilderCfg.Facility, msgBuilderCfg.PerLogLevelSeverity, msgBuilderCfg.Rfc5424, enforcementCfg) }
             };
 
-            foreach (var facility in Enum.GetValues(typeof(Facility)))
-            {
-                foreach (var severity in Enum.GetValues(typeof(Severity)))
-                {
-                    var priValue = (int)facility * 8 + (int)severity;
-                    PriValueCache[priValue] = GeneratePriOutput(priValue);
-                }
-            }
+            PriForFacilityAndSeverity = Enum
+                .GetValues(typeof(Facility))
+                .Cast<Facility>()
+                .ToDictionary
+                (
+                    facility => facility,
+                    facility => Enum
+                        .GetValues(typeof(Severity))
+                        .Cast<Severity>()
+                        .ToDictionary(severity => severity, severity => Pri(facility, severity))
+                );
         }
 
         public static MessageBuilder FromConfig(MessageBuilderConfig messageBuilderConfig, EnforcementConfig enforcementConfig)
@@ -63,7 +67,8 @@ namespace NLog.Targets.Syslog.MessageCreation
         public void PrepareMessage(ByteArray buffer, LogEventInfo logEvent, string logEntry)
         {
             buffer.Reset();
-            var pri = Pri(facility, logLevelSeverityMapping[logEvent.Level]);
+            var severity = logLevelSeverityMapping[logEvent.Level];
+            var pri = PriForFacilityAndSeverity[facility][severity];
             PrepareMessage(buffer, logEvent, pri, logEntry);
         }
 
@@ -72,14 +77,6 @@ namespace NLog.Targets.Syslog.MessageCreation
         private static string Pri(Facility facility, Severity severity)
         {
             var priVal = (int)facility * 8 + (int)severity;
-            if (PriValueCache.TryGetValue(priVal, out var priOutput))
-                return priOutput;
-            
-            return GeneratePriOutput(priVal);
-        }
-
-        private static string GeneratePriOutput(int priVal)
-        {
             return $"<{priVal.ToString(CultureInfo.InvariantCulture)}>";
         }
     }
