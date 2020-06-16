@@ -2,13 +2,13 @@
 // See the LICENSE file in the project root for more information
 
 using System;
+using NLog.Layouts;
+using NLog.Targets.Syslog.Policies;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using NLog.Layouts;
 using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Settings;
-using NLog.Targets.Syslog.Policies;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {
@@ -56,29 +56,12 @@ namespace NLog.Targets.Syslog.MessageCreation
             splitOnNewLinePolicy = new SplitOnNewLinePolicy(enforcementConfig);
         }
 
-        public string BuildLogEntry(LogEventInfo logEvent, Layout layout, out string[] splitLogEntries)
+        public string[] BuildLogEntries(LogEventInfo logEvent, Layout layout)
         {
-            splitLogEntries = null;
-
             if (logEvent.Level == LogLevel.Off)
-            {
-                return null;
-            }
-
+                return new string[0];
             var originalLogEntry = layout.Render(logEvent);
-            if (splitOnNewLinePolicy.IsApplicable(originalLogEntry))
-            {
-                var logEntries = splitOnNewLinePolicy.Apply(originalLogEntry);
-                if (logEntries.Length == 0)
-                    return string.Empty;
-                if (logEntries.Length == 1)
-                    return logEntries[0];
-
-                splitLogEntries = logEntries;
-                return splitLogEntries[0];
-            }
-
-            return originalLogEntry;
+            return splitOnNewLinePolicy.IsApplicable() ? splitOnNewLinePolicy.Apply(originalLogEntry) : new[] { originalLogEntry };
         }
 
         public void PrepareMessage(ByteArray buffer, LogEventInfo logEvent, string logEntry)

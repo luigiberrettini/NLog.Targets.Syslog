@@ -22,11 +22,6 @@ namespace NLog.Targets.Syslog.Policies
             return enforcementConfig.SplitOnNewLine;
         }
 
-        public bool IsApplicable(string s)
-        {
-            return enforcementConfig.SplitOnNewLine && s.IndexOfAny(LineSeps) >= 0;
-        }
-
         public string[] Apply(string s)
         {
             var split = s.Split(LineSeps, StringSplitOptions.RemoveEmptyEntries);
