@@ -1,17 +1,11 @@
 language: csharp
-matrix:
+jobs:
   include:
     - os: linux
-      dist: trusty
       mono: latest
-      dotnet: 2.1.201
-      sudo: required
       env: MONO_BASE_PATH=/usr/lib/mono/
     - os: osx
-      osx_image: xcode10.3
       mono: latest
-      dotnet: 2.1.201
-      sudo: required
       env: MONO_BASE_PATH=/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/
 before_install:
   - |
@@ -26,12 +20,11 @@ before_install:
         version=$(echo $dotnetReleases | jq "select(.\"channel-version\" == \"$channel\") | .\"latest-sdk\"" | sed -e 's/^"//' -e 's/"$//')
         curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version "$version" --install-dir "$DOTNET_INSTALL_DIR" --no-path
     }
-    installLatestDotNetSdk '1.1'
     installLatestDotNetSdk '2.1'
-    installLatestDotNetSdk '2.2'
+    installLatestDotNetSdk '3.1'
     export PATH="$DOTNET_INSTALL_DIR:$PATH"
-    # See https://github.com/dotnet/cli/issues/9114
     export DOTNET_ROOT="$DOTNET_INSTALL_DIR"
+    export DOTNET_MULTILEVEL_LOOKUP=0
 script:
   - |
     mostRecentTag=$(git describe --abbrev=0 --tags --always)

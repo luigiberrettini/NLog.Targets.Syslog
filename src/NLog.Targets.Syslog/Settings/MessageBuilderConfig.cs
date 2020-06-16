@@ -3,12 +3,14 @@
 
 using System;
 using System.ComponentModel;
+using NLog.Config;
 
 namespace NLog.Targets.Syslog.Settings
 {
     /// <inheritdoc cref="NotifyPropertyChanged" />
     /// <inheritdoc cref="IDisposable" />
     /// <summary>Message build configuration</summary>
+    [NLogConfigurationItem]
     public class MessageBuilderConfig : NotifyPropertyChanged, IDisposable
     {
         private Facility facility;

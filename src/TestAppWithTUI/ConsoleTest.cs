@@ -108,8 +108,8 @@ namespace TestAppWithTui
             Trace.WriteLine(receivedString);
 
             var file = protocolType == SyslogServer.UdpProtocolHashCode ? udpStreamWriter : tcpStreamWriter;
-            file.WriteLine(receivedString);
-            file.Flush();
+            file?.WriteLine(receivedString);
+            file?.Flush();
         }
 
         private void OnException(Task task)
@@ -119,10 +119,14 @@ namespace TestAppWithTui
 
         private void DisposeStreams()
         {
-            udpStreamWriter.Close();
-            udpFileStream.Close();
-            tcpStreamWriter.Close();
-            tcpFileStream.Close();
+            udpStreamWriter?.Close();
+            udpStreamWriter = null;
+            udpFileStream?.Close();
+            udpFileStream = null;
+            tcpStreamWriter?.Close();
+            tcpStreamWriter = null;
+            tcpFileStream?.Close();
+            tcpFileStream = null;
         }
     }
 }
