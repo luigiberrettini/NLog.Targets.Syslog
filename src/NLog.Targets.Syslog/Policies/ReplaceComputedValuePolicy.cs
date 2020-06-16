@@ -25,7 +25,7 @@ namespace NLog.Targets.Syslog.Policies
 
         public string Apply(string s, string searchFor)
         {
-            if (s.Length == 0 || string.IsNullOrEmpty(searchFor))
+            if (s.Length == 0 || string.IsNullOrEmpty(searchFor) || replaceWith == null)
                 return s;
 
             var replaced = Regex.Replace(s, searchFor, replaceWith);
