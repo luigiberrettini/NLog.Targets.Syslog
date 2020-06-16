@@ -25,11 +25,12 @@ namespace NLog.Targets.Syslog.Policies
 
         public string Apply(string s, string searchFor)
         {
-            if (string.IsNullOrEmpty(searchFor) || string.IsNullOrEmpty(replaceWith) || s.Length == 0)
+            if (s.Length == 0 || string.IsNullOrEmpty(searchFor) || replaceWith == null)
                 return s;
 
             var replaced = Regex.Replace(s, searchFor, replaceWith);
-            InternalLogger.Trace("[Syslog] Replaced '{0}' (if found) with '{1}' given computed value '{2}': '{3}'", searchFor, replaceWith, s, replaced);
+            if (!ReferenceEquals(replaced, s))
+                InternalLogger.Trace("[Syslog] Replaced '{0}' (if found) with '{1}' given computed value '{2}': '{3}'", searchFor, replaceWith, s, replaced);
             return replaced;
         }
     }
