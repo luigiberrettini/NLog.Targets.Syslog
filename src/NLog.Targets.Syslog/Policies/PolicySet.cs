@@ -23,10 +23,8 @@ namespace NLog.Targets.Syslog.Policies
         {
             var afterApplication = s;
             foreach (var policy in policies)
-            {
                 if (policy.IsApplicable())
                     afterApplication = policy.Apply(afterApplication);
-            }
             return afterApplication;
         }
     }
