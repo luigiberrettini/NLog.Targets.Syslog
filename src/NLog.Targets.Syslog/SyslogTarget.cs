@@ -66,8 +66,9 @@ namespace NLog.Targets.Syslog
             Task.WhenAll(tasks)
                 .ContinueWith(t =>
                 {
-                    InternalLogger.Debug(t.Exception?.GetBaseException(), "[Syslog] Explicit flush completed");
-                    asyncContinuation(t.Exception?.GetBaseException());
+                    var exception = t.Exception?.GetBaseException();
+                    InternalLogger.Debug(exception, "[Syslog] Explicit flush completed");
+                    asyncContinuation(exception);
                 });
         }
 
