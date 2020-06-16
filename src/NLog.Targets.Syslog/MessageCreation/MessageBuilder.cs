@@ -16,6 +16,10 @@ namespace NLog.Targets.Syslog.MessageCreation
     {
         private static readonly Dictionary<RfcNumber, Func<MessageBuilderConfig, EnforcementConfig, MessageBuilder>> BuilderFactory;
         private static readonly Dictionary<Facility, Dictionary<Severity, string>> PriForFacilityAndSeverity;
+        private static readonly string[] NoEntries = new string[0];
+
+        [ThreadStatic]
+        private static string[] singleEntry;
 
         private readonly SplitOnNewLinePolicy splitOnNewLinePolicy;
         private readonly Facility facility;
@@ -59,9 +63,17 @@ namespace NLog.Targets.Syslog.MessageCreation
         public string[] BuildLogEntries(LogEventInfo logEvent, Layout layout)
         {
             if (logEvent.Level == LogLevel.Off)
-                return new string[0];
+                return NoEntries;
+
             var originalLogEntry = layout.Render(logEvent);
-            return splitOnNewLinePolicy.IsApplicable() ? splitOnNewLinePolicy.Apply(originalLogEntry) : new[] { originalLogEntry };
+
+            if (splitOnNewLinePolicy.IsApplicable() && splitOnNewLinePolicy.CausesSplitOf(originalLogEntry))
+                return splitOnNewLinePolicy.Apply(originalLogEntry);
+
+            if (singleEntry == null)
+                singleEntry = new string[1];
+            singleEntry[0] = originalLogEntry;
+            return singleEntry;
         }
 
         public void PrepareMessage(ByteArray buffer, LogEventInfo logEvent, string logEntry)

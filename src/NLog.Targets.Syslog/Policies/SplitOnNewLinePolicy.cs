@@ -22,6 +22,11 @@ namespace NLog.Targets.Syslog.Policies
             return enforcementConfig.SplitOnNewLine;
         }
 
+        public bool CausesSplitOf(string s)
+        {
+            return s.IndexOfAny(LineSeps) >= 0;
+        }
+
         public string[] Apply(string s)
         {
             var split = s.Split(LineSeps, StringSplitOptions.RemoveEmptyEntries);
