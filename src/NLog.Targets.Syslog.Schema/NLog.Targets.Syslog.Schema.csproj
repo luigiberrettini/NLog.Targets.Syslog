@@ -23,6 +23,7 @@
   <PropertyGroup>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <EnableDefaultItems>false</EnableDefaultItems>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
   </PropertyGroup>
 
   <ItemGroup>
