@@ -14,7 +14,7 @@
     <Version>0.1.0-alpha-01-commitHash</Version>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/luigiberrettini/NLog.Targets.Syslog</PackageProjectUrl>
-    <PackageIconUrl>http://nlog-project.org/NConfig.png</PackageIconUrl>
+    <PackageIcon>NLog.Targets.Syslog.png</PackageIcon>
     <RepositoryUrl>https://github.com/luigiberrettini/NLog.Targets.Syslog</RepositoryUrl>
     <PackageReleaseNotes>https://github.com/luigiberrettini/NLog.Targets.Syslog/releases/tag/v0.1.0-alpha-01-commitHash</PackageReleaseNotes>
     <RepositoryType>Git</RepositoryType>
@@ -26,6 +26,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\NLog.Targets.Syslog.png" Pack="true" PackagePath="" />
     <Content Include="NLog.Targets.Syslog.xsd" Pack="true" PackagePath="$(ContentTargetFolders)" />
   </ItemGroup>
 </Project>
