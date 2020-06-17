@@ -107,7 +107,7 @@ namespace NLog.Targets.Syslog
         {
             try
             {
-                Enforcement.MessageProcessors.ForEach(i => asyncLoggers[i]?.Dispose());
+                Enforcement.MessageProcessors.ForEach(i => asyncLoggers?[i]?.Dispose());
             }
             catch (Exception exception)
             {
