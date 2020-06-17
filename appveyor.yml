@@ -3,7 +3,7 @@ image: Visual Studio 2019
 skip_branch_with_pr: true
 environment:
   NUGET_API_KEY:
-    secure: w4DT+CkuVfttvjO4tkpTtiD8kRWvu4Jgf9YTIWIEQ/ebVLLF1lbz/JyeigqirQQt
+    secure: ANrRqtL4Ht46VEFGHnSdzEi7xl6a7AJPs6bczi5H5hQW0MQFTPlVRwarLIU/q39P
 install:
   - ps: |
       $DOTNET_INSTALL_DIR = $(Join-Path (Get-Location) 'dotnetsdk')
