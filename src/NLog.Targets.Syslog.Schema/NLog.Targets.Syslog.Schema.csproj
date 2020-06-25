@@ -18,7 +18,15 @@
     <RepositoryUrl>https://github.com/luigiberrettini/NLog.Targets.Syslog</RepositoryUrl>
     <PackageReleaseNotes>https://github.com/luigiberrettini/NLog.Targets.Syslog/releases/tag/v0.1.0-alpha-01-commitHash</PackageReleaseNotes>
     <RepositoryType>Git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
 
   <PropertyGroup>
     <IncludeBuildOutput>false</IncludeBuildOutput>
