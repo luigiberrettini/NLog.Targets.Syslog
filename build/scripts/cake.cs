@@ -85,22 +85,37 @@ Task("Clean")
         if (DirectoryExists(artifactsDir))
             DeleteDirectory(artifactsDir, deleteDirectorySettings);
 
+        var toCleanFolders = childDirInfos
+            .Where(x => x.GetFiles("*.csproj").Length > 0)
+            .Select(x => x.FullName)
+            .ToList();
+
         var cleanSettings = new DotNetCoreCleanSettings
         {
             MSBuildSettings = new DotNetCoreMSBuildSettings { NoLogo = true, Verbosity = buildVerbosity }
         };
 
-        foreach (var folder in toBuildFolders)
+        foreach (var folder in toCleanFolders)
         {
-            Information(folder);
+            Information("Cleaning project in folder {0}", folder);
             DotNetCoreClean(folder, cleanSettings);
+        }
 
+        foreach (var folder in toCleanFolders)
+        {
             var binFolder = System.IO.Path.Combine(folder, "bin");
             if (DirectoryExists(binFolder))
+            {
+                Information("Deleting folder {0}", binFolder);
                 DeleteDirectory(binFolder, deleteDirectorySettings);
+            }
+
             var objFolder = System.IO.Path.Combine(folder, "obj");
             if (DirectoryExists(objFolder))
+            {
+                Information("Deleting folder {0}", objFolder);
                 DeleteDirectory(objFolder, deleteDirectorySettings);
+            }
         }
     });
 
