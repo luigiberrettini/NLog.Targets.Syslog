@@ -71,7 +71,7 @@ artifactsDir="$buildDir/artifacts"
 getToolAssemblyPath cakeAssemblyPath externalArgs $toolsDir 'cake.tool' '--cakePackageVersion=' 'dotnet-cake' 'cake.dll'
 cakeScript="$scriptsDir/cake.cs"
 gitRemote=$(git remote get-url origin | sed -e 's/.git$//')
-commitHash=$(git rev-parse --short HEAD)
+commitHash=$(git rev-parse HEAD)
 
 internalArgs=("$cakeAssemblyPath" "$cakeScript" "--gitRemote=$gitRemote" "--srcDir=$srcDir" "--artifactsDir=$artifactsDir" "--commitHash=$commitHash")
 "${internalArgs[@]}" $externalArgs
