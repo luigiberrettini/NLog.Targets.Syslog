@@ -52,7 +52,7 @@ $artifactsDir = Join-Path $buildDir 'artifacts'
 $cakeAssemblyPath = Get-ToolAssemblyPath $args $toolsDir 'cake.tool' '--cakePackageVersion=' 'dotnet-cake' 'cake.dll'
 $cakeScript = Join-Path $scriptsDir 'cake.cs'
 $gitRemote = $(git remote get-url origin) -replace '.git$', ''
-$commitHash = $(git rev-parse --short HEAD)
+$commitHash = $(git rev-parse HEAD)
 
 $cakeArgs = @("$cakeScript", "--gitRemote=$gitRemote", "--srcDir=$srcDir", "--artifactsDir=$artifactsDir", "--commitHash=$commitHash") + $args
 & $cakeAssemblyPath $cakeArgs

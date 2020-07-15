@@ -24,9 +24,43 @@ var perProjectMsBuildSettings = new Dictionary<string, DotNetCoreMSBuildSettings
 Task("MSBuildSettings")
     .Does(() =>
     {
-        var providedVersion = softwareVersion.Split(new [] { '-' }, 2, StringSplitOptions.RemoveEmptyEntries);
-        if (providedVersion.Length == 1)
-            providedVersion = new [] { providedVersion[0], ""};
+        var invalidVersion = ("", "", "", "", "");
+
+        (string major, string minor, string patch, string preRelease, string buildMetadata) GetSemanticVersionParts(string s)
+        {
+            var semanticVersioningPattern = @"([0-9]+\.[0-9]+\.[0-9]+)(\-[0-9A-Za-z-\.]+){0,1}(\+[0-9A-Za-z-\.]+){0,1}";
+            var semanticVersioningRegEx = new System.Text.RegularExpressions.Regex(semanticVersioningPattern);
+            var match = semanticVersioningRegEx.Match(s);
+            if (!match.Success)
+                return invalidVersion;
+            var core = match.Groups[1].Value.Split('.');
+            if (match.Groups.Count == 2)
+                return (core[0], core[1], core[2], "", "");
+            if (match.Groups.Count == 3)
+                return match.Groups[1].Value.StartsWith("-") ?
+                    (core[0], core[1], core[2], match.Groups[2].Value, "") :
+                    (core[0], core[1], core[2], "", match.Groups[2].Value.Replace("commitHash", commitHash));
+            return (core[0], core[1], core[2], match.Groups[2].Value, match.Groups[3].Value.Replace("commitHash", commitHash));
+        }
+
+        string GetVersionFromProjectFile(string projectFileContent)
+        {
+            var document = new System.Xml.XmlDocument();
+            document.LoadXml(projectFileContent);
+            var csprojProps = document.DocumentElement["PropertyGroup"];
+            return (csprojProps["InformationalVersion"] ?? csprojProps["Version"]).InnerText;
+        }
+
+        bool ProjectUsesSourceLink(string projectFileContent)
+        {
+            var document = new System.Xml.XmlDocument();
+            document.LoadXml(projectFileContent);
+            return document.SelectSingleNode("descendant::ItemGroup[PackageReference/@Include='Microsoft.SourceLink.GitHub']") != null;
+        }
+
+        // softwareVersion
+        // 1.2.3(-alpha-01)
+        var providedVersion = GetSemanticVersionParts($"{softwareVersion}+commitHash");
 
         var csprojFiles = childDirInfos
             .SelectMany(x => x.GetFiles("*.csproj"))
@@ -35,16 +69,21 @@ Task("MSBuildSettings")
 
         foreach (var project in csprojFiles)
         {
-            var content = System.IO.File.ReadAllText(project);
-            var document = new System.Xml.XmlDocument();
-            document.LoadXml(content);
-            var csprojProps = document.DocumentElement["PropertyGroup"];
-            var csprojVersion = (csprojProps["InformationalVersion"] ?? csprojProps["Version"]).InnerText.Split(new [] { '-' }, 2, StringSplitOptions.RemoveEmptyEntries);
-            var versionPrefix = providedVersion.Length == 0 ? csprojVersion[0].Split('.') : providedVersion[0].Split('.');
-            var versionSuffix = (providedVersion.Length == 0 ? csprojVersion[1] : providedVersion[1]).Replace("commitHash", commitHash);
-            if (versionSuffix.Length > 0)
-                versionSuffix = "-" + versionSuffix;
+            var projectFileContent = System.IO.File.ReadAllText(project);
 
+            var csprojVersion = GetSemanticVersionParts(GetVersionFromProjectFile(projectFileContent));
+            var usesSourceLink = ProjectUsesSourceLink(projectFileContent);
+
+            var version = providedVersion != invalidVersion ? providedVersion : csprojVersion;
+            if (version == invalidVersion)
+            {
+                Error("Version is invalid");
+                Environment.Exit(1);
+            }
+
+            // PackageVersion
+            // 1.2.3(-alpha-01)
+            //
             // AssemblyVersion
             // 1.0.0.0
             //
@@ -52,24 +91,37 @@ Task("MSBuildSettings")
             // 1.2.3.<BUILD_NUMBER>
             //
             // AssemblyInformationalVersion
-            // 1.2.3(-alpha-commitHash)
-            var assemblyVersion = String.Format("{0}.{1}.{1}.{1}", versionPrefix[0], 0);
-            var assemblyFileVersion = String.Format("{0}.{1}.{2}.{3}", versionPrefix[0], versionPrefix[1], versionPrefix[2], buildNumber);
-            var assemblyInformationalVersion = String.Format("{0}.{1}.{2}{3}", versionPrefix[0], versionPrefix[1], versionPrefix[2], versionSuffix);
-            var packageReleaseNotesUrl = String.Format("{0}/releases/tag/v{1}", gitRemote, assemblyInformationalVersion);
+            // 1.2.3(-alpha-01+commitHash)
+            // The GenerateAssemblyInfo target changes AssemblyInformationalVersion appending the SourceRevisionId if present:
+            // +<SourceRevisionId> if no build metadata is present or .<SourceRevisionId> otherwise
+            // SourceLink sets SourceRevisionId to the commitHash therefore the AssemblyInformationalVersion needs to be adjusted
+            // If some projects use SourceLink and some don't it is better to handle the AssemblyInformationalVersion manually:
+            // on build some dependencies are rebuilt using the AssemblyInformationalVersion of the project being built
+            // Setting IncludeSourceRevisionInInformationalVersion to false avoid changes to the AssemblyInformationalVersion
+            // An alternative could be preventing dependencies from being built but the script should build in the proper order
+            var packageVersion = $"{version.major}.{version.minor}.{version.patch}{version.preRelease}";
+            var packageReleaseNotesUrl = $"{gitRemote}/releases/tag/v{packageVersion}";
+            var assemblyVersion = $"{version.major}.0.0.0";
+            var assemblyFileVersion = $"{version.major}.{version.minor}.{version.patch}.{buildNumber}";
+            var assemblyInformationalVersion = $"{packageVersion}{version.buildMetadata}";
 
-            Information("Project: {0}", project);
-            Information("AssemblyVersion: {0}", assemblyVersion);
-            Information("AssemblyFileVersion: {0}", assemblyFileVersion);
-            Information("AssemblyInformationalVersion/NuGet package version: {0}", assemblyInformationalVersion);
-            Information("Package release notes URL: {0}{1}", packageReleaseNotesUrl, Environment.NewLine);
+            Information($"Project: {project}");
+            Information($"SourceLink: {usesSourceLink}");
+            Information($"AssemblyVersion: {assemblyVersion}");
+            Information($"AssemblyFileVersion: {assemblyFileVersion}");
+            Information($"AssemblyInformationalVersion: {assemblyInformationalVersion}");
+            Information($"NuGet package version: {packageVersion}");
+            Information($"Package release notes URL: {packageReleaseNotesUrl}");
+            Information(Environment.NewLine);
 
             perProjectMsBuildSettings[project] = new DotNetCoreMSBuildSettings { NoLogo = true, Verbosity = buildVerbosity }
                 .WithProperty("AssemblyVersion", assemblyVersion)
                 .WithProperty("FileVersion", assemblyFileVersion)
                 .WithProperty("InformationalVersion", assemblyInformationalVersion)
-                .WithProperty("Version", assemblyInformationalVersion)
-                .WithProperty("PackageReleaseNotes", packageReleaseNotesUrl);
+                .WithProperty("Version", packageVersion)
+                .WithProperty("PackageReleaseNotes", packageReleaseNotesUrl)
+                .WithProperty("Deterministic", usesSourceLink.ToString())
+                .WithProperty("ContinuousIntegrationBuild", usesSourceLink.ToString());
         }
     });
 
@@ -85,22 +137,37 @@ Task("Clean")
         if (DirectoryExists(artifactsDir))
             DeleteDirectory(artifactsDir, deleteDirectorySettings);
 
+        var toCleanFolders = childDirInfos
+            .Where(x => x.GetFiles("*.csproj").Length > 0)
+            .Select(x => x.FullName)
+            .ToList();
+
         var cleanSettings = new DotNetCoreCleanSettings
         {
             MSBuildSettings = new DotNetCoreMSBuildSettings { NoLogo = true, Verbosity = buildVerbosity }
         };
 
-        foreach (var folder in toBuildFolders)
+        foreach (var folder in toCleanFolders)
         {
-            Information(folder);
+            Information($"Cleaning project in folder {folder}");
             DotNetCoreClean(folder, cleanSettings);
+        }
 
+        foreach (var folder in toCleanFolders)
+        {
             var binFolder = System.IO.Path.Combine(folder, "bin");
             if (DirectoryExists(binFolder))
+            {
+                Information($"Deleting folder {binFolder}");
                 DeleteDirectory(binFolder, deleteDirectorySettings);
+            }
+
             var objFolder = System.IO.Path.Combine(folder, "obj");
             if (DirectoryExists(objFolder))
+            {
+                Information($"Deleting folder {objFolder}");
                 DeleteDirectory(objFolder, deleteDirectorySettings);
+            }
         }
     });
 
@@ -193,11 +260,11 @@ Task("NuGetPush")
         if (nuGetSource == null)
         {
             Information("Missing NuGet source:");
-            Information(" - test source = {0}", "https://apiint.nugettest.org/v3/index.json");
-            Information(" - live source = {0}", "https://api.nuget.org/v3/index.json");
+            Information(" - test source = https://apiint.nugettest.org/v3/index.json");
+            Information(" - live source = https://api.nuget.org/v3/index.json");
             return;
         }
-        Information("NuGet source: {0}", nuGetSource);
+        Information($"NuGet source: {nuGetSource}");
 
         var packageSearchPattern = System.IO.Path.Combine(artifactsDir, "*.nupkg");
         var nuGetPushSettings = new DotNetCoreNuGetPushSettings { Source = nuGetSource, ApiKey = nuGetApiKey };
