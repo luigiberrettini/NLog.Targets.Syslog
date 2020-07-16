@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27004.2010
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{37F84F7C-A60C-4FCE-A629-8D6829777961}"
 	ProjectSection(SolutionItems) = preProject
@@ -10,11 +10,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution 
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{FE11D99F-A094-42A4-9DA4-EFEFA413F674}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{FE11D99F-A094-42A4-9DA4-EFEFA413F674}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{3089347D-9E13-4707-A3C6-A7D786BE6369}"
 	ProjectSection(SolutionItems) = preProject
-		..\tools\build.cake = ..\tools\build.cake
-		..\tools\build.ps1 = ..\tools\build.ps1
-		..\tools\build.sh = ..\tools\build.sh
+		..\build\scripts\bootstrap.ps1 = ..\build\scripts\bootstrap.ps1
+		..\build\scripts\bootstrap.sh = ..\build\scripts\bootstrap.sh
+		..\build\scripts\cake.cs = ..\build\scripts\cake.cs
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FakeSyslogServer", "FakeSyslogServer\FakeSyslogServer.csproj", "{38722095-C8E7-496F-8126-AF17790B8A6E}"
@@ -59,6 +61,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FE11D99F-A094-42A4-9DA4-EFEFA413F674} = {37F84F7C-A60C-4FCE-A629-8D6829777961}
+		{3089347D-9E13-4707-A3C6-A7D786BE6369} = {FE11D99F-A094-42A4-9DA4-EFEFA413F674}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2D2B5C8D-A77F-436A-8836-1D45D2BFA3DD}
