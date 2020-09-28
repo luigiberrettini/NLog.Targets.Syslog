@@ -15,7 +15,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         private static readonly byte[] RightBracketBytes = { 0x5D };
 
         private readonly SdId sdId;
-        private readonly IList<SdParam> sdParams;
+        private readonly List<SdParam> sdParams;
 
         public SdElement(SdElementConfig sdElementConfig, EnforcementConfig enforcementConfig)
         {
@@ -23,22 +23,16 @@ namespace NLog.Targets.Syslog.MessageCreation
             sdParams = sdElementConfig.SdParams.Select(sdParamConfig => new SdParam(sdParamConfig, enforcementConfig)).ToList();
         }
 
-        public static void Append(ByteArray message, IEnumerable<SdElement> sdElements, LogEventInfo logEvent)
+        public static void Append(ByteArray message, List<SdElement> sdElements, LogEventInfo logEvent)
         {
-            var elements = sdElements
-                .Select(x => new { SdId = x.sdId, RenderedSdId = x.sdId.Render(logEvent), SdParams = x.sdParams })
-                .ToList();
-
-            InternalLogDuplicatesPolicy.Apply(elements, x => x.RenderedSdId);
-
-            elements
-                .ForEach(elem =>
-                {
-                    message.AppendBytes(LeftBracketBytes);
-                    elem.SdId.Append(message, elem.RenderedSdId);
-                    SdParam.Append(message, elem.SdParams, logEvent, SdIdToInvalidParamNamePattern.Map(elem.RenderedSdId));
-                    message.AppendBytes(RightBracketBytes);
-                });
+            foreach (var sdItem in sdElements)
+            {
+                var sdIdValue = sdItem.sdId.Render(logEvent);
+                message.AppendBytes(LeftBracketBytes);
+                sdItem.sdId.Append(message, sdIdValue);
+                SdParam.Append(message, sdItem.sdParams, logEvent, SdIdToInvalidParamNamePattern.Map(sdIdValue));
+                message.AppendBytes(RightBracketBytes);
+            }
         }
 
         public static string ToString(IEnumerable<SdElement> sdElements)
