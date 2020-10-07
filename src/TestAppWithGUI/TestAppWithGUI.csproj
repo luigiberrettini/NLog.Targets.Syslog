@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>net461</TargetFramework>
     <RootNamespace>TestAppWithGui</RootNamespace>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
     <OutputType>WinExe</OutputType>
@@ -19,6 +19,10 @@
 
     <StartupObject>TestAppWithGui.Program</StartupObject>
   </PropertyGroup>
+
+  <ItemGroup Condition="('$(TargetFrameworkIdentifier)' == '.NETFramework') AND ('$(OS)' != 'Windows_NT')">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="System" />
