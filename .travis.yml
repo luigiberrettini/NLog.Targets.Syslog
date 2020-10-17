@@ -29,10 +29,10 @@ script:
   - |
     mostRecentTag=$(git describe --abbrev=0 --tags --always)
     if [[ $mostRecentTag != v* ]]; then
-        mostRecentTag='v1.0.0'
+        mostRecentTag='v0.0.0'
         if [[ "${TRAVIS_TAG}" != "" ]]; then exit 1; fi
     fi
     mostRecentVersion=$(echo "$mostRecentTag" | cut -c 2-)
-    FrameworkPathOverride=$MONO_BASE_PATH/4.5.2-api/ $(pwd)/build/scripts/bootstrap.sh '--target=Test' "--softwareVersion=$mostRecentVersion" "--buildNumber=$TRAVIS_BUILD_NUMBER"
+    FrameworkPathOverride=$MONO_BASE_PATH/4.5.2-api/ $(pwd)/build/scripts/bootstrap.sh '--target=Test' "--softwareVersion=$mostRecentVersion+commitHash" "--buildId=$TRAVIS_BUILD_ID"
 notifications:
   email: false
