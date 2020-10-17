@@ -5,7 +5,7 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
     <OutputType>Library</OutputType>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    
+
     <Product>FakeSyslogServer</Product>
     <Copyright>Copyright © 2013 - present by Luigi Berrettini and others: https://github.com/luigiberrettini/NLog.Targets.Syslog/graphs/contributors</Copyright>
     <AssemblyTitle>Fake Syslog server</AssemblyTitle>
@@ -19,8 +19,8 @@
   <ItemGroup>
     <PackageReference Include="NLog" Version="4.5.4" />
   </ItemGroup>
-	
-  <ItemGroup Condition="('$(TargetFrameworkIdentifier)' == '.NETFramework') AND ('$(OS)' != 'Windows_NT')">
+
+  <ItemGroup Condition="'$(OS)' != 'Windows_NT' AND '$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
 </Project>
