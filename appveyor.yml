@@ -20,22 +20,21 @@ install:
       $env:DOTNET_MULTILEVEL_LOOKUP = 0
 before_build:
   - ps: |
+      Update-AppveyorBuild -Version "Build ID: $env:APPVEYOR_BUILD_ID"
       $mostRecentTag = git describe --abbrev=0 --tags --always
       if ($mostRecentTag.Substring(0, 1) -ne 'v') {
-          $mostRecentTag = 'v1.0.0'
+          $mostRecentTag = 'v0.0.0'
           if ($env:APPVEYOR_REPO_TAG -eq 'true') { exit 1 }
       }
       $mostRecentVersion = $mostRecentTag.Substring(1)
-      $currentCommitHash = git rev-parse --short HEAD
-      Set-AppveyorBuildVariable -Name SW_VER -Value $mostRecentVersion
-      Update-AppveyorBuild -Version "Build $env:APPVEYOR_BUILD_NUMBER - Commit $currentCommitHash - Tag v$mostRecentVersion"
+      Set-AppveyorBuildVariable -Name mostRecentVersion -Value "$mostRecentVersion"
 build_script:
   - ps: |
       if ($env:APPVEYOR_REPO_TAG -ne 'true') {
-          .\build\scripts\bootstrap.ps1 '--target=NuGetPack' "--softwareVersion=$env:SW_VER" "--buildNumber=$env:APPVEYOR_BUILD_NUMBER"
+          .\build\scripts\bootstrap.ps1 '--target=NuGetPack' "--softwareVersion=$env:mostRecentVersion+commitHash" "--buildId=$env:APPVEYOR_BUILD_ID"
       }
       else {
-          .\build\scripts\bootstrap.ps1 '--target=NuGetPush' "--softwareVersion=$env:SW_VER" '--nuGetSource=https://api.nuget.org/v3/index.json' "--nuGetApiKey=$env:NUGET_API_KEY"
+          .\build\scripts\bootstrap.ps1 '--target=NuGetPush' "--softwareVersion=$env:mostRecentVersion+commitHash" '--nuGetSource=https://api.nuget.org/v3/index.json' "--nuGetApiKey=$env:NUGET_API_KEY"
       }
       if ($LastExitCode -ne 0) { exit $LastExitCode }
 after_build:
