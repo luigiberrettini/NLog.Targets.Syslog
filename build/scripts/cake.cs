@@ -5,7 +5,7 @@ var target = Argument<string>("target", "Test");
 var buildConfiguration = Argument<string>("buildConfiguration", "Release");
 var buildVerbosity = (DotNetCoreVerbosity)Enum.Parse(typeof(DotNetCoreVerbosity), Argument<string>("buildVerbosity", "Minimal"));
 var softwareVersion = target.ToLower() == "nugetpack" || target.ToLower() == "nugetpush" ? Argument<string>("softwareVersion") : Argument<string>("softwareVersion", string.Empty);
-var buildNumber = Argument<int>("buildNumber", 0);
+var buildId = Argument<int>("buildId", 0);
 var commitHash = Argument<string>("commitHash");
 var nuGetSource = Argument<string>("nuGetSource", null);
 var nuGetApiKey = Argument<string>("nuGetApiKey", string.Empty);
@@ -24,15 +24,15 @@ var perProjectMsBuildSettings = new Dictionary<string, DotNetCoreMSBuildSettings
 Task("MSBuildSettings")
     .Does(() =>
     {
-        var invalidVersion = ("", "", "", "", "");
+        var invalidSemVer = ("", "", "", "", "");
 
-        (string major, string minor, string patch, string preRelease, string buildMetadata) GetSemanticVersionParts(string s)
+        (string Major, string Minor, string Patch, string PreRelease, string BuildMetadata) GetSemVerParts(string s)
         {
             var semanticVersioningPattern = @"([0-9]+\.[0-9]+\.[0-9]+)(\-[0-9A-Za-z-\.]+){0,1}(\+[0-9A-Za-z-\.]+){0,1}";
             var semanticVersioningRegEx = new System.Text.RegularExpressions.Regex(semanticVersioningPattern);
             var match = semanticVersioningRegEx.Match(s);
             if (!match.Success)
-                return invalidVersion;
+                return invalidSemVer;
             var core = match.Groups[1].Value.Split('.');
             if (match.Groups.Count == 2)
                 return (core[0], core[1], core[2], "", "");
@@ -43,24 +43,20 @@ Task("MSBuildSettings")
             return (core[0], core[1], core[2], match.Groups[2].Value, match.Groups[3].Value.Replace("commitHash", commitHash));
         }
 
-        string GetVersionFromProjectFile(string projectFileContent)
+        (string InformationalVersion, string UsesSourceLink) GetProjectInfo(string projectFilePath)
         {
+            var projectFileContent = System.IO.File.ReadAllText(projectFilePath);
             var document = new System.Xml.XmlDocument();
             document.LoadXml(projectFileContent);
-            var csprojProps = document.DocumentElement["PropertyGroup"];
-            return (csprojProps["InformationalVersion"] ?? csprojProps["Version"]).InnerText;
-        }
-
-        bool ProjectUsesSourceLink(string projectFileContent)
-        {
-            var document = new System.Xml.XmlDocument();
-            document.LoadXml(projectFileContent);
-            return document.SelectSingleNode("descendant::ItemGroup[PackageReference/@Include='Microsoft.SourceLink.GitHub']") != null;
+            var propertyGroup = document.DocumentElement["PropertyGroup"];
+            var informationalVersion = propertyGroup["InformationalVersion"]?.InnerText ?? propertyGroup["Version"].InnerText + "+commitHash";
+            var usesSourceLink = document.SelectSingleNode("descendant::ItemGroup[PackageReference/@Include='Microsoft.SourceLink.GitHub']") != null;
+            return (informationalVersion, usesSourceLink.ToString());
         }
 
         // softwareVersion
-        // 1.2.3(-alpha-01)
-        var providedVersion = GetSemanticVersionParts($"{softwareVersion}+commitHash");
+        // 1.2.3(-alpha-01+commitHash)
+        var providedSemVer = GetSemVerParts($"{softwareVersion}");
 
         var csprojFiles = childDirInfos
             .SelectMany(x => x.GetFiles("*.csproj"))
@@ -69,17 +65,17 @@ Task("MSBuildSettings")
 
         foreach (var project in csprojFiles)
         {
-            var projectFileContent = System.IO.File.ReadAllText(project);
+            Information($"Project: {project}");
 
-            var csprojVersion = GetSemanticVersionParts(GetVersionFromProjectFile(projectFileContent));
-            var usesSourceLink = ProjectUsesSourceLink(projectFileContent);
+            var projectInfo = GetProjectInfo(project);
+            var (projectSemVer, projectUsesSourceLink) = (GetSemVerParts(projectInfo.InformationalVersion), projectInfo.UsesSourceLink);
 
-            var version = providedVersion != invalidVersion ? providedVersion : csprojVersion;
-            if (version == invalidVersion)
+            if (providedSemVer == invalidSemVer && projectSemVer == invalidSemVer)
             {
-                Error("Version is invalid");
+                Error("Version does not follow the semantic version specification");
                 Environment.Exit(1);
             }
+            var semVer = providedSemVer != invalidSemVer ? providedSemVer : projectSemVer;
 
             // PackageVersion
             // 1.2.3(-alpha-01)
@@ -99,14 +95,18 @@ Task("MSBuildSettings")
             // on build some dependencies are rebuilt using the AssemblyInformationalVersion of the project being built
             // Setting IncludeSourceRevisionInInformationalVersion to false avoid changes to the AssemblyInformationalVersion
             // An alternative could be preventing dependencies from being built but the script should build in the proper order
-            var packageVersion = $"{version.major}.{version.minor}.{version.patch}{version.preRelease}";
+            var packageVersion = $"{semVer.Major}.{semVer.Minor}.{semVer.Patch}{semVer.PreRelease}";
             var packageReleaseNotesUrl = $"{gitRemote}/releases/tag/v{packageVersion}";
-            var assemblyVersion = $"{version.major}.0.0.0";
-            var assemblyFileVersion = $"{version.major}.{version.minor}.{version.patch}.{buildNumber}";
-            var assemblyInformationalVersion = $"{packageVersion}{version.buildMetadata}";
+            var assemblyVersion = $"{semVer.Major}.0.0.0";
+            var assemblyFileVersion = $"{semVer.Major}.{semVer.Minor}.{semVer.Patch}.{buildId}";
+            var assemblyInformationalVersion = $"{packageVersion}{semVer.BuildMetadata}";
+            if (buildId > 0)
+            {
+                packageVersion += $"+{buildId}";
+                assemblyInformationalVersion = $"{packageVersion}{semVer.BuildMetadata.Replace('+', '.')}";
+            }
 
-            Information($"Project: {project}");
-            Information($"SourceLink: {usesSourceLink}");
+            Information($"SourceLink: {projectUsesSourceLink}");
             Information($"AssemblyVersion: {assemblyVersion}");
             Information($"AssemblyFileVersion: {assemblyFileVersion}");
             Information($"AssemblyInformationalVersion: {assemblyInformationalVersion}");
@@ -120,8 +120,8 @@ Task("MSBuildSettings")
                 .WithProperty("InformationalVersion", assemblyInformationalVersion)
                 .WithProperty("Version", packageVersion)
                 .WithProperty("PackageReleaseNotes", packageReleaseNotesUrl)
-                .WithProperty("Deterministic", usesSourceLink.ToString())
-                .WithProperty("ContinuousIntegrationBuild", usesSourceLink.ToString());
+                .WithProperty("Deterministic", projectUsesSourceLink)
+                .WithProperty("ContinuousIntegrationBuild", projectUsesSourceLink);
         }
     });
 
