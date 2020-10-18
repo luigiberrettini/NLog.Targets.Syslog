@@ -1,13 +1,13 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
-using System;
 using NLog.Layouts;
+using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Policies;
+using NLog.Targets.Syslog.Settings;
+using System;
 using System.Globalization;
 using System.Text;
-using NLog.Targets.Syslog.MessageStorage;
-using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {
@@ -76,7 +76,7 @@ namespace NLog.Targets.Syslog.MessageCreation
             return formatSb
                 .Append('.')
                 .Append('f', fRepeatCount)
-                .Append('0', Math.Max(0, zeroRepeatCount))
+                .Append('0', zeroRepeatCount)
                 .Append("K");
         }
 

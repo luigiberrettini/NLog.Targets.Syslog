@@ -1,0 +1,18 @@
+* text=auto
+
+*.md text eol=crlf
+
+*.yml text eol=crlf
+*.ps1 text eol=crlf
+*.sh text eol=lf
+
+*.sln text eol=crlf
+*.csproj text eol=crlf
+*.cs text eol=crlf
+*.config text eol=crlf
+*.json text eol=crlf
+*.xsd text eol=crlf
+*.txt text eol=crlf
+
+*.png binary
+*.snk binary
