@@ -71,7 +71,7 @@ Task("MSBuildSettings")
         }
 
         // softwareVersion
-        // 1.2.3(-alpha-01+commitHash)
+        // 1.2.3(-alpha.1+commitHash)
         var providedSemVer = GetSemVerParts($"{softwareVersion}");
 
         var csprojFiles = childDirInfos
@@ -94,7 +94,7 @@ Task("MSBuildSettings")
             var semVer = providedSemVer != invalidSemVer ? providedSemVer : projectSemVer;
 
             // PackageVersion
-            // 1.2.3(-alpha-01)
+            // 1.2.3(-alpha.1)
             //
             // AssemblyVersion
             // 1.0.0.0
@@ -103,7 +103,7 @@ Task("MSBuildSettings")
             // 1.2.3.<BUILD_NUMBER>
             //
             // AssemblyInformationalVersion
-            // 1.2.3(-alpha-01+commitHash)
+            // 1.2.3(-alpha.1+commitHash)
             // The GenerateAssemblyInfo target changes AssemblyInformationalVersion appending the SourceRevisionId if present:
             // +<SourceRevisionId> if no build metadata is present or .<SourceRevisionId> otherwise
             // SourceLink sets SourceRevisionId to the commitHash therefore the AssemblyInformationalVersion needs to be adjusted
@@ -113,7 +113,7 @@ Task("MSBuildSettings")
             // An alternative could be preventing dependencies from being built but the script should build in the proper order
             var packageVersion = buildId == 0 ?
                 $"{semVer.Major}.{semVer.Minor}.{semVer.Patch}{semVer.PreRelease}" :
-                $"{semVer.Major}.{semVer.Minor}.{semVer.Patch}{semVer.PreRelease}-post-release-{buildId}";
+                $"{semVer.Major}.{semVer.Minor}.{semVer.Patch}{semVer.PreRelease}-postRelease.{buildId}";
             var packageReleaseNotesUrl = $"{gitRemote}/releases/tag/v{packageVersion}";
             var assemblyVersion = $"{semVer.Major}.0.0.0";
             var assemblyFileVersion = buildNumber == -1 ?

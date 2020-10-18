@@ -21,7 +21,7 @@
     <AssemblyName>NLog.Targets.Syslog</AssemblyName>
     <AssemblyVersion>0.0.0.0</AssemblyVersion>
     <FileVersion>0.1.0.0</FileVersion>
-    <InformationalVersion>0.1.0-alpha-01+commitHash</InformationalVersion>
+    <InformationalVersion>0.1.0-alpha.1+commitHash</InformationalVersion>
     <NeutralLanguage>en</NeutralLanguage>
 
     <Company>Luigi Berrettini</Company>
@@ -30,12 +30,12 @@
     <Title>NLog.Targets.Syslog</Title>
     <Description>Custom target for NLog to send logging messages to a Syslog server</Description>
     <PackageTags>NLog Syslog Log Logging</PackageTags>
-    <Version>0.1.0-alpha-01</Version>
+    <Version>0.1.0-alpha.1</Version>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/luigiberrettini/NLog.Targets.Syslog</PackageProjectUrl>
     <PackageIcon>NLog.Targets.Syslog.png</PackageIcon>
     <RepositoryUrl>https://github.com/luigiberrettini/NLog.Targets.Syslog</RepositoryUrl>
-    <PackageReleaseNotes>https://github.com/luigiberrettini/NLog.Targets.Syslog/releases/tag/v0.1.0-alpha-01</PackageReleaseNotes>
+    <PackageReleaseNotes>https://github.com/luigiberrettini/NLog.Targets.Syslog/releases/tag/v0.1.0-alpha.1</PackageReleaseNotes>
     <RepositoryType>Git</RepositoryType>
 
     <IncludeSymbols>true</IncludeSymbols>
