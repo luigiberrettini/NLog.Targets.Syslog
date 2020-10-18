@@ -33,6 +33,6 @@ script:
         if [[ "${TRAVIS_TAG}" != "" ]]; then exit 1; fi
     fi
     mostRecentVersion=$(echo "$mostRecentTag" | cut -c 2-)
-    $(pwd)/build/scripts/bootstrap.sh '--target=Test' "--softwareVersion=$mostRecentVersion+commitHash" "--buildId=$TRAVIS_BUILD_ID"
+    $(pwd)/build/scripts/bootstrap.sh '--target=Test' "--softwareVersion=$mostRecentVersion+commitHash" "--buildId=$TRAVIS_BUILD_ID" "--buildNumber=$TRAVIS_BUILD_NUMBER"
 notifications:
   email: false
