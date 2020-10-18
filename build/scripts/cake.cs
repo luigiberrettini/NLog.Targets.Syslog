@@ -6,6 +6,7 @@ var buildConfiguration = Argument<string>("buildConfiguration", "Release");
 var buildVerbosity = (DotNetCoreVerbosity)Enum.Parse(typeof(DotNetCoreVerbosity), Argument<string>("buildVerbosity", "Minimal"));
 var softwareVersion = target.ToLower() == "nugetpack" || target.ToLower() == "nugetpush" ? Argument<string>("softwareVersion") : Argument<string>("softwareVersion", string.Empty);
 var buildId = Argument<int>("buildId", 0);
+var buildNumber = buildId == 0 ? -1 : Argument<int>("buildNumber");
 var commitHash = Argument<string>("commitHash");
 var nuGetSource = Argument<string>("nuGetSource", null);
 var nuGetApiKey = Argument<string>("nuGetApiKey", string.Empty);
@@ -28,19 +29,19 @@ Task("MSBuildSettings")
 
         (string Major, string Minor, string Patch, string PreRelease, string BuildMetadata) GetSemVerParts(string s)
         {
-            var semanticVersioningPattern = @"([0-9]+\.[0-9]+\.[0-9]+)(\-[0-9A-Za-z-\.]+){0,1}(\+[0-9A-Za-z-\.]+){0,1}";
+            var semanticVersioningPattern = @"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*)?(\+[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*)?$";
             var semanticVersioningRegEx = new System.Text.RegularExpressions.Regex(semanticVersioningPattern);
             var match = semanticVersioningRegEx.Match(s);
             if (!match.Success)
                 return invalidSemVer;
-            var core = match.Groups[1].Value.Split('.');
-            if (match.Groups.Count == 2)
-                return (core[0], core[1], core[2], "", "");
-            if (match.Groups.Count == 3)
-                return match.Groups[1].Value.StartsWith("-") ?
-                    (core[0], core[1], core[2], match.Groups[2].Value, "") :
-                    (core[0], core[1], core[2], "", match.Groups[2].Value.Replace("commitHash", commitHash));
-            return (core[0], core[1], core[2], match.Groups[2].Value, match.Groups[3].Value.Replace("commitHash", commitHash));
+            return
+            (
+                match.Groups["1"].Value,
+                match.Groups["2"].Value,
+                match.Groups["3"].Value,
+                match.Groups["4"].Value,
+                match.Groups["5"].Value.Replace("commitHash", commitHash)
+            );
         }
 
         (string InformationalVersion, string UsesSourceLink) GetProjectInfo(string projectFilePath)
@@ -52,6 +53,21 @@ Task("MSBuildSettings")
             var informationalVersion = propertyGroup["InformationalVersion"]?.InnerText ?? propertyGroup["Version"].InnerText + "+commitHash";
             var usesSourceLink = document.SelectSingleNode("descendant::ItemGroup[PackageReference/@Include='Microsoft.SourceLink.GitHub']") != null;
             return (informationalVersion, usesSourceLink.ToString());
+        }
+
+        int ApplyRevisionBounds(int number)
+        {
+            // Assembly Version metadata restricts major, minor, build, revision to a maximum value of UInt16.MaxValue - 1
+            // https://docs.microsoft.com/en-us/dotnet/api/system.reflection.assemblyname.version
+            //
+            // Windows Installer ProductVersion has the format major.minor.build with a maximum value of 255.255.65535
+            // https://docs.microsoft.com/en-us/windows/win32/msi/productversion
+            //
+            // The maximum version respecting all of the above limits is 255.255.65534.65534
+            // https://binary-studio.com/2017/08/18/software-versioning-windows-net
+            const int maxSupportedRevision = 65534;
+            var remainder = number % maxSupportedRevision;
+            return remainder == 0 ? maxSupportedRevision : remainder;
         }
 
         // softwareVersion
@@ -95,16 +111,15 @@ Task("MSBuildSettings")
             // on build some dependencies are rebuilt using the AssemblyInformationalVersion of the project being built
             // Setting IncludeSourceRevisionInInformationalVersion to false avoid changes to the AssemblyInformationalVersion
             // An alternative could be preventing dependencies from being built but the script should build in the proper order
-            var packageVersion = $"{semVer.Major}.{semVer.Minor}.{semVer.Patch}{semVer.PreRelease}";
+            var packageVersion = buildId == 0 ?
+                $"{semVer.Major}.{semVer.Minor}.{semVer.Patch}{semVer.PreRelease}" :
+                $"{semVer.Major}.{semVer.Minor}.{semVer.Patch}{semVer.PreRelease}-post-release-{buildId}";
             var packageReleaseNotesUrl = $"{gitRemote}/releases/tag/v{packageVersion}";
             var assemblyVersion = $"{semVer.Major}.0.0.0";
-            var assemblyFileVersion = $"{semVer.Major}.{semVer.Minor}.{semVer.Patch}.{buildId}";
+            var assemblyFileVersion = buildNumber == -1 ?
+                $"{semVer.Major}.{semVer.Minor}.{semVer.Patch}.0" :
+                $"{semVer.Major}.{semVer.Minor}.{semVer.Patch}.{ApplyRevisionBounds(buildNumber)}";
             var assemblyInformationalVersion = $"{packageVersion}{semVer.BuildMetadata}";
-            if (buildId > 0)
-            {
-                packageVersion += $"+{buildId}";
-                assemblyInformationalVersion = $"{packageVersion}{semVer.BuildMetadata.Replace('+', '.')}";
-            }
 
             Information($"SourceLink: {projectUsesSourceLink}");
             Information($"AssemblyVersion: {assemblyVersion}");

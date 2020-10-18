@@ -31,7 +31,7 @@ before_build:
 build_script:
   - ps: |
       if ($env:APPVEYOR_REPO_TAG -ne 'true') {
-          .\build\scripts\bootstrap.ps1 '--target=NuGetPack' "--softwareVersion=$env:mostRecentVersion+commitHash" "--buildId=$env:APPVEYOR_BUILD_ID"
+          .\build\scripts\bootstrap.ps1 '--target=NuGetPack' "--softwareVersion=$env:mostRecentVersion+commitHash" "--buildId=$env:APPVEYOR_BUILD_ID" "--buildNumber=$env:APPVEYOR_BUILD_NUMBER"
       }
       else {
           .\build\scripts\bootstrap.ps1 '--target=NuGetPush' "--softwareVersion=$env:mostRecentVersion+commitHash" '--nuGetSource=https://api.nuget.org/v3/index.json' "--nuGetApiKey=$env:NUGET_API_KEY"
