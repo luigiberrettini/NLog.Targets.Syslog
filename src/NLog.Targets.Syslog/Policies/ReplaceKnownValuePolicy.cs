@@ -1,10 +1,9 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
-using System;
 using NLog.Common;
-using System.Text.RegularExpressions;
 using NLog.Targets.Syslog.Settings;
+using System.Text.RegularExpressions;
 
 namespace NLog.Targets.Syslog.Policies
 {

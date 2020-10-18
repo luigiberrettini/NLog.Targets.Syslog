@@ -1,12 +1,12 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
-using System.Collections.Generic;
-using System.Linq;
 using NLog.Layouts;
 using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Policies;
 using NLog.Targets.Syslog.Settings;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {
@@ -29,7 +29,7 @@ namespace NLog.Targets.Syslog.MessageCreation
             paramValuePolicySet = new ParamValuePolicySet(enforcementConfig);
         }
 
-        public static void Append(ByteArray message, List<SdParam> sdParams, LogEventInfo logEvent, string invalidNamesPattern)
+        public static void Append(ByteArray message, IList<SdParam> sdParams, LogEventInfo logEvent, string invalidNamesPattern)
         {
             foreach (var sdParam in sdParams)
             {

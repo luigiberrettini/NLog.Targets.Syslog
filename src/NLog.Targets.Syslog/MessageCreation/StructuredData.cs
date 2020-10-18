@@ -2,10 +2,10 @@
 // See the LICENSE file in the project root for more information
 
 using NLog.Layouts;
-using System.Collections.Generic;
-using System.Linq;
 using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Settings;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {
@@ -15,7 +15,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         private static readonly byte[] NilValueBytes = { 0x2D };
 
         private readonly Layout fromEventProperties;
-        private readonly List<SdElement> sdElements;
+        private readonly IList<SdElement> sdElements;
 
         public StructuredData(StructuredDataConfig sdConfig, EnforcementConfig enforcementConfig)
         {

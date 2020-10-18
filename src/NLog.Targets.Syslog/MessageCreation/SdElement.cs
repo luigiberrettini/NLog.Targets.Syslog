@@ -1,11 +1,10 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
-using NLog.Targets.Syslog.Policies;
-using System.Collections.Generic;
-using System.Linq;
 using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Settings;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {
@@ -15,7 +14,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         private static readonly byte[] RightBracketBytes = { 0x5D };
 
         private readonly SdId sdId;
-        private readonly List<SdParam> sdParams;
+        private readonly IList<SdParam> sdParams;
 
         public SdElement(SdElementConfig sdElementConfig, EnforcementConfig enforcementConfig)
         {
@@ -23,14 +22,14 @@ namespace NLog.Targets.Syslog.MessageCreation
             sdParams = sdElementConfig.SdParams.Select(sdParamConfig => new SdParam(sdParamConfig, enforcementConfig)).ToList();
         }
 
-        public static void Append(ByteArray message, List<SdElement> sdElements, LogEventInfo logEvent)
+        public static void Append(ByteArray message, IList<SdElement> sdElements, LogEventInfo logEvent)
         {
-            foreach (var sdItem in sdElements)
+            foreach (var sdElement in sdElements)
             {
-                var sdIdValue = sdItem.sdId.Render(logEvent);
+                var renderedSdId = sdElement.sdId.Render(logEvent);
                 message.AppendBytes(LeftBracketBytes);
-                sdItem.sdId.Append(message, sdIdValue);
-                SdParam.Append(message, sdItem.sdParams, logEvent, SdIdToInvalidParamNamePattern.Map(sdIdValue));
+                sdElement.sdId.Append(message, renderedSdId);
+                SdParam.Append(message, sdElement.sdParams, logEvent, SdIdToInvalidParamNamePattern.Map(renderedSdId));
                 message.AppendBytes(RightBracketBytes);
             }
         }
