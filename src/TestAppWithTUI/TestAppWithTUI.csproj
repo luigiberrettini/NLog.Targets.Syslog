@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <RootNamespace>TestAppWithTui</RootNamespace>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
     <OutputType>Exe</OutputType>
@@ -14,7 +14,7 @@
     <AssemblyName>TestAppWithTUI</AssemblyName>
     <AssemblyVersion>0.0.0.0</AssemblyVersion>
     <FileVersion>0.1.0.0</FileVersion>
-    <InformationalVersion>0.1.0-alpha-01+commitHash</InformationalVersion>
+    <InformationalVersion>0.1.0-alpha.1+commitHash</InformationalVersion>
     <NeutralLanguage>en</NeutralLanguage>
 
     <StartupObject>TestAppWithTui.Program</StartupObject>

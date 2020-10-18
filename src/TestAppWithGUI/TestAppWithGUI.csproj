@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <RootNamespace>TestAppWithGui</RootNamespace>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
     <OutputType>WinExe</OutputType>
@@ -14,7 +14,7 @@
     <AssemblyName>TestAppWithGUI</AssemblyName>
     <AssemblyVersion>0.0.0.0</AssemblyVersion>
     <FileVersion>0.1.0.0</FileVersion>
-    <InformationalVersion>0.1.0-alpha-01+commitHash</InformationalVersion>
+    <InformationalVersion>0.1.0-alpha.1+commitHash</InformationalVersion>
     <NeutralLanguage>en</NeutralLanguage>
 
     <StartupObject>TestAppWithGui.Program</StartupObject>
@@ -33,5 +33,9 @@
     <None Include="..\NLog.Targets.Syslog.Schema\NLog.Targets.Syslog.xsd" Link="NLog.Targets.Syslog.xsd" />
     <None Update="messagesToLog.txt" CopyToOutputDirectory="Always" />
     <None Update="NLog.config" CopyToOutputDirectory="Always" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(OS)' != 'Windows_NT' AND '$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
 </Project>
