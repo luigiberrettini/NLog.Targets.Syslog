@@ -1,21 +1,22 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
-using NLog.Targets.Syslog.Policies;
 using System.Collections.Generic;
 using System.Linq;
 using NLog.Targets.Syslog.MessageStorage;
+using NLog.Targets.Syslog.Policies;
 using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {
     internal class SdElement
     {
+        private static readonly InternalLogDuplicatesPolicy LogDuplicatesPolicy = new InternalLogDuplicatesPolicy();
         private static readonly byte[] LeftBracketBytes = { 0x5B };
         private static readonly byte[] RightBracketBytes = { 0x5D };
 
         private readonly SdId sdId;
-        private readonly IList<SdParam> sdParams;
+        private readonly List<SdParam> sdParams;
 
         public SdElement(SdElementConfig sdElementConfig, EnforcementConfig enforcementConfig)
         {
@@ -23,27 +24,24 @@ namespace NLog.Targets.Syslog.MessageCreation
             sdParams = sdElementConfig.SdParams.Select(sdParamConfig => new SdParam(sdParamConfig, enforcementConfig)).ToList();
         }
 
-        public static void Append(ByteArray message, IEnumerable<SdElement> sdElements, LogEventInfo logEvent)
+        public static void Append(ByteArray message, List<SdElement> sdElements, LogEventInfo logEvent)
         {
-            var elements = sdElements
-                .Select(x => new { SdId = x.sdId, RenderedSdId = x.sdId.Render(logEvent), SdParams = x.sdParams })
-                .ToList();
+            if (LogDuplicatesPolicy.IsApplicable())
+                LogDuplicatesPolicy.Apply(sdElements, x => x.sdId.Render(logEvent));
 
-            InternalLogDuplicatesPolicy.Apply(elements, x => x.RenderedSdId);
-
-            elements
-                .ForEach(elem =>
-                {
-                    message.AppendBytes(LeftBracketBytes);
-                    elem.SdId.Append(message, elem.RenderedSdId);
-                    SdParam.Append(message, elem.SdParams, logEvent, SdIdToInvalidParamNamePattern.Map(elem.RenderedSdId));
-                    message.AppendBytes(RightBracketBytes);
-                });
+            foreach (var sdElement in sdElements)
+            {
+                var renderedSdId = sdElement.sdId.Render(logEvent);
+                message.AppendBytes(LeftBracketBytes);
+                sdElement.sdId.Append(message, renderedSdId);
+                SdParam.Append(message, sdElement.sdParams, logEvent, SdIdToInvalidParamNamePattern.Map(renderedSdId));
+                message.AppendBytes(RightBracketBytes);
+            }
         }
 
         public static string ToString(IEnumerable<SdElement> sdElements)
         {
-            return sdElements.Aggregate(string.Empty, (acc, curr) => acc.ToString() + curr.ToString());
+            return sdElements.Aggregate(string.Empty, (acc, curr) => acc + curr);
         }
 
         public override string ToString()
