@@ -1,15 +1,17 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
-using NLog.Targets.Syslog.MessageStorage;
-using NLog.Targets.Syslog.Settings;
 using System.Collections.Generic;
 using System.Linq;
+using NLog.Targets.Syslog.MessageStorage;
+using NLog.Targets.Syslog.Policies;
+using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageCreation
 {
     internal class SdElement
     {
+        private static readonly InternalLogDuplicatesPolicy LogDuplicatesPolicy = new InternalLogDuplicatesPolicy();
         private static readonly byte[] LeftBracketBytes = { 0x5B };
         private static readonly byte[] RightBracketBytes = { 0x5D };
 
@@ -24,6 +26,9 @@ namespace NLog.Targets.Syslog.MessageCreation
 
         public static void Append(ByteArray message, List<SdElement> sdElements, LogEventInfo logEvent)
         {
+            if (LogDuplicatesPolicy.IsApplicable())
+                LogDuplicatesPolicy.Apply(sdElements, x => x.sdId.Render(logEvent));
+
             foreach (var sdElement in sdElements)
             {
                 var renderedSdId = sdElement.sdId.Render(logEvent);
@@ -36,7 +41,7 @@ namespace NLog.Targets.Syslog.MessageCreation
 
         public static string ToString(IEnumerable<SdElement> sdElements)
         {
-            return sdElements.Aggregate(string.Empty, (acc, curr) => acc.ToString() + curr.ToString());
+            return sdElements.Aggregate(string.Empty, (acc, curr) => acc + curr);
         }
 
         public override string ToString()
