@@ -15,7 +15,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         private static readonly byte[] NilValueBytes = { 0x2D };
 
         private readonly Layout fromEventProperties;
-        private readonly IList<SdElement> sdElements;
+        private readonly List<SdElement> sdElements;
 
         public StructuredData(StructuredDataConfig sdConfig, EnforcementConfig enforcementConfig)
         {

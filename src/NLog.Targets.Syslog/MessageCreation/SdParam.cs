@@ -29,7 +29,7 @@ namespace NLog.Targets.Syslog.MessageCreation
             paramValuePolicySet = new ParamValuePolicySet(enforcementConfig);
         }
 
-        public static void Append(ByteArray message, IList<SdParam> sdParams, LogEventInfo logEvent, string invalidNamesPattern)
+        public static void Append(ByteArray message, List<SdParam> sdParams, LogEventInfo logEvent, string invalidNamesPattern)
         {
             foreach (var sdParam in sdParams)
             {

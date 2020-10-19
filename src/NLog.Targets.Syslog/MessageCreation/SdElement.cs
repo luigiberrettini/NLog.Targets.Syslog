@@ -14,7 +14,7 @@ namespace NLog.Targets.Syslog.MessageCreation
         private static readonly byte[] RightBracketBytes = { 0x5D };
 
         private readonly SdId sdId;
-        private readonly IList<SdParam> sdParams;
+        private readonly List<SdParam> sdParams;
 
         public SdElement(SdElementConfig sdElementConfig, EnforcementConfig enforcementConfig)
         {
@@ -22,7 +22,7 @@ namespace NLog.Targets.Syslog.MessageCreation
             sdParams = sdElementConfig.SdParams.Select(sdParamConfig => new SdParam(sdParamConfig, enforcementConfig)).ToList();
         }
 
-        public static void Append(ByteArray message, IList<SdElement> sdElements, LogEventInfo logEvent)
+        public static void Append(ByteArray message, List<SdElement> sdElements, LogEventInfo logEvent)
         {
             foreach (var sdElement in sdElements)
             {
