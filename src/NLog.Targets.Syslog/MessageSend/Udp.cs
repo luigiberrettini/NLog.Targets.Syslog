@@ -14,7 +14,7 @@ namespace NLog.Targets.Syslog.MessageSend
     {
         private UdpClient udp;
 
-        public Udp(UdpConfig udpConfig) : base(udpConfig.Server, udpConfig.Port, udpConfig.ReconnectInterval)
+        public Udp(UdpConfig udpConfig) : base(udpConfig.Server?.Render(LogEventInfo.CreateNullEvent()), udpConfig.Port, udpConfig.ReconnectInterval)
         {
         }
 

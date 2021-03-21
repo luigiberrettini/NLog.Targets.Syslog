@@ -3,6 +3,7 @@
 
 using System;
 using System.ComponentModel;
+using NLog.Layouts;
 
 namespace NLog.Targets.Syslog.Settings
 {
@@ -14,7 +15,7 @@ namespace NLog.Targets.Syslog.Settings
         private const string Localhost = "localhost";
         private const int DefaultPort = 514;
         private const int DefaultReconnectInterval = 500;
-        private string server;
+        private Layout server;
         private int port;
         private int reconnectInterval;
         private KeepAliveConfig keepAlive;
@@ -24,7 +25,7 @@ namespace NLog.Targets.Syslog.Settings
         private FramingMethod framing;
 
         /// <summary>The IP address or hostname of the Syslog server</summary>
-        public string Server
+        public Layout Server
         {
             get => server;
             set => SetProperty(ref server, value);

@@ -28,7 +28,7 @@ namespace NLog.Targets.Syslog.MessageSend
         private TcpClient tcp;
         private Stream stream;
 
-        public Tcp(TcpConfig tcpConfig) : base(tcpConfig.Server, tcpConfig.Port, tcpConfig.ReconnectInterval)
+        public Tcp(TcpConfig tcpConfig) : base(tcpConfig.Server?.Render(LogEventInfo.CreateNullEvent()), tcpConfig.Port, tcpConfig.ReconnectInterval)
         {
             keepAliveConfig = tcpConfig.KeepAlive;
             useTls = tcpConfig.Tls.Enabled;
@@ -88,7 +88,7 @@ namespace NLog.Targets.Syslog.MessageSend
             }
 
             var octetCount = message.Length;
-            var prefix = Encoding.ASCII.GetBytes($"{octetCount} ");
+            var prefix = Encoding.ASCII.GetBytes(string.Concat(octetCount.ToString(), " "));
             return stream.WriteAsync(prefix, 0, prefix.Length);
         }
 
