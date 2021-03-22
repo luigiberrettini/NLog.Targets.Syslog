@@ -5,6 +5,7 @@ jobs:
       mono: latest
       env: MONO_BASE_PATH=/usr/lib/mono/
     - os: osx
+      osx_image: xcode11
       mono: latest
       env: MONO_BASE_PATH=/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/
 before_install:

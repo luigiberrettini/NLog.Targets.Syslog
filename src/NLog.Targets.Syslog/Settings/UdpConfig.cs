@@ -1,6 +1,8 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
+using NLog.Layouts;
+
 namespace NLog.Targets.Syslog.Settings
 {
     /// <inheritdoc />
@@ -10,12 +12,12 @@ namespace NLog.Targets.Syslog.Settings
         private const string Localhost = "localhost";
         private const int DefaultPort = 514;
         private const int DefaultReconnectInterval = 500;
-        private string server;
+        private Layout server;
         private int port;
         private int reconnectInterval;
 
         /// <summary>The IP address or hostname of the Syslog server</summary>
-        public string Server
+        public Layout Server
         {
             get => server;
             set => SetProperty(ref server, value);
