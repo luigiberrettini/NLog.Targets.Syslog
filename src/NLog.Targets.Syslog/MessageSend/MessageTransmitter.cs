@@ -9,6 +9,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using NLog.Common;
+using NLog.Layouts;
 using NLog.Targets.Syslog.Extensions;
 using NLog.Targets.Syslog.MessageStorage;
 using NLog.Targets.Syslog.Settings;
@@ -43,12 +44,12 @@ namespace NLog.Targets.Syslog.MessageSend
             return TransmitterFactory[messageTransmitterConfig.Protocol](messageTransmitterConfig);
         }
 
-        protected MessageTransmitter(string server, int port, int reconnectInterval)
+        protected MessageTransmitter(Layout server, int port, int reconnectInterval)
         {
             neverCalledInit = true;
             isReady = false;
             newInitDelay = TimeSpan.FromMilliseconds(reconnectInterval);
-            Server = server;
+            Server = server?.Render(LogEventInfo.CreateNullEvent());
             Port = port;
         }
 

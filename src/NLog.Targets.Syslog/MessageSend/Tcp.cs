@@ -28,7 +28,7 @@ namespace NLog.Targets.Syslog.MessageSend
         private TcpClient tcp;
         private Stream stream;
 
-        public Tcp(TcpConfig tcpConfig) : base(tcpConfig.Server?.Render(LogEventInfo.CreateNullEvent()), tcpConfig.Port, tcpConfig.ReconnectInterval)
+        public Tcp(TcpConfig tcpConfig) : base(tcpConfig.Server, tcpConfig.Port, tcpConfig.ReconnectInterval)
         {
             keepAliveConfig = tcpConfig.KeepAlive;
             useTls = tcpConfig.Tls.Enabled;
