@@ -4,7 +4,7 @@
 
 Syslog target for NLog
 ======================
-**NLog Syslog** is a custom target for **NLog**: [http://nlog-project.org](http://nlog-project.org/).
+**NLog Syslog** is a custom target for **NLog**: [https://nlog-project.org](https://nlog-project.org/).
 
 It can be used with version 4.5.4 and later of NLog and allows to send logging messages to a Syslog server.
 
@@ -108,17 +108,17 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
   * `outputPri` - `true` or `false` to output or not the PRI part (default: true, used for custom messages)
   * `outputHeader` - `true` or `false` to output or not the HEADER part (default: true, used for custom messages)
   * `outputSpaceBeforeMsg` - `true` or `false` to output or not the space before the MSG part (default: true, used for custom messages)
-  * `hostname` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the HOSTNAME field of the HEADER part (default: the hostname of the computer that is creating the message)
-  * `tag` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the TAG field of the MSG part (default: the name of the assembly that is creating the message)
+  * `hostname` ([Layout](https://github.com/NLog/NLog/wiki/Layouts)) - the HOSTNAME field of the HEADER part (default: the hostname of the computer that is creating the message)
+  * `tag` ([Layout](https://github.com/NLog/NLog/wiki/Layouts)) - the TAG field of the MSG part (default: the name of the assembly that is creating the message)
 * `rfc5424` - settings related to RFC 5424:
   * `timestampFractionalDigits` - the number of fractional digits for the TIMESTAMP field of the HEADER part (default: 6, max: 16 as per ISO 8601 but since .NET is limited to 7 the other digits will be zeroed)
-  * `hostname` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the HOSTNAME field of the HEADER part (default: the hostname of the computer that is creating the message)
-  * `appName` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the APPNAME field of the HEADER part (default: the name of the assembly that is creating the message)
-  * `procId` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the PROCID field of the HEADER part (default: `-`)
-  * `msgId` ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) - the MSGID field of the HEADER part (default: `-`)
-  * `structuredData` - the STRUCTURED-DATA part containing the SD-ELEMENTs each composed by an SD-ID ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) and optional SD-PARAM fields, i.e. the PARAM-NAME ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) and PARAM-VALUE ([Layout](http://github.com/NLog/NLog/wiki/Layouts)) fields (default: `-`).<br />
-    The fromEventProperties attribute allows to use [log event properties data](http://github.com/NLog/NLog/wiki/EventProperties-Layout-Renderer) enabling different STRUCTURED-DATA for each log message
-  * `disableBom` - `true` or `false` to handle RSyslog [issue 284](http://github.com/rsyslog/rsyslog/issues/284) (default: `false`)
+  * `hostname` ([Layout](https://github.com/NLog/NLog/wiki/Layouts)) - the HOSTNAME field of the HEADER part (default: the hostname of the computer that is creating the message)
+  * `appName` ([Layout](https://github.com/NLog/NLog/wiki/Layouts)) - the APPNAME field of the HEADER part (default: the name of the assembly that is creating the message)
+  * `procId` ([Layout](https://github.com/NLog/NLog/wiki/Layouts)) - the PROCID field of the HEADER part (default: `-`)
+  * `msgId` ([Layout](https://github.com/NLog/NLog/wiki/Layouts)) - the MSGID field of the HEADER part (default: `-`)
+  * `structuredData` - the STRUCTURED-DATA part containing the SD-ELEMENTs each composed by an SD-ID ([Layout](https://github.com/NLog/NLog/wiki/Layouts)) and optional SD-PARAM fields, i.e. the PARAM-NAME ([Layout](https://github.com/NLog/NLog/wiki/Layouts)) and PARAM-VALUE ([Layout](https://github.com/NLog/NLog/wiki/Layouts)) fields (default: `-`).<br />
+    The fromEventProperties attribute allows to use [log event properties data](https://github.com/NLog/NLog/wiki/EventProperties-Layout-Renderer) enabling different STRUCTURED-DATA for each log message
+  * `disableBom` - `true` or `false` to handle RSyslog [issue 284](https://github.com/rsyslog/rsyslog/issues/284) (default: `false`)
 
 #### Message send element
 * `protocol` - `udp` or `tcp` (default: `udp`)
@@ -265,12 +265,12 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
 
 # Syslog message format
 Messages are built using the format defined in
-[RFC 3164](http://tools.ietf.org/html/rfc3164) or
-[RFC 5424](http://tools.ietf.org/html/rfc5424).
+[RFC 3164](https://tools.ietf.org/html/rfc3164) or
+[RFC 5424](https://tools.ietf.org/html/rfc5424).
 They are then sent using one of the protocols defined in
-[RFC 5426](http://tools.ietf.org/html/rfc5426) or
-[RFC 6587](http://tools.ietf.org/html/rfc6587) or
-[RFC 5425](http://tools.ietf.org/html/rfc5425).
+[RFC 5426](https://tools.ietf.org/html/rfc5426) or
+[RFC 6587](https://tools.ietf.org/html/rfc6587) or
+[RFC 5425](https://tools.ietf.org/html/rfc5425).
 
 
 ### RFC 3164
