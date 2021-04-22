@@ -116,20 +116,15 @@ namespace NLog.Targets.Syslog
 
         private void Enqueue(AsyncLogEventInfo asyncLogEventInfo, int timeout)
         {
-            void LogEnqueueResult(string message)
+            bool success = queue.TryAdd(asyncLogEventInfo, timeout, token);
+
+            if (InternalLogger.IsDebugEnabled)
             {
-                if (!InternalLogger.IsDebugEnabled)
-                    return;
-                InternalLogger.Debug("[Syslog] {0} '{1}'", message, asyncLogEventInfo.ToFormattedMessage());
+                InternalLogger.Debug("[Syslog] {0} '{1}'", success ? "Enqueued" : "Failed Enqueue", asyncLogEventInfo.ToFormattedMessage());
             }
 
-            if (queue.TryAdd(asyncLogEventInfo, timeout, token))
-            {
-                LogEnqueueResult("Enqueued");
-                return;
-            }
-            LogEnqueueResult("Failed enqueuing");
-            asyncLogEventInfo.Continuation(new InvalidOperationException($"Enqueue failed"));
+            if (!success)
+                asyncLogEventInfo.Continuation(new InvalidOperationException($"Enqueue failed"));
         }
 
         public void Dispose()
