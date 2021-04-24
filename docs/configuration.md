@@ -44,7 +44,7 @@ Below is a sample NLog.config file:
 </nlog>
 ```
 
-A more detailed example is [included](../src/TestApp/NLog.config) in the test application.
+A more detailed example is [included](../src/TestAppWithGUI/NLog.config) in the test application.
 
 
 

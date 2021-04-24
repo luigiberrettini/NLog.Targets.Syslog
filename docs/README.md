@@ -12,9 +12,9 @@ It can be used with version 4.5.4 and later of NLog and allows to send logging m
 
 ### Documentation
 
- - [Configuration](docs/configuration.md)
- - [Syslog message format](docs/syslog-message-format.md)
- - [Test bench](docs/test-bench.md)
+ - [Configuration](configuration.md)
+ - [Syslog message format](syslog-message-format.md)
+ - [Test bench](test-bench.md)
 
 
 ### Support
@@ -39,4 +39,4 @@ Please follow these steps to contribute:
 
 NLog Syslog is licensed under the terms of BSD license.
 
-Please see the [LICENSE file](LICENSE) for further information.
+Please see the [LICENSE file](../LICENSE) for further information.
