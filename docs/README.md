@@ -33,6 +33,11 @@ In case of urgency it is advisable to fork the repository and/or create a differ
 Please take a look at the [contributing guidelines](CONTRIBUTING.md) to contribute to the project.
 
 
+### Code of conduct
+
+Please follow the [code of conduct](CODE_OF_CONDUCT.md) in all your interactions.
+
+
 ### License
 
 NLog Syslog is licensed under the terms of BSD license.
