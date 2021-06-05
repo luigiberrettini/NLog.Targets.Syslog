@@ -30,9 +30,7 @@ In case of urgency it is advisable to fork the repository and/or create a differ
 
 ### Contributing
 
-Please follow these steps to contribute:
- - open an issue describing your question or the problem you are experiencing or the feature you suggest
- - submit a pull request that closes the issue (optional but always requires an issue)
+Please take a look at the [contributing guidelines](CONTRIBUTING.md) to contribute to the project.
 
 
 ### License
