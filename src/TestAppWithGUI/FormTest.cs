@@ -1,11 +1,11 @@
 // Licensed under the BSD license
 // See the LICENSE file in the project root for more information
 
+using FakeSyslogServer;
 using System;
 using System.Configuration;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using FakeSyslogServer;
 
 namespace TestAppWithGui
 {
@@ -36,7 +36,7 @@ namespace TestAppWithGui
 
             var operation = start ? "Stop" : "Start";
             buttonStartStopSyslogServer.Name = $"button{operation}SyslogServer";
-            buttonStartStopSyslogServer.Text = $@"{operation} Syslog Server";
+            buttonStartStopSyslogServer.Text = $"{operation} Syslog Server";
 
             if (start)
                 syslogServer.Start(receivedStringAction, exceptionAction);
@@ -44,7 +44,7 @@ namespace TestAppWithGui
                 syslogServer.Stop();
 
             void EnableButton() => buttonStartStopSyslogServer.Enabled = true;
-            Task.Delay(500).ContinueWith(_ => Invoke((Action) EnableButton));
+            Task.Delay(500).ContinueWith(_ => Invoke((Action)EnableButton));
         }
 
         private Action<int, string> OnReceivedStringAction()
@@ -56,13 +56,13 @@ namespace TestAppWithGui
                 textBox.AppendText(Environment.NewLine);
             }
 
-            return (protocolType, recString) => Invoke((Action<int, string>) AppendStringAction, protocolType, recString);
+            return (protocolType, recString) => Invoke((Action<int, string>)AppendStringAction, protocolType, recString);
         }
 
         private Action<Task> OnExceptionAction()
         {
             void MsgBoxAction(Task task) => MessageBox.Show(this, task.Exception?.GetBaseException().ToString());
-            return task => Invoke((Action<Task>) MsgBoxAction, task);
+            return task => Invoke((Action<Task>)MsgBoxAction, task);
         }
 
         private void OnFormClosing(object sender, FormClosingEventArgs e)
