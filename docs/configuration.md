@@ -114,16 +114,35 @@ The maximum length of a message is detailed in many RFCs that can be summarized 
 
 
 ## Message send settings
-
+ - `retry` - settings related to transmission retry:
+    - `max` - the maximum number of retries to perform after the first attempt failed (default: `-1` i.e. infinite)
+    - `backoff` - the backoff approach, `Constant` / `Linear` / `Exponential` / `AwsJitteredExponential` / `PollyJitteredExponential`, used to wait before performing a retry (default: `Constant`)
+    - `constantBackoff` - settings related to constant backoff ([formula](../src/NLog.Targets.Syslog/Settings/ConstantBackoff.cs)):
+       - `firstDelayZero` - whether the first retry should be performed immediately (default: `false`)
+       - `baseDelay` - the number of milliseconds used as the base to compute the interval after which a retry is performed (default: `500`)
+    - `linearBackoff` - settings related to linear backoff ([formula](../src/NLog.Targets.Syslog/Settings/LinearBackoff.cs)):
+       - `firstDelayZero` - whether the first retry should be performed immediately (default: `false`)
+       - `baseDelay` - the number of milliseconds used as the base to compute the interval after which a retry is performed (default: `500`)
+       - `scaleFactor` - the scale factor used to compute the interval after which a retry is performed (default: `1`)
+    - `exponentialBackoff` - settings related to exponential backoff ([formula](../src/NLog.Targets.Syslog/Settings/ExponentialBackoff.cs)):
+       - `firstDelayZero` - whether the first retry should be performed immediately (default: `false`)
+       - `baseDelay` - the number of milliseconds used as the base to compute the interval after which a retry is performed (default: `500`)
+       - `scaleFactor` - the scale factor used to compute the interval after which a retry is performed (default: `2`)
+    - `awsJitteredExponentialBackoff` - settings related to the AWS jittered exponential backoff ([formula](../src/NLog.Targets.Syslog/Settings/AwsJitteredExponentialBackoff.cs)):
+       - `firstDelayZero` - whether the first retry should be performed immediately (default: `false`)
+       - `baseDelay` - the number of milliseconds used as the base to compute the interval after which a retry is performed (default: `500`)
+       - `maxDelay` - the maximum number of milliseconds used to compute the interval after which a retry is performed (default: `1500`)
+    - `pollyJitteredExponentialBackoff` - settings related to the Polly jittered exponential backoff ([formula](../src/NLog.Targets.Syslog/Settings/PollyJitteredExponentialBackoff.cs)):
+       - `firstDelayZero` - whether the first retry should be performed immediately (default: `false`)
+       - `baseDelay` - the number of milliseconds used as the base to compute the interval after which a retry is performed (default: `500`)
+       - `maxDelay` - the maximum number of milliseconds used to compute the interval after which a retry is performed (default: `60000`)
  - `protocol` - `udp` or `tcp` (default: `udp`)
  - `udp` - settings related to UDP:
     - `server` - IP or hostname of the Syslog server (default: `127.0.0.1`)
     - `port` - port the Syslog server is listening on (default: `514`)
-    - `reconnectInterval` - the time interval, in milliseconds, after which a connection is retried (default: `500`)
  - `tcp` - settings related to TCP:
     - `server` - IP or hostname of the Syslog server (default: `127.0.0.1`)
     - `port` - port the Syslog server is listening on (default: `514`)
-    - `reconnectInterval` - the time interval, in milliseconds, after which a connection is retried (default: `500`)
     - `keepAlive` - settings related to keep-alive:
        - `enabled` - whether to use keep-alive or not (default: `true`)
        - `retryCount` - the number of unacknowledged keep-alive probes to send before considering the connection dead and terminating it (default: `10`)

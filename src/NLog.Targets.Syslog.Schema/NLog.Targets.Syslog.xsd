@@ -10,19 +10,19 @@
     <xs:complexType name="Syslog">
         <xs:complexContent>
             <xs:extension base="nlog:Target">
-                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:all>
                     <xs:element name="name" type="xs:string" minOccurs="0" maxOccurs="1" />
                     <xs:element name="layout" type="nlog:Layout" minOccurs="0" maxOccurs="1" />
                     <xs:element name="enforcement" minOccurs="0" maxOccurs="1">
                         <xs:complexType>
-                            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                            <xs:all>
                                 <xs:element name="throttling" minOccurs="0" maxOccurs="1">
                                     <xs:complexType>
-                                        <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                        <xs:all>
                                             <xs:element name="limit" type="xs:integer" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="strategy" type="xs:string" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="delay" type="xs:decimal" minOccurs="0" maxOccurs="1" />
-                                        </xs:choice>
+                                        </xs:all>
                                         <xs:attribute name="limit" type="xs:integer" />
                                         <xs:attribute name="strategy" type="xs:string" />
                                         <xs:attribute name="delay" type="xs:decimal" />
@@ -34,7 +34,7 @@
                                 <xs:element name="replaceInvalidCharacters" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                 <xs:element name="truncateFieldsToMaxLength" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                 <xs:element name="truncateMessageTo" type="xs:integer" minOccurs="0" maxOccurs="1" />
-                            </xs:choice>
+                            </xs:all>
                             <xs:attribute name="messageProcessors" type="xs:integer" />
                             <xs:attribute name="splitOnNewLine" type="xs:boolean" />
                             <xs:attribute name="transliterate" type="xs:boolean" />
@@ -45,18 +45,18 @@
                     </xs:element>
                     <xs:element name="messageCreation" minOccurs="0" maxOccurs="1">
                         <xs:complexType>
-                            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                            <xs:all>
                                 <xs:element name="facility" type="xs:string" minOccurs="0" maxOccurs="1" />
                                 <xs:element name="perLogLevelSeverity" minOccurs="0" maxOccurs="1">
                                     <xs:complexType>
-                                        <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                        <xs:all>
                                             <xs:element name="fatal" type="xs:string" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="error" type="xs:string" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="warn"  type="xs:string" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="info"  type="xs:string" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="debug" type="xs:string" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="trace" type="xs:string" minOccurs="0" maxOccurs="1" />
-                                        </xs:choice>
+                                        </xs:all>
                                         <xs:attribute name="fatal" type="xs:string" />
                                         <xs:attribute name="error" type="xs:string" />
                                         <xs:attribute name="warn"  type="xs:string" />
@@ -68,13 +68,13 @@
                                 <xs:element name="rfc" type="xs:string" minOccurs="0" maxOccurs="1" />
                                 <xs:element name="rfc3164" minOccurs="0" maxOccurs="1">
                                     <xs:complexType>
-                                        <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                        <xs:all>
                                             <xs:element name="outputPri" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="outputHeader" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="outputSpaceBeforeMsg" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="hostname" type="xs:string" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="tag" type="xs:string" minOccurs="0" maxOccurs="1" />
-                                        </xs:choice>
+                                        </xs:all>
                                         <xs:attribute name="outputPri" type="xs:boolean" />
                                         <xs:attribute name="outputHeader" type="xs:boolean" />
                                         <xs:attribute name="outputSpaceBeforeMsg" type="xs:boolean" />
@@ -84,7 +84,7 @@
                                 </xs:element>
                                 <xs:element name="rfc5424" minOccurs="0" maxOccurs="1">
                                     <xs:complexType>
-                                        <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                        <xs:all>
                                             <xs:element name="timestampFractionalDigits" type="xs:integer" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="hostname" type="nlog:Layout" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="appName" type="nlog:Layout" minOccurs="0" maxOccurs="1" />
@@ -94,7 +94,7 @@
                                                 <xs:complexType>
                                                     <xs:choice minOccurs="0" maxOccurs="1">
                                                         <xs:element name="fromEventProperties" type="nlog:Layout" minOccurs="0" maxOccurs="1" />
-                                                        <xs:element name="sdElement" minOccurs="1" maxOccurs="unbounded">
+                                                        <xs:element name="sdElement" minOccurs="0" maxOccurs="unbounded">
                                                             <xs:complexType>
                                                                 <xs:sequence>
                                                                     <xs:element name="sdParam" minOccurs="1" maxOccurs="unbounded">
@@ -115,7 +115,7 @@
                                                 </xs:complexType>
                                             </xs:element>
                                             <xs:element name="disableBom" type="xs:boolean" minOccurs="0" maxOccurs="1" />
-                                        </xs:choice>
+                                        </xs:all>
                                         <xs:attribute name="timestampFractionalDigits" type="xs:integer" />
                                         <xs:attribute name="hostname" type="nlog:SimpleLayoutAttribute" />
                                         <xs:attribute name="appName" type="nlog:SimpleLayoutAttribute" />
@@ -124,39 +124,104 @@
                                         <xs:attribute name="disableBom" type="xs:boolean" />
                                     </xs:complexType>
                                 </xs:element>
-                            </xs:choice>
+                            </xs:all>
                         </xs:complexType>
                     </xs:element>
                     <xs:element name="messageSend" minOccurs="0" maxOccurs="1">
                         <xs:complexType>
-                            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                            <xs:all>
+                                <xs:element name="retry" minOccurs="0" maxOccurs="1">
+                                    <xs:complexType>
+                                        <xs:all>
+                                            <xs:element name="max" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                                            <xs:element name="backoff" type="xs:string" minOccurs="0" maxOccurs="1" />
+                                            <xs:element name="constantBackoff" minOccurs="0" maxOccurs="1">
+                                                <xs:complexType>
+                                                    <xs:all>
+                                                        <xs:element name="firstDelayZero" type="xs:boolean" minOccurs="0" maxOccurs="1" />
+                                                        <xs:element name="baseDelay" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                                                    </xs:all>
+                                                    <xs:attribute name="firstDelayZero" type="xs:boolean" />
+                                                    <xs:attribute name="baseDelay" type="xs:integer" />
+                                                </xs:complexType>
+                                            </xs:element>
+                                            <xs:element name="linearBackoff" minOccurs="0" maxOccurs="1">
+                                                <xs:complexType>
+                                                    <xs:all>
+                                                        <xs:element name="firstDelayZero" type="xs:boolean" minOccurs="0" maxOccurs="1" />
+                                                        <xs:element name="baseDelay" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                                                        <xs:element name="scaleFactor" type="xs:decimal" minOccurs="0" maxOccurs="1" />
+                                                    </xs:all>
+                                                    <xs:attribute name="firstDelayZero" type="xs:boolean" />
+                                                    <xs:attribute name="baseDelay" type="xs:integer" />
+                                                    <xs:attribute name="scaleFactor" type="xs:decimal" />
+                                                </xs:complexType>
+                                            </xs:element>
+                                            <xs:element name="exponentialBackoff" minOccurs="0" maxOccurs="1">
+                                                <xs:complexType>
+                                                    <xs:all>
+                                                        <xs:element name="firstDelayZero" type="xs:boolean" minOccurs="0" maxOccurs="1" />
+                                                        <xs:element name="baseDelay" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                                                        <xs:element name="scaleFactor" type="xs:decimal" minOccurs="0" maxOccurs="1" />
+                                                    </xs:all>
+                                                    <xs:attribute name="firstDelayZero" type="xs:boolean" />
+                                                    <xs:attribute name="baseDelay" type="xs:integer" />
+                                                    <xs:attribute name="scaleFactor" type="xs:decimal" />
+                                                </xs:complexType>
+                                            </xs:element>
+                                            <xs:element name="awsJitteredExponentialBackoff" minOccurs="0" maxOccurs="1">
+                                                <xs:complexType>
+                                                    <xs:all>
+                                                        <xs:element name="firstDelayZero" type="xs:boolean" minOccurs="0" maxOccurs="1" />
+                                                        <xs:element name="baseDelay" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                                                        <xs:element name="maxDelay" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                                                    </xs:all>
+                                                    <xs:attribute name="firstDelayZero" type="xs:boolean" />
+                                                    <xs:attribute name="baseDelay" type="xs:integer" />
+                                                    <xs:attribute name="maxDelay" type="xs:integer" />
+                                                </xs:complexType>
+                                            </xs:element>
+                                            <xs:element name="pollyJitteredExponentialBackoff" minOccurs="0" maxOccurs="1">
+                                                <xs:complexType>
+                                                    <xs:all>
+                                                        <xs:element name="firstDelayZero" type="xs:boolean" minOccurs="0" maxOccurs="1" />
+                                                        <xs:element name="baseDelay" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                                                        <xs:element name="maxDelay" type="xs:integer" minOccurs="0" maxOccurs="1" />
+                                                    </xs:all>
+                                                    <xs:attribute name="firstDelayZero" type="xs:boolean" />
+                                                    <xs:attribute name="baseDelay" type="xs:integer" />
+                                                    <xs:attribute name="maxDelay" type="xs:integer" />
+                                                </xs:complexType>
+                                            </xs:element>
+                                        </xs:all>
+                                        <xs:attribute name="max" type="xs:integer" />
+                                        <xs:attribute name="backoff" type="xs:string" />
+                                    </xs:complexType>
+                                </xs:element>
                                 <xs:element name="protocol" type="xs:string" minOccurs="0" maxOccurs="1" />
                                 <xs:element name="udp" minOccurs="0" maxOccurs="1">
                                     <xs:complexType>
-                                        <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                        <xs:all>
                                             <xs:element name="server" type="xs:string" minOccurs="1" maxOccurs="1" />
                                             <xs:element name="port" type="xs:integer" minOccurs="0" maxOccurs="1" />
-                                            <xs:element name="reconnectInterval" type="xs:integer" minOccurs="0" maxOccurs="1" />
-                                        </xs:choice>
+                                        </xs:all>
                                         <xs:attribute name="server" type="xs:string" />
                                         <xs:attribute name="port" type="xs:integer" />
-                                        <xs:attribute name="reconnectInterval" type="xs:integer" />
                                     </xs:complexType>
                                 </xs:element>
                                 <xs:element name="tcp" minOccurs="0" maxOccurs="1">
                                     <xs:complexType>
-                                        <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                        <xs:all>
                                             <xs:element name="server" type="xs:string" minOccurs="1" maxOccurs="1" />
                                             <xs:element name="port" type="xs:integer" minOccurs="0" maxOccurs="1" />
-                                            <xs:element name="reconnectInterval" type="xs:integer" minOccurs="0" maxOccurs="1" />
                                             <xs:element name="keepAlive" minOccurs="0" maxOccurs="1">
                                                 <xs:complexType>
-                                                    <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                                    <xs:all>
                                                         <xs:element name="enabled" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                                         <xs:element name="retryCount" type="xs:integer" minOccurs="0" maxOccurs="1" />
                                                         <xs:element name="time" type="xs:integer" minOccurs="0" maxOccurs="1" />
                                                         <xs:element name="interval" type="xs:integer" minOccurs="0" maxOccurs="1" />
-                                                    </xs:choice>
+                                                    </xs:all>
                                                     <xs:attribute name="enabled" type="xs:boolean" />
                                                     <xs:attribute name="retryCount" type="xs:integer" />
                                                     <xs:attribute name="time" type="xs:integer" />
@@ -165,14 +230,14 @@
                                             </xs:element>
                                             <xs:element name="tls" minOccurs="0" maxOccurs="1">
                                                 <xs:complexType>
-                                                    <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                                    <xs:all>
                                                         <xs:element name="enabled" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                                         <xs:element name="useClientCertificates" type="xs:boolean" minOccurs="0" maxOccurs="1" />
                                                         <xs:element name="certificateStoreLocation" type="xs:string" minOccurs="0" maxOccurs="1" />
                                                         <xs:element name="certificateStoreName" type="xs:string" minOccurs="0" maxOccurs="1" />
                                                         <xs:element name="certificateFilterType" type="xs:string" minOccurs="0" maxOccurs="1" />
                                                         <xs:element name="certificateFilterValue" type="xs:string" minOccurs="0" maxOccurs="1" />
-                                                    </xs:choice>
+                                                    </xs:all>
                                                     <xs:attribute name="enabled" type="xs:boolean" />
                                                     <xs:attribute name="useClientCertificates" type="xs:boolean" />
                                                     <xs:attribute name="certificateStoreLocation" type="xs:string" />
@@ -182,17 +247,16 @@
                                                 </xs:complexType>
                                             </xs:element>
                                             <xs:element name="framing" type="xs:string" minOccurs="0" maxOccurs="1" />
-                                        </xs:choice>
+                                        </xs:all>
                                         <xs:attribute name="server" type="xs:string" />
                                         <xs:attribute name="port" type="xs:integer" />
-                                        <xs:attribute name="reconnectInterval" type="xs:integer" />
                                         <xs:attribute name="framing" type="xs:string" />
                                     </xs:complexType>
                                 </xs:element>
-                            </xs:choice>
+                            </xs:all>
                         </xs:complexType>
                     </xs:element>
-                </xs:choice>
+                </xs:all>
                 <xs:attribute name="name" type="xs:string" />
                 <xs:attribute name="layout" type="nlog:SimpleLayoutAttribute" />
             </xs:extension>

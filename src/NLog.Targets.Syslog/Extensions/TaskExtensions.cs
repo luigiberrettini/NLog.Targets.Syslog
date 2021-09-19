@@ -9,6 +9,13 @@ namespace NLog.Targets.Syslog.Extensions
 {
     internal static class TaskExtensions
     {
+        public static Task Then(this Task task, Func<Task, Task> continuationFunction, CancellationToken token)
+        {
+            return task
+                .Then<Task>(continuationFunction, token)
+                .Unwrap();
+        }
+
         public static Task<TResult> Then<TResult>(this Task task, Func<Task, TResult> continuationFunction, CancellationToken token)
         {
             return task
