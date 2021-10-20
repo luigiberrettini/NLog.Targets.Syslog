@@ -16,15 +16,16 @@ namespace NLog.Targets.Syslog.Extensions
                 {
                     var tcs = new TaskCompletionSource<TResult>();
 
-                    if (t.IsCanceled)
+                    var exception = t.Exception;
+                    if (token.IsCancellationRequested || t.IsCanceled)
                         tcs.SetCanceled();
-                    else if (t.Exception != null) // t.IsFaulted is true
-                        tcs.SetException(t.Exception.GetBaseException());
+                    else if (exception != null) // t.IsFaulted is true
+                        tcs.SetException(exception.GetBaseException());
                     else
                         tcs.SetResult(((Func<Task, TResult>)c).Invoke(t));
 
                     return tcs.Task;
-                }, continuationFunction, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
+                }, continuationFunction, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
                 .Unwrap();
         }
     }

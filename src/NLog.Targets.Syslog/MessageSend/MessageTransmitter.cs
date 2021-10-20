@@ -63,13 +63,14 @@ namespace NLog.Targets.Syslog.MessageSend
                 .Unwrap()
                 .ContinueWith(t =>
                 {
-                    if (t.Exception == null) // t.IsFaulted is false
+                    var exception = t.Exception;
+                    if (token.IsCancellationRequested || t.IsCanceled || exception == null)
                         return Task.FromResult<object>(null);
 
-                    InternalLogger.Warn(t.Exception?.GetBaseException(), "[Syslog] SendAsync failed");
+                    InternalLogger.Warn(exception?.GetBaseException(), "[Syslog] SendAsync failed");
                     TidyUp();
                     return SendMessageAsync(message, token); // Failures impact on the log entry queue
-                }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
+                }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current)
                 .Unwrap();
         }
 

@@ -72,7 +72,7 @@ namespace NLog.Targets.Syslog
                 {
                     InternalLogger.Warn(t.Exception?.GetBaseException(), "[Syslog] ProcessQueueAsync faulted within try");
                     ProcessQueueAsync(messageBuilder);
-                }, token, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Current);
+                }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Current);
         }
 
         private Task ProcessQueueAsync(MessageBuilder messageBuilder, TaskCompletionSource<object> tcs)
@@ -92,19 +92,25 @@ namespace NLog.Targets.Syslog
                     .SendAsync(token)
                     .ContinueWith(t =>
                     {
-                        if (t.IsCanceled)
+                        var exception = t.Exception;
+                        if (token.IsCancellationRequested || t.IsCanceled)
                         {
                             InternalLogger.Debug("[Syslog] Task canceled");
                             tcs.SetCanceled();
                             return;
                         }
-                        if (t.Exception != null) // t.IsFaulted is true
-                            InternalLogger.Warn(t.Exception.GetBaseException(), "[Syslog] Task faulted");
+                        if (exception != null) // t.IsFaulted is true
+                            InternalLogger.Warn(exception.GetBaseException(), "[Syslog] Task faulted");
                         else
                             InternalLogger.Debug("[Syslog] Successfully handled message '{0}'", logEventMsgSet);
                         ProcessQueueAsync(messageBuilder, tcs);
-                    }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current);
+                    }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current);
 
+                return tcs.Task;
+            }
+            catch (OperationCanceledException)
+            {
+                tcs.SetCanceled();
                 return tcs.Task;
             }
             catch (Exception exception)
