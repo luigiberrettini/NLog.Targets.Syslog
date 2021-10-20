@@ -66,19 +66,20 @@ namespace NLog.Targets.Syslog
                     .SendMessageAsync(buffer, token)
                     .ContinueWith(t =>
                     {
-                        if (t.IsCanceled)
+                        var exception = t.Exception;
+                        if (token.IsCancellationRequested || t.IsCanceled)
                         {
                             tcs.SetCanceled();
                             return;
                         }
-                        if (t.Exception != null)
+                        if (exception != null)
                         {
-                            asyncLogEventInfo.Continuation(t.Exception.GetBaseException());
-                            tcs.SetException(t.Exception);
+                            asyncLogEventInfo.Continuation(exception.GetBaseException());
+                            tcs.SetException(exception);
                             return;
                         }
                         SendAsync(token, tcs);
-                    }, token, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current);
+                    }, CancellationToken.None, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Current);
 
                 return tcs.Task;
             }
