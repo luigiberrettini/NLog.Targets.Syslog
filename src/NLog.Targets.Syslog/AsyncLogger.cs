@@ -108,11 +108,6 @@ namespace NLog.Targets.Syslog
 
                 return tcs.Task;
             }
-            catch (OperationCanceledException)
-            {
-                tcs.SetCanceled();
-                return tcs.Task;
-            }
             catch (Exception exception)
             {
                 tcs.SetException(exception);
