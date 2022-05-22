@@ -2,6 +2,26 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32505.173
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{94A03BF0-4CCF-4CB6-990D-C2126176F55C}"
+	ProjectSection(SolutionItems) = preProject
+		..\.github\PULL_REQUEST_TEMPLATE.md = ..\.github\PULL_REQUEST_TEMPLATE.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ISSUE_TEMPLATE", "ISSUE_TEMPLATE", "{DE911B4D-5A26-45BF-A041-CEF72BEECAA0}"
+	ProjectSection(SolutionItems) = preProject
+		..\.github\ISSUE_TEMPLATE\bug.md = ..\.github\ISSUE_TEMPLATE\bug.md
+		..\.github\ISSUE_TEMPLATE\config.md = ..\.github\ISSUE_TEMPLATE\config.md
+		..\.github\ISSUE_TEMPLATE\documentation.md = ..\.github\ISSUE_TEMPLATE\documentation.md
+		..\.github\ISSUE_TEMPLATE\enhancement.md = ..\.github\ISSUE_TEMPLATE\enhancement.md
+		..\.github\ISSUE_TEMPLATE\feature.md = ..\.github\ISSUE_TEMPLATE\feature.md
+		..\.github\ISSUE_TEMPLATE\question.md = ..\.github\ISSUE_TEMPLATE\question.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{F729507C-B49B-48BD-9884-E2F056658A63}"
+	ProjectSection(SolutionItems) = preProject
+		..\.github\workflows\pipeline.yml = ..\.github\workflows\pipeline.yml
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{FE11D99F-A094-42A4-9DA4-EFEFA413F674}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{3089347D-9E13-4707-A3C6-A7D786BE6369}"
@@ -69,9 +89,12 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{94A03BF0-4CCF-4CB6-990D-C2126176F55C} = {37F84F7C-A60C-4FCE-A629-8D6829777961}
 		{FE11D99F-A094-42A4-9DA4-EFEFA413F674} = {37F84F7C-A60C-4FCE-A629-8D6829777961}
 		{3089347D-9E13-4707-A3C6-A7D786BE6369} = {FE11D99F-A094-42A4-9DA4-EFEFA413F674}
 		{82394A02-1436-428F-B29E-5C3AD4CE597B} = {37F84F7C-A60C-4FCE-A629-8D6829777961}
+		{DE911B4D-5A26-45BF-A041-CEF72BEECAA0} = {94A03BF0-4CCF-4CB6-990D-C2126176F55C}
+		{F729507C-B49B-48BD-9884-E2F056658A63} = {94A03BF0-4CCF-4CB6-990D-C2126176F55C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2D2B5C8D-A77F-436A-8836-1D45D2BFA3DD}

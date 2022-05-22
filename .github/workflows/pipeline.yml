@@ -1,0 +1,112 @@
+name: Pipeline
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - master
+  release:
+    types:
+      - created
+  workflow_dispatch:
+jobs:
+  determine-most-recent-version:
+    name: Determine most recent version
+    outputs:
+      mrv: ${{ steps.compute-mrv.outputs.mrv }}
+    runs-on: ubuntu-latest
+    steps:
+      - id: checkout-code
+        name: Checkout code
+        uses: actions/checkout@v2
+      - id: compute-mrv
+        name: Compute most recent version
+        shell: pwsh
+        run: |
+          $InformationPreference = 'Continue'
+          Write-Information "Run ID: ${{ github.run_id }}"
+          Write-Information "Run number: ${{ github.run_number }}"
+          Write-Information "Run attempt: ${{ github.run_attempt }}"
+          $isNewRelease = ("${{ github.event_name }}" -eq 'release' -and "${{ github.event.action }}" -eq 'created')
+          $mostRecentTag = git describe --abbrev=0 --tags --always
+          if ($mostRecentTag.Substring(0, 1) -ne 'v') {
+              $mostRecentTag = 'v0.0.0'
+              if ($isNewRelease) { exit 1 }
+          }
+          $mostRecentVersion = $mostRecentTag.Substring(1)
+          Write-Output "::set-output name=mrv::$mostRecentVersion"
+  build:
+    name: Build
+    needs: determine-most-recent-version
+    if: ${{ github.event_name != 'release' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ windows-latest, ubuntu-latest, macos-latest ]
+        dotnet-version: [ '3.1.x', '6.0.x' ]
+    env:
+      DOTNET_NOLOGO: true # remove messages on first run of dotnet CLI
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_MULTILEVEL_LOOKUP: false # ignore any globally installed .NET version
+    runs-on: ${{ matrix.os }}
+    steps:
+      - id: checkout-code
+        name: Checkout code
+        uses: actions/checkout@v2
+      - id: install-dotnet-sdk
+        name: Install dotnet SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+      - id: build-artifacts
+        name: Build artifacts
+        shell: pwsh
+        run: |
+          $InformationPreference = 'Continue'
+          $mostRecentVersion = ${{ needs.determine-most-recent-version.outputs.mrv }}
+          $buildId = "${{ github.run_id }}.${{ github.run_number }}"
+          $buildNumber = ${{ github.run_attempt }}
+          ${{ github.workspace }}\build\scripts\bootstrap.ps1 '--target=NuGetPack' "--softwareVersion=${mostRecentVersion}+commitHash" "--buildId=${buildId}" "--buildNumber=${buildNumber}"
+          if ($LastExitCode -ne 0) { exit $LastExitCode }
+      - id: archive-artifacts
+        name: Archive artifacts
+        shell: pwsh
+        run: |
+          $InformationPreference = 'Continue'
+          ${{ github.workspace }}\build\scripts\bootstrap.ps1 '--target=ZipArtifacts'
+      - id: upload-artifacts
+        name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+            name: artifacts_${{ matrix.os }}_${{ matrix.dotnet-version }}_${{ github.run_id }}.${{ github.run_number }}
+            path: ${{ github.workspace }}/build/artifacts/artifacts.zip
+            if-no-files-found: error
+            retention-days: 15
+  release:
+    name: Release
+    needs: determine-most-recent-version
+    if: ${{ github.event_name == 'release' }}
+    env:
+      DOTNET_NOLOGO: true # remove messages on first run of dotnet CLI
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+      DOTNET_MULTILEVEL_LOOKUP: false # ignore any globally installed .NET version
+    runs-on: windows-latest
+    steps:
+      - id: checkout-code
+        name: Checkout code
+        uses: actions/checkout@v2
+      - id: install-dotnet-sdk
+        name: Install dotnet SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '6.0.x'
+      - id: release-to-nuget
+        name: Release to Nuget
+        shell: pwsh
+        run: |
+          $InformationPreference = 'Continue'
+          $mostRecentVersion = ${{ needs.determine-most-recent-version.outputs.mrv }}
+          $nuGetApiKey = ${{ secrets.NUGET_API_KEY }}
+          ${{ github.workspace }}\build\scripts\bootstrap.ps1 '--target=NuGetPush' "--softwareVersion=${mostRecentVersion}+commitHash" '--nuGetSource=https://api.nuget.org/v3/index.json' "--nuGetApiKey=${nuGetApiKey}"
+          if ($LastExitCode -ne 0) { exit $LastExitCode }
