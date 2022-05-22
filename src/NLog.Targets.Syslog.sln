@@ -1,12 +1,18 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30204.135
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32505.173
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{37F84F7C-A60C-4FCE-A629-8D6829777961}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{FE11D99F-A094-42A4-9DA4-EFEFA413F674}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{3089347D-9E13-4707-A3C6-A7D786BE6369}"
 	ProjectSection(SolutionItems) = preProject
-		..\.travis.yml = ..\.travis.yml
-		..\appveyor.yml = ..\appveyor.yml
-		..\LICENSE = ..\LICENSE
+		..\build\scripts\bootstrap.ps1 = ..\build\scripts\bootstrap.ps1
+		..\build\scripts\bootstrap.sh = ..\build\scripts\bootstrap.sh
+		..\build\scripts\cake.cs = ..\build\scripts\cake.cs
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{82394A02-1436-428F-B29E-5C3AD4CE597B}"
+	ProjectSection(SolutionItems) = preProject
 		..\docs\CODE_OF_CONDUCT.md = ..\docs\CODE_OF_CONDUCT.md
 		..\docs\configuration.md = ..\docs\configuration.md
 		..\docs\CONTRIBUTING.md = ..\docs\CONTRIBUTING.md
@@ -15,13 +21,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution 
 		..\docs\test-bench.md = ..\docs\test-bench.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{FE11D99F-A094-42A4-9DA4-EFEFA413F674}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{3089347D-9E13-4707-A3C6-A7D786BE6369}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution items", "Solution items", "{37F84F7C-A60C-4FCE-A629-8D6829777961}"
 	ProjectSection(SolutionItems) = preProject
-		..\build\scripts\bootstrap.ps1 = ..\build\scripts\bootstrap.ps1
-		..\build\scripts\bootstrap.sh = ..\build\scripts\bootstrap.sh
-		..\build\scripts\cake.cs = ..\build\scripts\cake.cs
+		..\.travis.yml = ..\.travis.yml
+		..\appveyor.yml = ..\appveyor.yml
+		..\LICENSE = ..\LICENSE
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FakeSyslogServer", "FakeSyslogServer\FakeSyslogServer.csproj", "{38722095-C8E7-496F-8126-AF17790B8A6E}"
@@ -67,6 +71,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{FE11D99F-A094-42A4-9DA4-EFEFA413F674} = {37F84F7C-A60C-4FCE-A629-8D6829777961}
 		{3089347D-9E13-4707-A3C6-A7D786BE6369} = {FE11D99F-A094-42A4-9DA4-EFEFA413F674}
+		{82394A02-1436-428F-B29E-5C3AD4CE597B} = {37F84F7C-A60C-4FCE-A629-8D6829777961}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2D2B5C8D-A77F-436A-8836-1D45D2BFA3DD}
