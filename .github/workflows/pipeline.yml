@@ -72,18 +72,12 @@ jobs:
           $buildNumber = ${{ github.run_number }}
           ${{ github.workspace }}\build\scripts\bootstrap.ps1 '--target=NuGetPack' $excludedProjects "--softwareVersion=${mostRecentVersion}+commitHash" "--buildId=${buildId}" "--buildNumber=${buildNumber}"
           if ($LastExitCode -ne 0) { exit $LastExitCode }
-      - id: archive-artifacts
-        name: Archive artifacts
-        shell: pwsh
-        run: |
-          $InformationPreference = 'Continue'
-          ${{ github.workspace }}\build\scripts\bootstrap.ps1 '--target=ZipArtifacts'
       - id: upload-artifacts
         name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
             name: artifacts_${{ matrix.os }}_${{ github.run_id }}.${{ github.run_number }}
-            path: ${{ github.workspace }}/build/artifacts/artifacts.zip
+            path: ${{ github.workspace }}/build/artifacts/*
             if-no-files-found: error
             retention-days: 15
   release:
