@@ -7,7 +7,7 @@ function Find-ToolAssembly {
     if (-Not (Get-ChildItem -Force -Recurse $toolDir -Filter $assemblyName)) {
         return $null
     }
-    return (Get-ChildItem -Force $toolDir -Filter "$toolName.exe").FullName
+    return (Get-ChildItem -Force $toolDir -Filter "$toolName*").FullName
 }
 
 function Install-Tool {

@@ -1,18 +1,22 @@
 var gitRemote = Argument<string>("gitRemote");
 var srcDir = Argument<string>("srcDir");
+var excludedProjects = Argument<string>("excludedProjects", string.Empty).Split(",");
 var artifactsDir = Argument<string>("artifactsDir");
 var target = Argument<string>("target", "Test");
 var buildConfiguration = Argument<string>("buildConfiguration", "Release");
 var buildVerbosity = (DotNetVerbosity)Enum.Parse(typeof(DotNetVerbosity), Argument<string>("buildVerbosity", "Minimal"));
 var softwareVersion = target.ToLower() == "nugetpack" || target.ToLower() == "nugetpush" ? Argument<string>("softwareVersion") : Argument<string>("softwareVersion", string.Empty);
-var buildId = Argument<int>("buildId", 0);
-var buildNumber = buildId == 0 ? -1 : Argument<int>("buildNumber");
+var buildId = Argument<string>("buildId", null);
+var buildNumber = buildId == null ? -1 : Argument<int>("buildNumber");
 var commitHash = Argument<string>("commitHash");
 var nuGetSource = Argument<string>("nuGetSource", null);
 var nuGetApiKey = Argument<string>("nuGetApiKey", string.Empty);
 
 var srcDirInfo = new DirectoryInfo(srcDir);
-var childDirInfos = srcDirInfo.GetDirectories();
+var childDirInfos = srcDirInfo
+    .GetDirectories()
+    .Where(x => !excludedProjects.Contains(x.Name))
+    .ToList();
 var toBuildDirInfo = childDirInfos
     .Where(x => x.GetFiles("*.csproj").Length > 0 && x.GetFiles("*.cs").Length > 0)
     .ToList();
@@ -111,7 +115,7 @@ Task("MSBuildSettings")
             // on build some dependencies are rebuilt using the AssemblyInformationalVersion of the project being built
             // Setting IncludeSourceRevisionInInformationalVersion to false avoid changes to the AssemblyInformationalVersion
             // An alternative could be preventing dependencies from being built but the script should build in the proper order
-            var packageVersion = buildId == 0 ?
+            var packageVersion = buildId == null ?
                 $"{semVer.Major}.{semVer.Minor}.{semVer.Patch}{semVer.PreRelease}" :
                 $"{semVer.Major}.{semVer.Minor}.{semVer.Patch}{semVer.PreRelease}-postRelease.{buildId}";
             var packageReleaseNotesUrl = $"{gitRemote}/releases/tag/v{packageVersion}";
