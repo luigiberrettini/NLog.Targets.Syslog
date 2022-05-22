@@ -3,7 +3,7 @@ var srcDir = Argument<string>("srcDir");
 var artifactsDir = Argument<string>("artifactsDir");
 var target = Argument<string>("target", "Test");
 var buildConfiguration = Argument<string>("buildConfiguration", "Release");
-var buildVerbosity = (DotNetCoreVerbosity)Enum.Parse(typeof(DotNetCoreVerbosity), Argument<string>("buildVerbosity", "Minimal"));
+var buildVerbosity = (DotNetVerbosity)Enum.Parse(typeof(DotNetVerbosity), Argument<string>("buildVerbosity", "Minimal"));
 var softwareVersion = target.ToLower() == "nugetpack" || target.ToLower() == "nugetpush" ? Argument<string>("softwareVersion") : Argument<string>("softwareVersion", string.Empty);
 var buildId = Argument<int>("buildId", 0);
 var buildNumber = buildId == 0 ? -1 : Argument<int>("buildNumber");
@@ -210,12 +210,12 @@ Task("Build")
 
         foreach (var projectToBuild in toBuildProjects)
         {
-            var buildSettings = new DotNetCoreBuildSettings
+            var buildSettings = new DotNetBuildSettings
             {
                 MSBuildSettings = perProjectMsBuildSettings[projectToBuild],
                 Configuration = buildConfiguration
             };
-            DotNetCoreBuild(projectToBuild, buildSettings);
+            DotNetBuild(projectToBuild, buildSettings);
         }
     });
 
