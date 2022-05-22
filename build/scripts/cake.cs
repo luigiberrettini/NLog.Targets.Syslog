@@ -1,5 +1,6 @@
 var gitRemote = Argument<string>("gitRemote");
 var srcDir = Argument<string>("srcDir");
+var excludedProjects = Argument<string>("excludedProjects", string.Empty).Split(",");
 var artifactsDir = Argument<string>("artifactsDir");
 var target = Argument<string>("target", "Test");
 var buildConfiguration = Argument<string>("buildConfiguration", "Release");
@@ -12,7 +13,10 @@ var nuGetSource = Argument<string>("nuGetSource", null);
 var nuGetApiKey = Argument<string>("nuGetApiKey", string.Empty);
 
 var srcDirInfo = new DirectoryInfo(srcDir);
-var childDirInfos = srcDirInfo.GetDirectories();
+var childDirInfos = srcDirInfo
+    .GetDirectories()
+    .Where(x => !excludedProjects.Contains(x.Name))
+    .ToList();
 var toBuildDirInfo = childDirInfos
     .Where(x => x.GetFiles("*.csproj").Length > 0 && x.GetFiles("*.cs").Length > 0)
     .ToList();

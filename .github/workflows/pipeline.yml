@@ -29,12 +29,13 @@ jobs:
           Write-Information "Run number: ${{ github.run_number }}"
           Write-Information "Run attempt: ${{ github.run_attempt }}"
           $isNewRelease = ("${{ github.event_name }}" -eq 'release' -and "${{ github.event.action }}" -eq 'created')
-          $mostRecentTag = git describe --abbrev=0 --tags --always
+          $mostRecentTag = $(git describe --abbrev=0 --tags --always)
           if ($mostRecentTag.Substring(0, 1) -ne 'v') {
               $mostRecentTag = 'v0.0.0'
               if ($isNewRelease) { exit 1 }
           }
           $mostRecentVersion = $mostRecentTag.Substring(1)
+          Write-Information "Most recent version: $mostRecentVersion"
           Write-Output "::set-output name=mrv::$mostRecentVersion"
   build:
     name: Build
@@ -44,7 +45,6 @@ jobs:
       fail-fast: false
       matrix:
         os: [ windows-latest, ubuntu-latest, macos-latest ]
-        dotnet-version: [ '3.1.x', '6.0.x' ]
     env:
       DOTNET_NOLOGO: true # remove messages on first run of dotnet CLI
       DOTNET_CLI_TELEMETRY_OPTOUT: true
@@ -58,16 +58,17 @@ jobs:
         name: Install dotnet SDK
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: ${{ matrix.dotnet-version }}
+          dotnet-version: '6.0.x'
       - id: build-artifacts
         name: Build artifacts
         shell: pwsh
         run: |
           $InformationPreference = 'Continue'
+          $excludedProjects = if ("${{ matrix.os }}" -eq 'windows-latest') { '' } else { '--excludedProjects=TestAppWithGUI' }
           $mostRecentVersion = ${{ needs.determine-most-recent-version.outputs.mrv }}
           $buildId = "${{ github.run_id }}.${{ github.run_attempt }}"
-          $buildNumber = ${{ github.run_attempt }}
-          ${{ github.workspace }}\build\scripts\bootstrap.ps1 '--target=NuGetPack' "--softwareVersion=${mostRecentVersion}+commitHash" "--buildId=${buildId}" "--buildNumber=${buildNumber}"
+          $buildNumber = ${{ github.run_number }}
+          ${{ github.workspace }}\build\scripts\bootstrap.ps1 '--target=NuGetPack' $excludedProjects "--softwareVersion=${mostRecentVersion}+commitHash" "--buildId=${buildId}" "--buildNumber=${buildNumber}"
           if ($LastExitCode -ne 0) { exit $LastExitCode }
       - id: archive-artifacts
         name: Archive artifacts
@@ -79,7 +80,7 @@ jobs:
         name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-            name: artifacts_${{ matrix.os }}_${{ matrix.dotnet-version }}_${{ github.run_id }}.${{ github.run_number }}
+            name: artifacts_${{ matrix.os }}_${{ github.run_id }}.${{ github.run_number }}
             path: ${{ github.workspace }}/build/artifacts/artifacts.zip
             if-no-files-found: error
             retention-days: 15
