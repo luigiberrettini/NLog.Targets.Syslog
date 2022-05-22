@@ -65,7 +65,7 @@ jobs:
         run: |
           $InformationPreference = 'Continue'
           $mostRecentVersion = ${{ needs.determine-most-recent-version.outputs.mrv }}
-          $buildId = "${{ github.run_id }}"
+          $buildId = "${{ github.run_id }}.${{ github.run_attempt }}"
           $buildNumber = ${{ github.run_attempt }}
           ${{ github.workspace }}\build\scripts\bootstrap.ps1 '--target=NuGetPack' "--softwareVersion=${mostRecentVersion}+commitHash" "--buildId=${buildId}" "--buildNumber=${buildNumber}"
           if ($LastExitCode -ne 0) { exit $LastExitCode }
