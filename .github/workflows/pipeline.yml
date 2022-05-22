@@ -58,7 +58,7 @@ jobs:
         uses: actions/checkout@v3
       - id: install-dotnet-sdk
         name: Install dotnet SDK
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v2
         with:
           dotnet-version: '6.0.x'
       - id: build-artifacts
@@ -67,7 +67,7 @@ jobs:
         run: |
           $InformationPreference = 'Continue'
           $excludedProjects = if ("${{ matrix.os }}" -eq 'windows-latest') { '' } else { '--excludedProjects=TestAppWithGUI' }
-          $mostRecentVersion = ${{ needs.determine-most-recent-version.outputs.mrv }}
+          $mostRecentVersion = "${{ needs.determine-most-recent-version.outputs.mrv }}"
           $buildId = "${{ github.run_id }}.${{ github.run_attempt }}"
           $buildNumber = ${{ github.run_number }}
           ${{ github.workspace }}\build\scripts\bootstrap.ps1 '--target=NuGetPack' $excludedProjects "--softwareVersion=${mostRecentVersion}+commitHash" "--buildId=${buildId}" "--buildNumber=${buildNumber}"
@@ -101,7 +101,7 @@ jobs:
         uses: actions/checkout@v3
       - id: install-dotnet-sdk
         name: Install dotnet SDK
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v2
         with:
           dotnet-version: '6.0.x'
       - id: release-to-nuget
@@ -109,7 +109,7 @@ jobs:
         shell: pwsh
         run: |
           $InformationPreference = 'Continue'
-          $mostRecentVersion = ${{ needs.determine-most-recent-version.outputs.mrv }}
+          $mostRecentVersion = "${{ needs.determine-most-recent-version.outputs.mrv }}"
           $nuGetApiKey = ${{ secrets.NUGET_API_KEY }}
           ${{ github.workspace }}\build\scripts\bootstrap.ps1 '--target=NuGetPush' "--softwareVersion=${mostRecentVersion}+commitHash" '--nuGetSource=https://api.nuget.org/v3/index.json' "--nuGetApiKey=${nuGetApiKey}"
           if ($LastExitCode -ne 0) { exit $LastExitCode }
