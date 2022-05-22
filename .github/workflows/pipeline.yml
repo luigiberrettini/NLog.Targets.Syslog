@@ -30,12 +30,12 @@ jobs:
           Write-Information "Run attempt: ${{ github.run_attempt }}"
           $isNewRelease = ("${{ github.event_name }}" -eq 'release' -and "${{ github.event.action }}" -eq 'created')
           $mostRecentTag = $(git describe --abbrev=0 --tags --always)
+          Write-Information "Most recent tag: $mostRecentTag"
           if ($mostRecentTag.Substring(0, 1) -ne 'v') {
               $mostRecentTag = 'v0.0.0'
               if ($isNewRelease) { exit 1 }
           }
           $mostRecentVersion = $mostRecentTag.Substring(1)
-          Write-Information "Most recent version: $mostRecentVersion"
           Write-Output "::set-output name=mrv::$mostRecentVersion"
   build:
     name: Build
