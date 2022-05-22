@@ -3,7 +3,7 @@ var srcDir = Argument<string>("srcDir");
 var artifactsDir = Argument<string>("artifactsDir");
 var target = Argument<string>("target", "Test");
 var buildConfiguration = Argument<string>("buildConfiguration", "Release");
-var buildVerbosity = (DotNetCoreVerbosity)Enum.Parse(typeof(DotNetCoreVerbosity), Argument<string>("buildVerbosity", "Minimal"));
+var buildVerbosity = (DotNetVerbosity)Enum.Parse(typeof(DotNetVerbosity), Argument<string>("buildVerbosity", "Minimal"));
 var softwareVersion = target.ToLower() == "nugetpack" || target.ToLower() == "nugetpush" ? Argument<string>("softwareVersion") : Argument<string>("softwareVersion", string.Empty);
 var buildId = Argument<int>("buildId", 0);
 var buildNumber = buildId == 0 ? -1 : Argument<int>("buildNumber");
@@ -20,7 +20,7 @@ var toBuildFolders = toBuildDirInfo
     .Select(x => x.FullName)
     .ToList();
 
-var perProjectMsBuildSettings = new Dictionary<string, DotNetCoreMSBuildSettings>();
+var perProjectMsBuildSettings = new Dictionary<string, DotNetMSBuildSettings>();
 
 Task("MSBuildSettings")
     .Does(() =>
@@ -129,7 +129,7 @@ Task("MSBuildSettings")
             Information($"Package release notes URL: {packageReleaseNotesUrl}");
             Information(Environment.NewLine);
 
-            perProjectMsBuildSettings[project] = new DotNetCoreMSBuildSettings { NoLogo = true, Verbosity = buildVerbosity }
+            perProjectMsBuildSettings[project] = new DotNetMSBuildSettings { NoLogo = true, Verbosity = buildVerbosity }
                 .WithProperty("AssemblyVersion", assemblyVersion)
                 .WithProperty("FileVersion", assemblyFileVersion)
                 .WithProperty("InformationalVersion", assemblyInformationalVersion)
@@ -157,15 +157,15 @@ Task("Clean")
             .Select(x => x.FullName)
             .ToList();
 
-        var cleanSettings = new DotNetCoreCleanSettings
+        var cleanSettings = new DotNetCleanSettings
         {
-            MSBuildSettings = new DotNetCoreMSBuildSettings { NoLogo = true, Verbosity = buildVerbosity }
+            MSBuildSettings = new DotNetMSBuildSettings { NoLogo = true, Verbosity = buildVerbosity }
         };
 
         foreach (var folder in toCleanFolders)
         {
             Information($"Cleaning project in folder {folder}");
-            DotNetCoreClean(folder, cleanSettings);
+            DotNetClean(folder, cleanSettings);
         }
 
         foreach (var folder in toCleanFolders)
@@ -196,7 +196,7 @@ Task("RestorePackages")
             .ToList();
 
         foreach (var projectToRestore in toRestoreProjects)
-            DotNetCoreRestore(projectToRestore);
+            DotNetRestore(projectToRestore);
     });
 
 Task("Build")
@@ -210,12 +210,12 @@ Task("Build")
 
         foreach (var projectToBuild in toBuildProjects)
         {
-            var buildSettings = new DotNetCoreBuildSettings
+            var buildSettings = new DotNetBuildSettings
             {
                 MSBuildSettings = perProjectMsBuildSettings[projectToBuild],
                 Configuration = buildConfiguration
             };
-            DotNetCoreBuild(projectToBuild, buildSettings);
+            DotNetBuild(projectToBuild, buildSettings);
         }
     });
 
@@ -232,8 +232,8 @@ Task("Test")
         foreach (var folder in testFolders)
         {
             Information(folder);
-            var testSettings = new DotNetCoreTestSettings { NoBuild = true, Configuration = buildConfiguration, Verbosity = buildVerbosity };
-            DotNetCoreTest(folder, testSettings);
+            var testSettings = new DotNetTestSettings { NoBuild = true, Configuration = buildConfiguration, Verbosity = buildVerbosity };
+            DotNetTest(folder, testSettings);
         }
     });
 
@@ -256,14 +256,14 @@ Task("NuGetPack")
 
         foreach (var projectToPack in toPackProjects)
         {
-            var packSettings = new DotNetCorePackSettings
+            var packSettings = new DotNetPackSettings
             {
                 MSBuildSettings = perProjectMsBuildSettings[projectToPack],
                 Configuration = buildConfiguration,
                 NoBuild = true,
                 OutputDirectory = artifactsDir
             };
-            DotNetCorePack(projectToPack, packSettings);
+            DotNetPack(projectToPack, packSettings);
         }
     });
 
@@ -282,8 +282,8 @@ Task("NuGetPush")
         Information($"NuGet source: {nuGetSource}");
 
         var packageSearchPattern = System.IO.Path.Combine(artifactsDir, "*.nupkg");
-        var nuGetPushSettings = new DotNetCoreNuGetPushSettings { Source = nuGetSource, ApiKey = nuGetApiKey };
-        DotNetCoreNuGetPush(packageSearchPattern, nuGetPushSettings);
+        var nuGetPushSettings = new DotNetNuGetPushSettings { Source = nuGetSource, ApiKey = nuGetApiKey };
+        DotNetNuGetPush(packageSearchPattern, nuGetPushSettings);
     });
 
 Task("ZipArtifacts")

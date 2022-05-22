@@ -22,6 +22,9 @@ Below is a sample NLog.config file:
 <nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xmlns:sl="http://www.nlog-project.org/schemas/NLog.Targets.Syslog.xsd">
+  <extensions>
+    <add assembly="NLog.Targets.Syslog"/>
+  </extensions>
   <targets>
     <target xsi:type="Syslog" name="cee-udp">
       <sl:layout xsi:type="SimpleLayout" text="@cee: {&quot;message&quot;: &quot;${message}&quot;}" />
