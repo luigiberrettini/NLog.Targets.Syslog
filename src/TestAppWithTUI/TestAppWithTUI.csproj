@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
+    <TargetFramework>net6.0</TargetFramework>
     <RootNamespace>TestAppWithTui</RootNamespace>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
     <OutputType>Exe</OutputType>
@@ -23,9 +23,12 @@
   <ItemGroup>
     <ProjectReference Include="..\FakeSyslogServer\FakeSyslogServer.csproj" />
     <ProjectReference Include="..\NLog.Targets.Syslog\NLog.Targets.Syslog.csproj" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.0" />
-    <PackageReference Include="NLog.Schema" Version="4.5.10" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="6.0.0" />
+    <PackageReference Include="NLog.Schema" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\NLog.Targets.Syslog.Schema\NLog.Targets.Syslog.xsd" Link="NLog.Targets.Syslog.xsd" />
     <None Update="appsettings.json" CopyToOutputDirectory="Always" />
     <None Update="messagesToLog.txt" CopyToOutputDirectory="Always" />

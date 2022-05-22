@@ -2,7 +2,9 @@
 // See the LICENSE file in the project root for more information
 
 using System;
+using System.Diagnostics;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using NLog.Targets.Syslog.Settings;
 
 namespace NLog.Targets.Syslog.MessageSend
@@ -48,6 +50,8 @@ namespace NLog.Targets.Syslog.MessageSend
 
         protected override void ApplyKeepAliveValues(Socket socket, KeepAliveConfig keepAliveConfig)
         {
+            Debug.Assert(RuntimeInformation.IsOSPlatform(OSPlatform.Windows));
+
             if (CanSetSocketOptionKeepAliveRetryCount)
                 socket.SetSocketOption(SocketOptionLevel.Tcp, TcpKeepAliveRetryCount, keepAliveConfig.RetryCount);
 
@@ -105,7 +109,7 @@ namespace NLog.Targets.Syslog.MessageSend
 
         private static bool KeepAliveConfigurationIsUpToDate(KeepAliveConfig keepAliveConfig)
         {
-            return keepAliveConfiguration != null && 
+            return keepAliveConfiguration != null &&
                 keepAliveConfiguration.Enabled == keepAliveConfig.Enabled &&
                 keepAliveConfiguration.RetryCount == keepAliveConfig.RetryCount &&
                 keepAliveConfiguration.Time == keepAliveConfig.Time &&

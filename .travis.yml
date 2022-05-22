@@ -21,8 +21,8 @@ before_install:
         version=$(echo $dotnetReleases | jq "select(.\"channel-version\" == \"$channel\") | .\"latest-sdk\"" | sed -e 's/^"//' -e 's/"$//')
         curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --version "$version" --install-dir "$DOTNET_INSTALL_DIR" --no-path
     }
-    installLatestDotNetSdk '2.1'
     installLatestDotNetSdk '3.1'
+    installLatestDotNetSdk '6.0'
     export PATH="$DOTNET_INSTALL_DIR:$PATH"
     export DOTNET_ROOT="$DOTNET_INSTALL_DIR"
     export DOTNET_MULTILEVEL_LOOKUP=0

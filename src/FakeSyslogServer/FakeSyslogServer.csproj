@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     <RootNamespace>FakeSyslogServer</RootNamespace>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
     <OutputType>Library</OutputType>
@@ -17,10 +17,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NLog" Version="4.5.4" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(OS)' != 'Windows_NT' AND '$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="NLog" Version="5.0.0" />
   </ItemGroup>
 </Project>
