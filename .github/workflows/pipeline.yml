@@ -13,6 +13,7 @@ on:
 jobs:
   determine-most-recent-version:
     name: Determine most recent version
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name }}
     outputs:
       mrv: ${{ steps.compute-mrv.outputs.mrv }}
     runs-on: ubuntu-latest
@@ -42,7 +43,7 @@ jobs:
   build:
     name: Build
     needs: determine-most-recent-version
-    if: ${{ github.event_name != 'release' }}
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name }}
     strategy:
       fail-fast: false
       matrix:
