@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
 
     <Product>NLog.Targets.Syslog.Schema</Product>
     <Copyright>Copyright © 2013 - present by Luigi Berrettini and others: https://github.com/luigiberrettini/NLog.Targets.Syslog/graphs/contributors</Copyright>
@@ -18,9 +18,7 @@
     <RepositoryUrl>https://github.com/luigiberrettini/NLog.Targets.Syslog</RepositoryUrl>
     <PackageReleaseNotes>https://github.com/luigiberrettini/NLog.Targets.Syslog/releases/tag/v0.1.0-alpha.1</PackageReleaseNotes>
     <RepositoryType>Git</RepositoryType>
-  </PropertyGroup>
 
-  <PropertyGroup>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <EnableDefaultItems>false</EnableDefaultItems>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
