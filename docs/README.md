@@ -1,6 +1,5 @@
-[![NuGet](https://buildstats.info/nuget/Nlog.Targets.Syslog)](https://www.nuget.org/packages/NLog.Targets.Syslog/)
-[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/s5wqsmvk4bj76bug?svg=true)](https://ci.appveyor.com/project/luigiberrettini/nlog-targets-syslog)
-[![Travis CI build status](https://travis-ci.org/luigiberrettini/NLog.Targets.Syslog.svg?branch=master)](https://travis-ci.org/luigiberrettini/NLog.Targets.Syslog)
+[![NuGet](https://buildstats.info/nuget/Nlog.Targets.Syslog)](https://www.nuget.org/packages/NLog.Targets.Syslog)
+[![Build](https://github.com/luigiberrettini/NLog.Targets.Syslog/actions/workflows/pipeline.yml/badge.svg)](https://github.com/luigiberrettini/NLog.Targets.Syslog/actions/workflows/pipeline.yml)
 
 Syslog target for NLog
 ======================
