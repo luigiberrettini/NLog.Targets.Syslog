@@ -285,9 +285,9 @@ Task("NuGetPush")
         }
         Information($"NuGet source: {nuGetSource}");
 
-        var packageSearchPattern = System.IO.Path.Combine(artifactsDir, "*.nupkg");
+        var packages = new DirectoryInfo(artifactsDir).GetFiles("*.nupkg").ToList();
         var nuGetPushSettings = new DotNetNuGetPushSettings { Source = nuGetSource, ApiKey = nuGetApiKey };
-        DotNetNuGetPush(packageSearchPattern, nuGetPushSettings);
+        packages.ForEach(x => DotNetNuGetPush(x.FullName, nuGetPushSettings));
     });
 
 Task("ZipArtifacts")
