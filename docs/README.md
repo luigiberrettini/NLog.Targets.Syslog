@@ -7,7 +7,7 @@ Syslog target for NLog
 
 **NLog Syslog** is a custom target for [**NLog**](https://nlog-project.org/) available as [NLog.Targets.Syslog](https://www.nuget.org/packages/NLog.Targets.Syslog/) on Nuget.
 
-It can be used with version 4.5.4 and later of NLog and allows to send logging messages to a Syslog server.
+It can be used with version 5.0.0 and later of NLog and allows to send logging messages to a Syslog server.
 
 
 ### Documentation
