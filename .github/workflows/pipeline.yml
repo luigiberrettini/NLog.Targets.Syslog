@@ -105,6 +105,6 @@ jobs:
         run: |
           $InformationPreference = 'Continue'
           $mostRecentVersion = "${{ needs.determine-most-recent-version.outputs.mrv }}"
-          $nuGetApiKey = ${{ secrets.NUGET_API_KEY }}
+          $nuGetApiKey = "${{ secrets.NUGET_API_KEY }}"
           ${{ github.workspace }}\build\scripts\bootstrap.ps1 '--target=NuGetPush' "--softwareVersion=${mostRecentVersion}+commitHash" '--nuGetSource=https://api.nuget.org/v3/index.json' "--nuGetApiKey=${nuGetApiKey}"
           if ($LastExitCode -ne 0) { exit $LastExitCode }
