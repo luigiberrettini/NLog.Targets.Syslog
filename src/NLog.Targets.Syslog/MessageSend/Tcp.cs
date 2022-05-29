@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Net;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
@@ -28,7 +29,7 @@ namespace NLog.Targets.Syslog.MessageSend
         private TcpClient tcp;
         private Stream stream;
 
-        public Tcp(TcpConfig tcpConfig) : base(tcpConfig.Server, tcpConfig.Port, tcpConfig.ReconnectInterval)
+        public Tcp(TcpConfig tcpConfig, RetryConfig retryConfig) : base(tcpConfig.Server, tcpConfig.Port, retryConfig)
         {
             keepAliveConfig = tcpConfig.KeepAlive;
             useTls = tcpConfig.Tls.Enabled;
@@ -36,9 +37,8 @@ namespace NLog.Targets.Syslog.MessageSend
             framing = tcpConfig.Framing;
         }
 
-        protected override Task Init()
+        protected override Task Init(IPEndPoint ipEndPoint)
         {
-            var ipEndPoint = GetIpEndPoint();
             tcp = new TcpClient(ipEndPoint.AddressFamily);
             SocketInitialization.DisableAddressSharing(tcp.Client);
             SocketInitialization.DiscardPendingDataOnClose(tcp.Client);
@@ -55,8 +55,7 @@ namespace NLog.Targets.Syslog.MessageSend
                 return Task.FromResult<object>(null);
 
             return HandleFramingAsync(message)
-                .Then(_ => stream.WriteAsync(message, 0, message.Length, token), token)
-                .Unwrap();
+                .Then(_ => stream.WriteAsync(message, 0, message.Length, token), token);
         }
 
         protected override void Terminate()

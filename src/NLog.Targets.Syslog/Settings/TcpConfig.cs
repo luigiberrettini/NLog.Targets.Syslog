@@ -14,10 +14,8 @@ namespace NLog.Targets.Syslog.Settings
     {
         private const string Localhost = "localhost";
         private const int DefaultPort = 514;
-        private const int DefaultReconnectInterval = 500;
         private Layout server;
         private int port;
-        private int reconnectInterval;
         private KeepAliveConfig keepAlive;
         private readonly PropertyChangedEventHandler keepAlivePropsChanged;
         private TlsConfig tls;
@@ -36,13 +34,6 @@ namespace NLog.Targets.Syslog.Settings
         {
             get => port;
             set => SetProperty(ref port, value);
-        }
-
-        /// <summary>The time interval, in milliseconds, after which a connection is retried</summary>
-        public int ReconnectInterval
-        {
-            get => reconnectInterval;
-            set => SetProperty(ref reconnectInterval, value <= 0 ? DefaultReconnectInterval : value);
         }
 
         /// <summary>KeepAlive configuration</summary>
@@ -72,7 +63,6 @@ namespace NLog.Targets.Syslog.Settings
         {
             server = Localhost;
             port = DefaultPort;
-            reconnectInterval = DefaultReconnectInterval;
             keepAlive = new KeepAliveConfig();
             keepAlivePropsChanged = (sender, args) => OnPropertyChanged(nameof(KeepAlive));
             keepAlive.PropertyChanged += keepAlivePropsChanged;

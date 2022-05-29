@@ -14,13 +14,12 @@ namespace NLog.Targets.Syslog.MessageSend
     {
         private UdpClient udp;
 
-        public Udp(UdpConfig udpConfig) : base(udpConfig.Server, udpConfig.Port, udpConfig.ReconnectInterval)
+        public Udp(UdpConfig udpConfig, RetryConfig retryConfig) : base(udpConfig.Server, udpConfig.Port, retryConfig)
         {
         }
 
-        protected override Task Init()
+        protected override Task Init(IPEndPoint ipEndPoint)
         {
-            var ipEndPoint = GetIpEndPoint();
             udp = new UdpClient(ipEndPoint.AddressFamily);
             udp.Connect(ipEndPoint);
             return Task.FromResult<object>(null);

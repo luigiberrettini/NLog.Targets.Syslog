@@ -11,11 +11,20 @@ namespace NLog.Targets.Syslog.Settings
     /// <summary>Message transmission configuration</summary>
     public class MessageTransmitterConfig : NotifyPropertyChanged, IDisposable
     {
+        private RetryConfig retry;
+        private readonly PropertyChangedEventHandler retryPropsChanged;
         private ProtocolType protocol;
         private UdpConfig udp;
         private readonly PropertyChangedEventHandler udpPropsChanged;
         private TcpConfig tcp;
         private readonly PropertyChangedEventHandler tcpPropsChanged;
+
+        /// <summary>Retry configuration</summary>
+        public RetryConfig Retry
+        {
+            get => retry;
+            set => SetProperty(ref retry, value);
+        }
 
         /// <summary>The Syslog server protocol</summary>
         public ProtocolType Protocol
@@ -41,6 +50,10 @@ namespace NLog.Targets.Syslog.Settings
         /// <summary>Builds a new instance of the MessageTransmitterConfig class</summary>
         public MessageTransmitterConfig()
         {
+            retry = new RetryConfig();
+            retryPropsChanged = (sender, args) => OnPropertyChanged(nameof(Retry));
+            retry.PropertyChanged += retryPropsChanged;
+
             udp = new UdpConfig();
             udpPropsChanged = (sender, args) => OnPropertyChanged(nameof(Udp));
             udp.PropertyChanged += udpPropsChanged;
@@ -54,8 +67,10 @@ namespace NLog.Targets.Syslog.Settings
         /// <summary>Disposes the instance</summary>
         public void Dispose()
         {
+            retry.PropertyChanged -= retryPropsChanged;
             udp.PropertyChanged -= udpPropsChanged;
             tcp.PropertyChanged -= tcpPropsChanged;
+            retry.Dispose();
             tcp.Dispose();
         }
     }

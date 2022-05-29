@@ -11,10 +11,8 @@ namespace NLog.Targets.Syslog.Settings
     {
         private const string Localhost = "localhost";
         private const int DefaultPort = 514;
-        private const int DefaultReconnectInterval = 500;
         private Layout server;
         private int port;
-        private int reconnectInterval;
 
         /// <summary>The IP address or hostname of the Syslog server</summary>
         public Layout Server
@@ -30,19 +28,11 @@ namespace NLog.Targets.Syslog.Settings
             set => SetProperty(ref port, value);
         }
 
-        /// <summary>The time interval, in milliseconds, after which a connection is retried</summary>
-        public int ReconnectInterval
-        {
-            get => reconnectInterval;
-            set => SetProperty(ref reconnectInterval, value <= 0 ? DefaultReconnectInterval : value);
-        }
-
         /// <summary>Builds a new instance of the UdpProtocolConfig class</summary>
         public UdpConfig()
         {
             server = Localhost;
             port = DefaultPort;
-            reconnectInterval = DefaultReconnectInterval;
         }
     }
 }
