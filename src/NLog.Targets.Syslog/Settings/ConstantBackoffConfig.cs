@@ -20,11 +20,11 @@ namespace NLog.Targets.Syslog.Settings
         }
 
         /// <summary>The number of milliseconds used as the base to compute the interval after which a retry is performed</summary>
-        /// <remarks>Must be greater than 0</remarks>
+        /// <remarks>Must be greater than or equal to 0</remarks>
         public int BaseDelay
         {
             get => baseDelay;
-            set => SetProperty(ref baseDelay, value <= 0 ? DefaultBaseDelay : value);
+            set => SetProperty(ref baseDelay, value < 0 ? DefaultBaseDelay : value);
         }
 
         /// <summary>Builds a new instance of the ConstantBackoffConfig class</summary>

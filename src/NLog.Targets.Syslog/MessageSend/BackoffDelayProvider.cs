@@ -19,17 +19,22 @@ namespace NLog.Targets.Syslog.MessageSend
         {
             BackoffFactory = new Dictionary<BackoffType, Func<RetryConfig, BackoffDelayProvider>>
             {
-                { BackoffType.Constant, retryConfig => new BackoffDelayProvider(retryConfig.Max, retryConfig.ConstantBackoff) },
-                { BackoffType.Linear, retryConfig => new BackoffDelayProvider(retryConfig.Max, retryConfig.LinearBackoff) },
-                { BackoffType.Exponential, retryConfig => new BackoffDelayProvider(retryConfig.Max, retryConfig.ExponentialBackoff) },
-                { BackoffType.AwsJitteredExponential, retryConfig => new BackoffDelayProvider(retryConfig.Max, retryConfig.AwsJitteredExponentialBackoff) },
-                { BackoffType.PollyJitteredExponential, retryConfig => new BackoffDelayProvider(retryConfig.Max, retryConfig.PollyJitteredExponentialBackoff) },
+                { BackoffType.Constant, retryConfig => new BackoffDelayProvider(PollyMaxRetries(retryConfig), retryConfig.ConstantBackoff) },
+                { BackoffType.Linear, retryConfig => new BackoffDelayProvider(PollyMaxRetries(retryConfig), retryConfig.LinearBackoff) },
+                { BackoffType.Exponential, retryConfig => new BackoffDelayProvider(PollyMaxRetries(retryConfig), retryConfig.ExponentialBackoff) },
+                { BackoffType.AwsJitteredExponential, retryConfig => new BackoffDelayProvider(PollyMaxRetries(retryConfig), retryConfig.AwsJitteredExponentialBackoff) },
+                { BackoffType.PollyJitteredExponential, retryConfig => new BackoffDelayProvider(PollyMaxRetries(retryConfig), retryConfig.PollyJitteredExponentialBackoff) },
             };
         }
 
         public static BackoffDelayProvider FromConfig(RetryConfig retryConfig)
         {
             return BackoffFactory[retryConfig.Backoff](retryConfig);
+        }
+
+        private static int PollyMaxRetries(RetryConfig retryConfig)
+        {
+            return retryConfig.InfiniteRetries ? int.MaxValue : retryConfig.Max;
         }
 
         private BackoffDelayProvider(int maxRetries, ConstantBackoffConfig config)

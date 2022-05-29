@@ -22,19 +22,19 @@ namespace NLog.Targets.Syslog.Settings
         }
 
         /// <summary>The number of milliseconds used as the base to compute the interval after which a retry is performed</summary>
-        /// <remarks>Must be greater than 0</remarks>
+        /// <remarks>Must be greater than or equal to 0</remarks>
         public int BaseDelay
         {
             get => baseDelay;
-            set => SetProperty(ref baseDelay, value <= 0 ? DefaultBaseDelay : value);
+            set => SetProperty(ref baseDelay, value < 0 ? DefaultBaseDelay : value);
         }
 
         /// <summary>The scale factor used to compute the interval after which a retry is performed</summary>
-        /// <remarks>Must be greater than 1</remarks>
+        /// <remarks>Must be greater than or equal to 1</remarks>
         public double ScaleFactor
         {
             get => scaleFactor;
-            set => SetProperty(ref scaleFactor, value <= 1 ? DefaultScaleFactor : value);
+            set => SetProperty(ref scaleFactor, value < 1d ? DefaultScaleFactor : value);
         }
 
         /// <summary>Builds a new instance of the ExponentialBackoffConfig class</summary>

@@ -31,7 +31,7 @@ namespace NLog.Targets.Syslog.Settings
         public int Max
         {
             get => max;
-            set => SetProperty(ref max, value <= 0 ? DefaultMax : value);
+            set => SetProperty(ref max, value < 0 ? DefaultMax : value);
         }
 
         /// <summary>The backoff approach used to wait before performing a retry</summary>

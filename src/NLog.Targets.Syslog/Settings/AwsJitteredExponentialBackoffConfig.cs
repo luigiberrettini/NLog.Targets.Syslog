@@ -22,19 +22,19 @@ namespace NLog.Targets.Syslog.Settings
         }
 
         /// <summary>The number of milliseconds used as the base to compute the interval after which a retry is performed</summary>
-        /// <remarks>Must be greater than 0</remarks>
+        /// <remarks>Must be greater than or equal to 0</remarks>
         public int BaseDelay
         {
             get => baseDelay;
-            set => SetProperty(ref baseDelay, value <= 0 || value >= maxDelay ? maxDelay / 3 : value);
+            set => SetProperty(ref baseDelay, value < 0 || value > maxDelay ? maxDelay / 3 : value);
         }
 
         /// <summary>The maximum number of milliseconds used to compute the interval after which a retry is performed</summary>
-        /// <remarks>Must be greater than <see cref="BaseDelay"/>BaseDelay</remarks>
+        /// <remarks>Must be greater than or equal to <see cref="BaseDelay"/>BaseDelay</remarks>
         public int MaxDelay
         {
             get => maxDelay;
-            set => SetProperty(ref maxDelay, value <= 0 || value <= baseDelay ? baseDelay * 3 : value);
+            set => SetProperty(ref maxDelay, value < 0 || value < baseDelay ? baseDelay * 3 : value);
         }
 
         /// <summary>Builds a new instance of the AwsJitteredExponentialBackoffConfig class</summary>
