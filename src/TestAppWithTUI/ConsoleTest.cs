@@ -14,18 +14,21 @@ namespace TestAppWithTui
 {
     public class ConsoleTest : IDisposable
     {
-        private static readonly Dictionary<char, string> ChosenOperation;
-
         private readonly IConfigurationRoot settings;
+        private readonly Dictionary<char, string> availableOperations;
         private readonly TestAppHelper testAppHelper;
         private FileStream udpFileStream;
         private StreamWriter udpStreamWriter;
         private FileStream tcpFileStream;
         private StreamWriter tcpStreamWriter;
 
-        static ConsoleTest()
+        public ConsoleTest()
         {
-            ChosenOperation = new Dictionary<char, string>
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appSettings.json");
+            settings = builder.Build();
+            availableOperations = new Dictionary<char, string>
             {
                 { 'T', "Trace" },
                 { 'D', "Debug" },
@@ -41,28 +44,20 @@ namespace TestAppWithTui
                 { 'S', "StartSyslogServer" },
                 { 'Q', "Quit" }
             };
-        }
-
-        public ConsoleTest()
-        {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appSettings.json");
-            settings = builder.Build();
             testAppHelper = new TestAppHelper(key => settings[key], ToggleSyslogServer);
         }
 
         public string PromptUserForOperationChoice()
         {
             Console.WriteLine("Choose an operation:");
-            ChosenOperation
+            availableOperations
                 .Select(x => $"{x.Key} => {x.Value}")
                 .ToList()
                 .ForEach(Console.WriteLine);
 
-            var choice = Char.ToUpper(Console.ReadKey().KeyChar);
+            var chosenOperation = Char.ToUpper(Console.ReadKey().KeyChar);
             Console.WriteLine();
-            return ChosenOperation[choice];
+            return availableOperations[chosenOperation];
         }
 
         public void PerformOperation(string operation)
@@ -74,19 +69,20 @@ namespace TestAppWithTui
         {
             testAppHelper.Dispose();
             DisposeStreams();
+            GC.SuppressFinalize(this);
         }
 
-        private void ToggleSyslogServer (bool start, SyslogServer syslogServer)
+        private void ToggleSyslogServer(bool start, SyslogServer syslogServer)
         {
             if (start)
             {
-                ChosenOperation['S'] = "StopSyslogServer";
+                availableOperations['S'] = "StopSyslogServer";
                 InitStreams();
                 syslogServer.Start(OnReceivedString, OnException);
             }
             else
             {
-                ChosenOperation['S'] = "StartSyslogServer";
+                availableOperations['S'] = "StartSyslogServer";
                 syslogServer.Stop();
                 DisposeStreams();
             }
